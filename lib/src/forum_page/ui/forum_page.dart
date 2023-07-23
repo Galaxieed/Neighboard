@@ -301,7 +301,8 @@ Widget otherLinks = Column(
             text: 'Alemhelp source code on GitHub.\n\n',
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                launcherUrl('https://www.youtube.com');
+                launcherUrl(
+                    'https://github.com/Galaxieed/Neighboard/tree/master');
               },
           ),
           TextSpan(
