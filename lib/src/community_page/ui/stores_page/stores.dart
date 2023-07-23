@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/store_data.dart';
+import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 
 class StoresPage extends StatefulWidget {
@@ -37,7 +38,8 @@ class _StoresPageState extends State<StoresPage> {
                   childAspectRatio: 400 / 300,
                 ),
                 children: [
-                  for (int i = 0; i < 20; i++) const StoresCards(),
+                  for (StoreModel stModel in stores)
+                    StoresCards(storeModel: stModel),
                 ],
               ),
             ),
@@ -51,7 +53,10 @@ class _StoresPageState extends State<StoresPage> {
 class StoresCards extends StatelessWidget {
   const StoresCards({
     super.key,
+    required this.storeModel,
   });
+
+  final StoreModel storeModel;
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +66,8 @@ class StoresCards extends StatelessWidget {
         elevation: 4,
         child: Container(
           decoration: BoxDecoration(
-              image: const DecorationImage(
-                  image: AssetImage('assets/bigscoop.jpg'), fit: BoxFit.cover),
+              image: DecorationImage(
+                  image: AssetImage(storeModel.storeImage), fit: BoxFit.cover),
               borderRadius: BorderRadius.circular(5)),
           child: Column(
             children: [
@@ -70,6 +75,7 @@ class StoresCards extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   showDialog(
+                      // The Modal
                       context: context,
                       builder: (BuildContext context) {
                         return Dialog(
@@ -87,7 +93,7 @@ class StoresCards extends StatelessWidget {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Chilly Choice',
+                                        storeModel.storeName,
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineMedium,
@@ -96,7 +102,7 @@ class StoresCards extends StatelessWidget {
                                         height: 20,
                                       ),
                                       Text(
-                                        'Block 12 Lot 18, Zaragosa Street',
+                                        storeModel.storeAddress,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleLarge,
@@ -114,7 +120,8 @@ class StoresCards extends StatelessWidget {
                                     height: 600,
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
-                                          image: AssetImage(bigScoopImage),
+                                          image:
+                                              AssetImage(storeModel.storeImage),
                                           fit: BoxFit.cover),
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(5)),
@@ -139,7 +146,7 @@ class StoresCards extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Chilly Choice',
+                            storeModel.storeName,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ],

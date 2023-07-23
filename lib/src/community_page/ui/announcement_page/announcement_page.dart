@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/announcement_data.dart';
+import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 
 class AnnouncementPage extends StatefulWidget {
@@ -44,23 +45,39 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
             Expanded(
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     flex: 5,
-                    child: MainAnnouncement(),
+                    child: () {
+                      Widget widget = Container();
+                      for (AnnouncementModel announcementModel
+                          in announcements) {
+                        if (announcementModel.isMainAnnouncement) {
+                          widget = MainAnnouncement(
+                            announcementModel: announcementModel,
+                          );
+                          break;
+                        } else {
+                          widget = Container();
+                        }
+                      }
+                      return widget;
+                    }(),
                   ),
                   const SizedBox(
                     width: 30,
                   ),
                   Expanded(
                     flex: 3,
-                    child: ListView(
-                      children: const [
-                        OtherAnnouncement(),
-                        OtherAnnouncement(),
-                        OtherAnnouncement(),
-                        OtherAnnouncement(),
-                        OtherAnnouncement(),
-                      ],
+                    child: ListView.builder(
+                      itemCount: announcements.length,
+                      itemBuilder: (context, index) {
+                        var model = announcements[index];
+                        if (!model.isMainAnnouncement) {
+                          return OtherAnnouncement(announcementModel: model);
+                        } else {
+                          return Container();
+                        }
+                      },
                     ),
                   ),
                 ],
@@ -74,8 +91,8 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 }
 
 class MainAnnouncement extends StatelessWidget {
-  const MainAnnouncement({super.key});
-
+  const MainAnnouncement({super.key, required this.announcementModel});
+  final AnnouncementModel announcementModel;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -84,7 +101,7 @@ class MainAnnouncement extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(homeImage),
+                image: AssetImage(announcementModel.image),
                 fit: BoxFit.cover,
               ),
             ),
@@ -105,11 +122,11 @@ class MainAnnouncement extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Bingo Bonanza'.toUpperCase(),
+                        announcementModel.title.toUpperCase(),
                         style: Theme.of(context).textTheme.headlineLarge,
                       ),
                       Text(
-                        'April 30, 2023 - 1PM',
+                        announcementModel.timeStamp,
                         style: Theme.of(context).textTheme.headlineSmall,
                       )
                     ],
@@ -129,8 +146,8 @@ class MainAnnouncement extends StatelessWidget {
 }
 
 class OtherAnnouncement extends StatelessWidget {
-  const OtherAnnouncement({super.key});
-
+  const OtherAnnouncement({super.key, required this.announcementModel});
+  final AnnouncementModel announcementModel;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -140,7 +157,7 @@ class OtherAnnouncement extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage(homeImage),
+              image: AssetImage(announcementModel.image),
               fit: BoxFit.cover,
             ),
             borderRadius: BorderRadius.circular(5),
@@ -165,11 +182,11 @@ class OtherAnnouncement extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Water Interruption',
+                            announcementModel.title,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           Text(
-                            'April 17, 2023',
+                            announcementModel.timeStamp,
                             style: Theme.of(context).textTheme.titleMedium,
                           )
                         ],
