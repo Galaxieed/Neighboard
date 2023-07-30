@@ -4,6 +4,8 @@ import 'package:neighboard/src/community_page/ui/community_map_page/community_ma
 import 'package:neighboard/src/community_page/ui/stores_page/stores.dart';
 import 'package:neighboard/src/forum_page/ui/forum_page.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
+import 'package:neighboard/src/login_register_page/login_page/login_page_ui.dart';
+import 'package:neighboard/src/login_register_page/register_page/register_page_ui.dart';
 
 class Routes {
   navigate(String route, [BuildContext? context]) {
@@ -23,13 +25,13 @@ class Routes {
       Navigator.push(
           context!,
           MaterialPageRoute(
-              builder: (BuildContext context) => const Placeholder()));
+              builder: (BuildContext context) => const LoginPage()));
     }
     if (route == 'Register') {
       Navigator.push(
           context!,
           MaterialPageRoute(
-              builder: (BuildContext context) => const Placeholder()));
+              builder: (BuildContext context) => const RegisterPage()));
     }
     if (route == 'Announcements') {
       Navigator.push(

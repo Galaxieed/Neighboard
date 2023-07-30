@@ -1,0 +1,179 @@
+import 'package:flutter/material.dart';
+import 'package:neighboard/src/forum_page/ui/forum_page.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/src/login_register_page/register_page/register_function.dart';
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController email = TextEditingController();
+  final TextEditingController password = TextEditingController();
+  bool isLoading = false;
+
+  void onCreateAccount() async {
+    if (email.text.isNotEmpty && password.text.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+      });
+      bool isAccountSuccessfullyCreated =
+          await RegisterFunction.createAccout(email.text, password.text);
+
+      if (isAccountSuccessfullyCreated) {
+        // ignore: use_build_context_synchronously
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ForumPage(),
+          ),
+        );
+      } else {
+        // something went wrong
+      }
+
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return isLoading
+        ? const LoadingScreen()
+        : Scaffold(
+            body: Center(
+              child: Scaffold(
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  title: const Text('NEIGHBOARD'),
+                  actions: [
+                    OutlinedButton.icon(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      icon: const Icon(Icons.person_add_alt_1_outlined),
+                      label: const Text('Register'),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    OutlinedButton(
+                      onPressed: () {},
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                      ),
+                      child: const Text('Login'),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                  ],
+                ),
+                body: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                        flex: 4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 60, vertical: 0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Register',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 32,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              const Text(
+                                'Please enter your details',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: email,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Email',
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: password,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Password',
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              ElevatedButton(
+                                onPressed: onCreateAccount,
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize:
+                                      const Size(double.infinity, 50.0),
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                ),
+                                child: const Text(
+                                  'REGISTER',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                    Expanded(
+                      flex: 5,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage("assets/home.jpg"),
+                            fit: BoxFit.cover,
+                            alignment: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+  }
+}
