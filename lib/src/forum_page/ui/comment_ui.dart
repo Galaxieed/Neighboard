@@ -326,13 +326,13 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
           IconButton(
             onPressed: () {
               final ReplyModel thisReply = ReplyModel(
-                  replyId: generateRandomId(8),
-                  senderId: generateRandomId(8),
-                  senderName: WordPair.random().asPascalCase,
-                  recipientId: widget.recipientId,
-                  recipientName: widget.recipientName,
-                  replyMessage: replyController.text,
-                  replies: []);
+                replyId: generateRandomId(8),
+                senderId: generateRandomId(8),
+                senderName: WordPair.random().asPascalCase,
+                recipientId: widget.recipientId,
+                recipientName: widget.recipientName,
+                replyMessage: replyController.text,
+              );
               widget.addReply(reply: thisReply);
               replyController.clear();
               widget.setVisibility!(false);

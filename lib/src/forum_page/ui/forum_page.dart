@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:neighboard/data/user_model.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/forum_page/ui/new_post/new_post.dart';

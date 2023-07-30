@@ -56,10 +56,10 @@ CommentModel comments = CommentModel(
     replies: [replies]);
 
 ReplyModel replies = ReplyModel(
-    replyId: randomId,
-    senderId: randomName,
-    senderName: randomName,
-    recipientId: randomId,
-    recipientName: randomName,
-    replyMessage: randomName,
-    replies: []);
+  replyId: randomId,
+  senderId: randomName,
+  senderName: randomName,
+  recipientId: randomId,
+  recipientName: randomName,
+  replyMessage: randomName,
+);
