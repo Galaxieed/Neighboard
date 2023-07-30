@@ -1,10 +1,10 @@
-import 'package:english_words/english_words.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/user_model.dart';
 import 'package:neighboard/src/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/forum_page/ui/new_post/new_post.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
 
@@ -23,6 +23,18 @@ class ForumPage extends StatefulWidget {
 }
 
 class _ForumPageState extends State<ForumPage> {
+  UserModel? userModel;
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUserDetails();
+  }
+
+  void getCurrentUserDetails() async {
+    userModel = await ProfileFunction.getUserDetails();
+    setState(() {});
+  }
+
   int pageIndex = 0;
   changePage(int num) {
     setState(() {
@@ -115,7 +127,7 @@ class _ForumPageState extends State<ForumPage> {
                         horizontal: 50, vertical: 40),
                     child: pageIndex == 0 || pageIndex == 1
                         ? otherLinks
-                        : miniProfile,
+                        : miniProfile(userModel!),
                   ),
                 ),
               ),
@@ -127,86 +139,88 @@ class _ForumPageState extends State<ForumPage> {
   }
 }
 
-Widget miniProfile = Column(
-  crossAxisAlignment: CrossAxisAlignment.center,
-  mainAxisSize: MainAxisSize.max,
-  children: [
-    CircleAvatar(
-      radius: 80,
-      backgroundImage: AssetImage(homeImage),
-    ),
-    const SizedBox(
-      height: 20,
-    ),
-    Text(
-      '@${WordPair.random().asPascalCase}',
-      style: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 18,
-        letterSpacing: 1,
-      ),
-    ),
-    const SizedBox(
-      height: 10,
-    ),
-    const Divider(),
-    const SizedBox(
-      height: 10,
-    ),
-    Row(
-      mainAxisSize: MainAxisSize.min,
+Widget miniProfile(UserModel userModel) => Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
       children: [
-        Icon(
-          Icons.lightbulb_sharp,
-          color: Colors.amber[500],
-          size: 18,
-          weight: 2,
+        CircleAvatar(
+          radius: 80,
+          backgroundImage: NetworkImage(userModel.profilePicture.toString()),
         ),
         const SizedBox(
-          width: 10,
+          height: 20,
         ),
         Text(
-          '125 [8]',
-          style: TextStyle(
-            fontSize: 18,
+          "@s${userModel.username}",
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.amber[500],
+            fontSize: 18,
+            letterSpacing: 1,
           ),
         ),
-      ],
-    ),
-    const SizedBox(
-      height: 10,
-    ),
-    const Divider(),
-    const SizedBox(
-      height: 10,
-    ),
-    Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.link),
+        const SizedBox(
+          height: 10,
+        ),
+        const Divider(),
+        const SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.lightbulb_sharp,
+              color: Colors.amber[500],
+              size: 18,
+              weight: 2,
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Text(
+              '${userModel.rank} [${userModel.posts}]',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.amber[500],
+              ),
+            ),
+          ],
         ),
         const SizedBox(
-          width: 10,
+          height: 10,
         ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.linked_camera),
-        ),
+        const Divider(),
         const SizedBox(
-          width: 10,
+          height: 10,
         ),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.facebook),
-        ),
+        userModel.socialMediaLinks.isNotEmpty
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.link),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.linked_camera),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.facebook),
+                  ),
+                ],
+              )
+            : Container(),
       ],
-    )
-  ],
-);
+    );
 
 Widget otherLinks = Column(
   crossAxisAlignment: CrossAxisAlignment.start,

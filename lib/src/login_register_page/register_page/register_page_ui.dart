@@ -13,6 +13,9 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  final TextEditingController firstName = TextEditingController();
+  final TextEditingController lastName = TextEditingController();
+  final TextEditingController username = TextEditingController();
   bool isLoading = false;
 
   void onCreateAccount() async {
@@ -20,8 +23,13 @@ class _RegisterPageState extends State<RegisterPage> {
       setState(() {
         isLoading = true;
       });
-      bool isAccountSuccessfullyCreated =
-          await RegisterFunction.createAccout(email.text, password.text);
+      bool isAccountSuccessfullyCreated = await RegisterFunction.createAccout(
+          email.text,
+          password.text,
+          firstName.text,
+          lastName.text,
+          username.text);
+      print(username.text);
 
       if (isAccountSuccessfullyCreated) {
         // ignore: use_build_context_synchronously
@@ -106,9 +114,29 @@ class _RegisterPageState extends State<RegisterPage> {
                                 height: 10,
                               ),
                               const Text(
-                                'Please enter your details',
+                                'Get more features and priviliges by joining the La Aldea Community',
                                 style: TextStyle(
                                   fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: firstName,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'First Name',
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: lastName,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Last Name',
                                 ),
                               ),
                               const SizedBox(
@@ -119,6 +147,16 @@ class _RegisterPageState extends State<RegisterPage> {
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   labelText: 'Email',
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: username,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Username',
                                 ),
                               ),
                               const SizedBox(
