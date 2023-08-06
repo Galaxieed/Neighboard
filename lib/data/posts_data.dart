@@ -1,12 +1,7 @@
 import 'dart:math';
-
-import 'package:neighboard/constants/constants.dart';
-import 'package:neighboard/models/comment_model.dart';
-import 'package:neighboard/models/post_model.dart';
 import 'package:english_words/english_words.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
-import 'package:neighboard/models/reply_model.dart';
 
 String formattedDate =
     DateFormat('MMMM d, yyyy | hh:mm a').format(DateTime.now());
@@ -22,44 +17,41 @@ String generateRandomId(int length) {
 }
 
 final randomId = generateRandomId(8);
+//TODO: add post to database and display it in ui
+// List<PostModel> posts = [
+//   PostModel(
+//     postId: postId,
+//     authorId: authorId,
+//     authorName: authorName,
+//     profilePicture: profilePicture,
+//     timeStamp: timeStamp,
+//     title: title,
+//     content: content,
+//     noOfViews: noOfViews,
+//     comments: comments,
+//     noOfUpVotes: noOfUpVotes,
+//     isUpvoted: isUpvoted,
+//     tags: tags,
+//   ),
+// ];
 
-List<PostModel> posts = [
-  PostModel(
-      postId: randomId,
-      authorId: randomId,
-      authorName: randomName,
-      profilePicture: homeImage,
-      timeStamp: formattedDate,
-      title: randomName,
-      content: randomName,
-      noOfViews: 100,
-      comments: [comments],
-      noOfUpVotes: 100,
-      isUpVoted: true,
-      tags: [
-        randomName,
-        randomName,
-        randomName,
-      ])
-];
+// CommentModel comments = CommentModel(
+//     commentId: randomId,
+//     senderId: randomId,
+//     senderName: randomName,
+//     timeStamp: formattedDate,
+//     commentMessage: randomName,
+//     noOfLikes: 100,
+//     isLiked: true,
+//     noOfDislikes: 0,
+//     isDisliked: false,
+//     replies: [replies]);
 
-CommentModel comments = CommentModel(
-    commentId: randomId,
-    senderId: randomId,
-    senderName: randomName,
-    timeStamp: formattedDate,
-    commentMessage: randomName,
-    noOfLikes: 100,
-    isLiked: true,
-    noOfDislikes: 0,
-    isDisliked: false,
-    replies: [replies]);
-
-ReplyModel replies = ReplyModel(
-  replyId: randomId,
-  senderId: randomName,
-  senderName: randomName,
-  recipientId: randomId,
-  recipientName: randomName,
-  replyMessage: randomName,
-);
+// ReplyModel replies = ReplyModel(
+//   replyId: randomId,
+//   senderId: randomName,
+//   senderName: randomName,
+//   recipientId: randomId,
+//   recipientName: randomName,
+//   replyMessage: randomName,
+// );

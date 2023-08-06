@@ -1,69 +1,49 @@
-import 'package:neighboard/models/post_model.dart';
-import 'package:neighboard/models/reply_model.dart';
-
 class CommentModel {
-  String commentId;
-  String senderId;
-  String senderName;
-  String timeStamp;
-  String commentMessage;
-  int noOfLikes;
-  bool isLiked;
-  int noOfDislikes;
-  bool isDisliked;
-  List<ReplyModel> replies;
+  late String commentId;
+  late String senderId;
+  late String senderProfilePicture;
+  late String senderName;
+  late String timeStamp;
+  late String commentMessage;
+  late int noOfLikes;
+  late int noOfDislikes;
+  late int noOfReplies;
 
-  // Constructor
   CommentModel({
     required this.commentId,
     required this.senderId,
+    required this.senderProfilePicture,
     required this.senderName,
     required this.timeStamp,
     required this.commentMessage,
     required this.noOfLikes,
-    required this.isLiked,
     required this.noOfDislikes,
-    required this.isDisliked,
-    required this.replies,
+    required this.noOfReplies,
   });
-}
 
-addCommentData(PostModel post, CommentModel comment) {
-  post.comments.add(comment);
-}
-
-triggerLikeComment (PostModel post, commentId) {
-  for (CommentModel comment in post.comments) {
-    if (comment.commentId == commentId) {
-      if (comment.isDisliked) {
-        comment.isDisliked = false;
-        comment.noOfDislikes -= 1;
-      }
-      if(comment.isLiked) {
-        comment.isLiked = false;
-        comment.noOfLikes -= 1;
-      } else {
-        comment.isLiked = true;
-        comment.noOfLikes += 1;
-      }
-    }
+  CommentModel.fromJson(Map<String, dynamic> json) {
+    commentId = json['comment_id'];
+    senderId = json['sender_id'];
+    senderProfilePicture = json['sender_profile_picture'];
+    senderName = json['sender_name'];
+    timeStamp = json['time_stamp'];
+    commentMessage = json['comment_message'];
+    noOfLikes = json['no_of_likes'];
+    noOfDislikes = json['no_of_dislikes'];
+    noOfReplies = json['no_of_replies'];
   }
-}
 
-triggerDislikeComment (PostModel post, commentId) {
-  for (CommentModel comment in post.comments) {
-    if (comment.commentId == commentId) {
-      if (comment.isLiked) {
-        comment.isLiked = false;
-        comment.noOfLikes -= 1;
-      }
-      if(comment.isDisliked) {
-        comment.isDisliked = false;
-        comment.noOfDislikes -= 1;
-      } else {
-        comment.isDisliked = true;
-        comment.noOfDislikes += 1;
-      }
-    }
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['comment_id'] = commentId;
+    data['sender_id'] = senderId;
+    data['sender_profile_picture'] = senderProfilePicture;
+    data['sender_name'] = senderName;
+    data['time_stamp'] = timeStamp;
+    data['comment_message'] = commentMessage;
+    data['no_of_likes'] = noOfLikes;
+    data['no_of_dislikes'] = noOfDislikes;
+    data['no_of_replies'] = noOfReplies;
+    return data;
   }
 }

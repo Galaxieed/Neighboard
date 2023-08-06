@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/forum_page/ui/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
@@ -29,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => const ForumPage(),
+            builder: (context) => const ForumPage(),
           ),
         );
       } else {
@@ -53,7 +54,9 @@ class _LoginPageState extends State<LoginPage> {
                   title: const Text('NEIGHBOARD'),
                   actions: [
                     OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Routes().navigate("Register", context);
+                      },
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),

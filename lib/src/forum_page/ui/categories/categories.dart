@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/post_model.dart';
+import 'package:neighboard/src/forum_page/ui/categories/categories_function.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
@@ -15,17 +16,42 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
+  List<PostModel> postModels = [];
+  bool isLoading = true;
+
+  void getCategoryPosts() async {
+    // TODO: sort this based on category
+    postModels =
+        await CategoriesFunction.getPostsByCategory(category: "") ?? [];
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getCategoryPosts();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: posts.length,
-        itemBuilder: (context, index) {
-          PostModel post = posts[index];
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-            child: SinglePost(post: post),
-          );
-        });
+    return isLoading
+        ? const LoadingScreen()
+        : postModels.isEmpty
+            ? const Center(
+                child: Text("No Posts"),
+              )
+            : ListView.builder(
+                itemCount: postModels.length,
+                itemBuilder: (context, index) {
+                  PostModel post = postModels[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 10),
+                    child: SinglePost(post: post),
+                  );
+                });
   }
 }
 
@@ -122,7 +148,7 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
           onPressed: () {},
           icon: const Icon(Icons.mode_comment_outlined),
         ),
-        Text('${widget.post.comments.length}'),
+        Text('${widget.post.noOfComments}'),
         const SizedBox(
           width: 20,
         ),

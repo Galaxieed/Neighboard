@@ -1,21 +1,16 @@
-import 'package:neighboard/models/comment_model.dart';
-import 'package:neighboard/data/posts_data.dart';
-
 class PostModel {
-  String postId;
-  String authorId;
-  String authorName;
-  String profilePicture;
-  String timeStamp;
-  String title;
-  String content;
-  int noOfViews;
-  List<CommentModel> comments;
-  int noOfUpVotes;
-  bool isUpVoted;
-  List<String> tags;
+  late String postId;
+  late String authorId;
+  late String authorName;
+  late String profilePicture;
+  late String timeStamp;
+  late String title;
+  late String content;
+  late int noOfComments;
+  late int noOfViews;
+  late int noOfUpVotes;
+  late List<String> tags;
 
-  // Constructor
   PostModel({
     required this.postId,
     required this.authorId,
@@ -24,26 +19,39 @@ class PostModel {
     required this.timeStamp,
     required this.title,
     required this.content,
+    required this.noOfComments,
     required this.noOfViews,
-    required this.comments,
     required this.noOfUpVotes,
-    required this.isUpVoted,
     required this.tags,
   });
-}
 
-addPostData(PostModel post) {
-  posts.add(post);
-}
+  PostModel.fromJson(Map<String, dynamic> json) {
+    postId = json['post_id'];
+    authorId = json['author_id'];
+    authorName = json['author_name'];
+    profilePicture = json['profile_picture'];
+    timeStamp = json['time_stamp'];
+    title = json['title'];
+    content = json['content'];
+    noOfComments = json['no_of_comments'];
+    noOfViews = json['no_of_views'];
+    noOfUpVotes = json['no_of_upVotes'];
+    tags = json['tags'].cast<String>();
+  }
 
-triggerUpVote(PostModel post, postId) {
-  if (post.postId == postId) {
-    if (post.isUpVoted) {
-      post.isUpVoted = false;
-      post.noOfUpVotes -= 1;
-    } else {
-      post.isUpVoted = true;
-      post.noOfUpVotes += 1;
-    }
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['post_id'] = postId;
+    data['author_id'] = authorId;
+    data['author_name'] = authorName;
+    data['profile_picture'] = profilePicture;
+    data['time_stamp'] = timeStamp;
+    data['title'] = title;
+    data['content'] = content;
+    data['no_of_comments'] = noOfComments;
+    data['no_of_views'] = noOfViews;
+    data['no_of_upVotes'] = noOfUpVotes;
+    data['tags'] = tags;
+    return data;
   }
 }

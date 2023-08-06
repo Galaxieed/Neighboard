@@ -1,11 +1,12 @@
-import 'package:english_words/english_words.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
-import 'package:neighboard/constants/constants.dart';
-import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/forum_page/ui/comments/comment_function.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
@@ -25,6 +26,8 @@ class CommentUI extends StatefulWidget {
 class _CommentUIState extends State<CommentUI> {
   bool isRepliesVisible = false;
   bool isReplyBoxVisible = false;
+  bool isLiked = false;
+  bool isDisliked = false;
 
   setRepliesVisible(bool condition) {
     setState(() {
@@ -38,21 +41,81 @@ class _CommentUIState extends State<CommentUI> {
     });
   }
 
-  addReplyCallback({required ReplyModel reply}) {
-    setState(() {
-      addReplyData(widget.post, widget.comment.commentId, reply);
-    });
+  void checkIfLikedOrDisliked() async {
+    isLiked = await CommentFunction.isAlreadyLiked(
+        postId: widget.post.postId, commentId: widget.comment.commentId);
+    isDisliked = await CommentFunction.isAlreadyDisliked(
+        postId: widget.post.postId, commentId: widget.comment.commentId);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
-  likeDislikeAction({required String type}) {
-    setState(() {
-      if (type == 'like') {
-        triggerLikeComment(widget.post, widget.comment.commentId);
+  likeDislikeAction({required String type}) async {
+    if (type == 'like') {
+      if (isDisliked) {
+        widget.comment.noOfDislikes -= 1;
+        isDisliked = false;
+        await CommentFunction.onDislikeAndUnDislike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isDisliked: false);
       }
-      if (type == 'dislike') {
-        triggerDislikeComment(widget.post, widget.comment.commentId);
+      if (isLiked) {
+        setState(() {
+          widget.comment.noOfLikes -= 1;
+          isLiked = false;
+        });
+        await CommentFunction.onLikeAndUnlike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isLiked: false);
+      } else {
+        setState(() {
+          widget.comment.noOfLikes += 1;
+          isLiked = true;
+        });
+        await CommentFunction.onLikeAndUnlike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isLiked: true);
       }
-    });
+    }
+    if (type == 'dislike') {
+      if (isLiked) {
+        widget.comment.noOfLikes -= 1;
+        isLiked = false;
+        await CommentFunction.onLikeAndUnlike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isLiked: false);
+      }
+      if (isDisliked) {
+        setState(() {
+          widget.comment.noOfDislikes -= 1;
+          isDisliked = false;
+        });
+        await CommentFunction.onDislikeAndUnDislike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isDisliked: false);
+      } else {
+        setState(() {
+          widget.comment.noOfDislikes += 1;
+          isDisliked = true;
+        });
+        await CommentFunction.onDislikeAndUnDislike(
+            postId: widget.post.postId,
+            commentId: widget.comment.commentId,
+            isDisliked: true);
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkIfLikedOrDisliked();
   }
 
   @override
@@ -75,7 +138,8 @@ class _CommentUIState extends State<CommentUI> {
                 children: [
                   Row(
                     children: [
-                      SmallProfilePic(profilePic: homeImage),
+                      SmallProfilePic(
+                          profilePic: widget.comment.senderProfilePicture),
                       const SizedBox(
                         width: 10,
                       ),
@@ -111,17 +175,16 @@ class _CommentUIState extends State<CommentUI> {
                   const SizedBox(
                     height: 10,
                   ),
+                  //TODO: Need Fixing
                   ActionBarComment(
-                    noOfLikes: widget.comment.noOfLikes,
-                    isLiked: widget.comment.isLiked,
-                    noOfDislikes: widget.comment.noOfDislikes,
-                    isDisliked: widget.comment.isDisliked,
-                    replies: widget.comment.replies,
+                    postId: widget.post.postId,
+                    comment: widget.comment,
+                    isRepliesVisible: isRepliesVisible,
                     setRepliesVisible: setRepliesVisible,
                     setReplyBoxVisible: setReplyBoxVisible,
-                    isRepliesVisible: isRepliesVisible,
-                    isReplyBoxVisible: isReplyBoxVisible,
                     likeDislikeAction: likeDislikeAction,
+                    isAlreadyLiked: isLiked,
+                    isAlreadyDisliked: isDisliked,
                   ),
                 ],
               ),
@@ -129,13 +192,12 @@ class _CommentUIState extends State<CommentUI> {
           ),
         ),
         RepliesContainer(
-          // recipientId: widget.comment.recipientId,
+          post: widget.post,
           comment: widget.comment,
           setRepliesVisible: setRepliesVisible,
           isRepliesVisible: isRepliesVisible,
           isReplyBoxVisible: isReplyBoxVisible,
-          setReplyBoxVisible: setReplyBoxVisible,
-          addReply: addReplyCallback, //Yung addReply ayusin
+          setReplyBoxVisible: setReplyBoxVisible, //Yung addReply ayusin
         ),
         const SizedBox(
           height: 5,
@@ -147,48 +209,92 @@ class _CommentUIState extends State<CommentUI> {
 
 // ignore: must_be_immutable
 class RepliesContainer extends StatefulWidget {
-  RepliesContainer({
+  const RepliesContainer({
     super.key,
+    required this.post,
     required this.comment,
     required this.setRepliesVisible,
     required this.setReplyBoxVisible,
     required this.isReplyBoxVisible,
     required this.isRepliesVisible,
-    required this.addReply,
-    // required this.recipientId,
   });
 
-  bool isRepliesVisible, isReplyBoxVisible;
-  final Function setRepliesVisible, setReplyBoxVisible, addReply;
+  final bool isRepliesVisible, isReplyBoxVisible;
+  final Function setRepliesVisible, setReplyBoxVisible;
   final CommentModel comment;
-  // final int recipientId;
+  final PostModel post;
 
   @override
   State<RepliesContainer> createState() => _RepliesContainerState();
 }
 
 class _RepliesContainerState extends State<RepliesContainer> {
+  List<ReplyModel> replyModel = [];
+  bool isLoading = true;
+
+  void getAllReplies() async {
+    replyModel = await CommentFunction.getAllReplies(
+            postId: widget.post.postId, commentId: widget.comment.commentId) ??
+        [];
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  //TODO: add comment to database and display it here
+  addReplyCallback({required ReplyModel reply}) async {
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
+    await CommentFunction.postReply(
+      postId: widget.post.postId,
+      commentId: widget.comment.commentId,
+      replyModel: reply,
+    );
+    replyModel.add(reply);
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAllReplies();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Visibility(
-      visible: widget.isRepliesVisible,
-      child: Column(
-        children: [
-          ReplyTextField(
-            visibility: widget.isReplyBoxVisible,
-            addReply: widget.addReply,
-            setVisibility: widget.setReplyBoxVisible,
-            recipientId: widget.comment.senderId,
-            recipientName: widget.comment.senderName,
-          ),
-          for (ReplyModel singleReply in widget.comment.replies)
-            SingleReplyUI(
-              replyModel: singleReply,
-              addReply: widget.addReply,
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : Visibility(
+            visible: widget.isRepliesVisible,
+            child: Column(
+              children: [
+                ReplyTextField(
+                  visibility: widget.isReplyBoxVisible,
+                  addReply: addReplyCallback,
+                  setVisibility: widget.setReplyBoxVisible,
+                  recipientId: widget.comment.senderId,
+                  recipientName: widget.comment.senderName,
+                ),
+                for (ReplyModel singleReply in replyModel)
+                  SingleReplyUI(
+                    replyModel: singleReply,
+                    addReply: addReplyCallback,
+                  ),
+              ],
             ),
-        ],
-      ),
-    );
+          );
   }
 }
 
@@ -303,6 +409,21 @@ class ReplyTextField extends StatefulWidget {
 
 class _ReplyTextFieldState extends State<ReplyTextField> {
   TextEditingController replyController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  UserModel? userModel;
+
+  void getUserDetails() async {
+    userModel = await ProfileFunction.getUserDetails();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserDetails();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Visibility(
@@ -326,9 +447,9 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
           IconButton(
             onPressed: () {
               final ReplyModel thisReply = ReplyModel(
-                replyId: generateRandomId(8),
-                senderId: generateRandomId(8),
-                senderName: WordPair.random().asPascalCase,
+                replyId: DateTime.now().toIso8601String(),
+                senderId: _auth.currentUser!.uid,
+                senderName: userModel!.username,
                 recipientId: widget.recipientId,
                 recipientName: widget.recipientName,
                 replyMessage: replyController.text,
@@ -345,29 +466,22 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
   }
 }
 
-// ignore: must_be_immutable
 class ActionBarComment extends StatelessWidget {
-  ActionBarComment({
+  const ActionBarComment({
     super.key,
-    required this.noOfLikes,
-    required this.noOfDislikes,
-    this.replies,
-    required this.isLiked,
-    required this.isDisliked,
+    required this.postId,
+    required this.comment,
     required this.setRepliesVisible,
-    required this.isReplyBoxVisible,
-    required this.isRepliesVisible,
     required this.setReplyBoxVisible,
     required this.likeDislikeAction,
+    required this.isRepliesVisible,
+    required this.isAlreadyLiked,
+    required this.isAlreadyDisliked,
   });
-
-  bool isRepliesVisible, isReplyBoxVisible;
+  final bool isRepliesVisible, isAlreadyLiked, isAlreadyDisliked;
+  final String postId;
+  final CommentModel comment;
   final Function setRepliesVisible, setReplyBoxVisible, likeDislikeAction;
-  bool isLiked;
-  bool isDisliked;
-  int noOfLikes;
-  int noOfDislikes;
-  List? replies = [];
 
   @override
   Widget build(BuildContext context) {
@@ -375,7 +489,7 @@ class ActionBarComment extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         LikeButton(
-          isLiked: isLiked,
+          isLiked: isAlreadyLiked,
           onTap: (bool isLiked) {
             likeDislikeAction(type: 'like');
             return Future.value(!isLiked);
@@ -383,13 +497,13 @@ class ActionBarComment extends StatelessWidget {
           likeBuilder: (isLiked) => isLiked
               ? const Icon(Icons.thumb_up)
               : const Icon(Icons.thumb_up_outlined),
-          likeCount: noOfLikes,
+          likeCount: comment.noOfLikes,
         ),
         const SizedBox(
           width: 20,
         ),
         LikeButton(
-          isLiked: isDisliked,
+          isLiked: isAlreadyDisliked,
           onTap: (bool isLiked) {
             likeDislikeAction(type: 'dislike');
             return Future.value(!isLiked);
@@ -397,7 +511,7 @@ class ActionBarComment extends StatelessWidget {
           likeBuilder: (isLiked) => isLiked
               ? const Icon(Icons.thumb_down)
               : const Icon(Icons.thumb_down_outlined),
-          likeCount: noOfDislikes,
+          likeCount: comment.noOfDislikes,
         ),
         const Expanded(
             child: SizedBox(
@@ -410,7 +524,7 @@ class ActionBarComment extends StatelessWidget {
                   setRepliesVisible(false);
                 },
                 icon: const Icon(Icons.expand_less_rounded),
-                label: Text('Hide All Replies (${replies!.length})'),
+                label: Text('Hide All Replies (${comment.noOfReplies})'),
               )
             : Container(),
         const SizedBox(

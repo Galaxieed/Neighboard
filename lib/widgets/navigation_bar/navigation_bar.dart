@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/src/landing_page/ui/landing_page.dart';
+import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
   const NavBar({Key? key})
@@ -37,8 +41,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        NavBarCircularImageDropDownButton(
-            image: homeImage, callback: Routes().navigate),
+        NavBarCircularImageDropDownButton(callback: Routes().navigate),
         const SizedBox(
           width: 10,
         ),
@@ -170,10 +173,8 @@ class _NavBarBadgesState extends State<NavBarBadges> {
 }
 
 class NavBarCircularImageDropDownButton extends StatefulWidget {
-  const NavBarCircularImageDropDownButton(
-      {Key? key, required this.callback, required this.image})
+  const NavBarCircularImageDropDownButton({Key? key, required this.callback})
       : super(key: key);
-  final String image;
   final Function callback;
   @override
   State<NavBarCircularImageDropDownButton> createState() =>
@@ -182,49 +183,134 @@ class NavBarCircularImageDropDownButton extends StatefulWidget {
 
 class _NavBarCircularImageDropDownButtonState
     extends State<NavBarCircularImageDropDownButton> {
-  static const menuItems = <String>[
-    'User',
-    'Login',
-    'Register',
-  ];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  UserModel? userModel;
+  bool isLoading = true;
 
-  final List<PopupMenuItem<String>> _popUpMenuItems = menuItems
-      .map(
-        (String value) => PopupMenuItem<String>(
-          value: value,
-          child: Row(
-            children: [
-              value == 'User'
-                  ? const Icon(Icons.person)
-                  : value == 'Login'
-                      ? const Icon(Icons.login)
-                      : value == 'Register'
-                          ? const Icon(Icons.app_registration)
-                          : Container(),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(value)
-            ],
+  Future<void> getUserDetails() async {
+    userModel = await ProfileFunction.getUserDetails();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    isLoggedIn = _auth.currentUser != null;
+    if (isLoggedIn) {
+      getUserDetails();
+    }
+  }
+
+  List<PopupMenuItem<String>> menuItemsGuest = [
+    const PopupMenuItem(
+      value: "Login",
+      child: Row(
+        children: [
+          Icon(Icons.login),
+          SizedBox(
+            width: 10,
           ),
-        ),
-      )
-      .toList();
+          Text('Login'),
+        ],
+      ),
+    ),
+    const PopupMenuItem(
+      value: "Register",
+      child: Row(
+        children: [
+          Icon(Icons.app_registration_sharp),
+          SizedBox(
+            width: 10,
+          ),
+          Text('Register'),
+        ],
+      ),
+    ),
+  ];
 
   late String selectedValue;
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<String>(
-      position: PopupMenuPosition.under,
-      icon: CircleAvatar(
-        backgroundImage: AssetImage(widget.image),
-      ),
-      //child: Icon(Icons.keyboard_arrow_down),
-      onSelected: (String newValue) {
-        selectedValue = newValue;
-        widget.callback(newValue, context);
-      },
-      itemBuilder: (BuildContext context) => _popUpMenuItems,
-    );
+        position: PopupMenuPosition.under,
+        icon: isLoading
+            ? !isLoggedIn
+                ? const CircleAvatar()
+                : const CircularProgressIndicator()
+            : CircleAvatar(
+                backgroundImage: NetworkImage(userModel!.profilePicture),
+              ),
+        //child: Icon(Icons.keyboard_arrow_down),
+        onSelected: (String newValue) {
+          if (newValue == "Logout") {
+            LoginFunction.logout();
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const LandingPage()),
+                (route) => false);
+          } else {
+            selectedValue = newValue;
+            widget.callback(newValue, context);
+          }
+        },
+        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              isLoggedIn
+                  ? PopupMenuItem(
+                      value: "User",
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage:
+                                NetworkImage(userModel!.profilePicture),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(userModel!.username),
+                        ],
+                      ),
+                    )
+                  : const PopupMenuItem(
+                      value: "Login",
+                      child: Row(
+                        children: [
+                          Icon(Icons.login),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text('Login'),
+                        ],
+                      ),
+                    ),
+              isLoggedIn
+                  ? const PopupMenuItem(
+                      value: "Logout",
+                      child: Row(
+                        children: [
+                          Icon(Icons.logout),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text("Logout"),
+                        ],
+                      ),
+                    )
+                  : const PopupMenuItem(
+                      value: "Register",
+                      child: Row(
+                        children: [
+                          Icon(Icons.app_registration),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text('Register'),
+                        ],
+                      ),
+                    ),
+            ]);
   }
 }

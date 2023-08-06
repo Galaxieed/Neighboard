@@ -12,7 +12,7 @@ class SmallProfilePic extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 30,
-      backgroundImage: AssetImage(
+      backgroundImage: NetworkImage(
         profilePic,
       ),
     );
