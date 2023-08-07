@@ -132,63 +132,63 @@ class _NewPostState extends State<NewPost> {
           )
         : Padding(
             padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 0),
-            child: Card(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      DropdownButtonFormField(
-                        decoration:
-                            const InputDecoration(border: OutlineInputBorder()),
-                        value: _category,
-                        hint: const Text('Choose categories *'),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _category = newValue;
-                          });
-                        },
-                        items: [
-                          'Category1',
-                          'Category2',
-                          'Category3',
-                        ].map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select a category';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(
-                        controller: _cTitlePost,
-                        onSaved: (value) => _postTitle = value!,
-                        decoration: const InputDecoration(
-                          labelText: "Enter Post Title",
-                          border: OutlineInputBorder(),
+            child: SingleChildScrollView(
+              child: Card(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        DropdownButtonFormField(
+                          decoration: const InputDecoration(
+                              border: OutlineInputBorder()),
+                          value: _category,
+                          hint: const Text('Choose categories *'),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              _category = newValue;
+                            });
+                          },
+                          items: [
+                            'Category1',
+                            'Category2',
+                            'Category3',
+                          ].map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Please select a category';
+                            }
+                            return null;
+                          },
                         ),
-                        validator: (value) {
-                          if (value?.trim() == '') {
-                            return 'Please enter title';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Expanded(
-                        child: TextFormField(
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
+                          controller: _cTitlePost,
+                          onSaved: (value) => _postTitle = value!,
+                          decoration: const InputDecoration(
+                            labelText: "Enter Post Title",
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) {
+                            if (value?.trim() == '') {
+                              return 'Please enter title';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
                           controller: _cContentPost,
                           onSaved: (value) => _postContent = value!,
                           decoration: const InputDecoration(
@@ -197,8 +197,8 @@ class _NewPostState extends State<NewPost> {
                             alignLabelWithHint: true,
                           ),
                           keyboardType: TextInputType.multiline,
-                          maxLines: null,
-                          expands: true,
+                          expands: false,
+                          maxLines: 16,
                           textAlignVertical: TextAlignVertical.top,
                           validator: (value) {
                             if (value?.trim() == '') {
@@ -207,43 +207,43 @@ class _NewPostState extends State<NewPost> {
                             return null;
                           },
                         ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: _getImage,
-                            style: ElevatedButton.styleFrom(
-                              shape: const BeveledRectangleBorder(),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _getImage,
+                              style: ElevatedButton.styleFrom(
+                                shape: const BeveledRectangleBorder(),
+                              ),
+                              icon: const Icon(Icons.image),
+                              label: const Text('Add Image'),
                             ),
-                            icon: const Icon(Icons.image),
-                            label: const Text('Add Image'),
-                          ),
-                          const Spacer(),
-                          ElevatedButton.icon(
-                            onPressed: _draftPost,
-                            style: ElevatedButton.styleFrom(
-                              shape: const BeveledRectangleBorder(),
+                            const Spacer(),
+                            ElevatedButton.icon(
+                              onPressed: _draftPost,
+                              style: ElevatedButton.styleFrom(
+                                shape: const BeveledRectangleBorder(),
+                              ),
+                              icon: const Icon(Icons.drafts),
+                              label: const Text('Save as Draft'),
                             ),
-                            icon: const Icon(Icons.drafts),
-                            label: const Text('Save as Draft'),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: _publishPost,
-                            style: ElevatedButton.styleFrom(
-                              shape: const BeveledRectangleBorder(),
+                            const SizedBox(
+                              width: 10,
                             ),
-                            icon: const Icon(Icons.send),
-                            label: const Text('Publish'),
-                          ),
-                        ],
-                      ),
-                    ],
+                            ElevatedButton.icon(
+                              onPressed: _publishPost,
+                              style: ElevatedButton.styleFrom(
+                                shape: const BeveledRectangleBorder(),
+                              ),
+                              icon: const Icon(Icons.send),
+                              label: const Text('Publish'),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

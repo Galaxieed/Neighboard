@@ -12,18 +12,13 @@ import 'package:neighboard/widgets/others/launch_url.dart';
 class ForumPage extends StatefulWidget {
   const ForumPage({Key? key}) : super(key: key);
 
-  static const forumPages = <Widget>[
-    Categories(),
-    Categories(),
-    MyPosts(),
-    NewPost(),
-  ];
-
   @override
   State<ForumPage> createState() => _ForumPageState();
 }
 
 class _ForumPageState extends State<ForumPage> {
+  String searchedText = "";
+
   UserModel? userModel;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
@@ -68,22 +63,29 @@ class _ForumPageState extends State<ForumPage> {
                   children: [
                     SearchBar(
                       leading: const Icon(Icons.search),
-                      hintText: 'Search...',
+                      hintText: 'Search Post Title...',
                       constraints: const BoxConstraints(
                         minWidth: double.infinity,
                         minHeight: 60,
                       ),
-                      onChanged: (String searchText) {},
-                      onTap: () {},
+                      onChanged: (String searchText) {
+                        setState(() {
+                          searchedText = searchText;
+                        });
+                      },
+                      onTap: () {
+                        // showSearch(
+                        //     context: context, delegate: SearchScreenUI());
+                      },
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     DefaultTabController(
                       initialIndex: 1,
-                      length: ForumPage.forumPages.length,
+                      length: 4,
                       child: Builder(
-                        builder: (BuildContext context) => Expanded(
+                        builder: (context) => Expanded(
                           child: Column(
                             children: <Widget>[
                               Padding(
@@ -103,9 +105,19 @@ class _ForumPageState extends State<ForumPage> {
                               const SizedBox(
                                 height: 20,
                               ),
-                              const Expanded(
-                                child:
-                                    TabBarView(children: ForumPage.forumPages),
+                              Expanded(
+                                child: TabBarView(
+                                  children: [
+                                    Categories(
+                                      category: searchedText,
+                                    ),
+                                    Categories(
+                                      category: searchedText,
+                                    ),
+                                    MyPosts(search: searchedText),
+                                    const NewPost(),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

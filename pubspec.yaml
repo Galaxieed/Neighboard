@@ -47,6 +47,8 @@ dependencies:
   firebase_auth: ^4.7.1
   firebase_storage: ^11.2.5
   shared_preferences: ^2.2.0
+  search_page: ^2.3.0
+  flutter_screenutil: ^5.8.4
 
 dev_dependencies:
   flutter_test:

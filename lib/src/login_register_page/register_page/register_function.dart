@@ -56,10 +56,8 @@ class RegisterFunction {
         profilePicture: "",
       );
       await _firestore.collection("users").doc(userId).set(userModel.toJson());
-      print("done");
     } catch (e) {
-      print(e);
-      //catch error
+      return;
     }
   }
 }

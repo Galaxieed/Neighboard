@@ -9,7 +9,8 @@ import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
 
 class Categories extends StatefulWidget {
-  const Categories({Key? key}) : super(key: key);
+  const Categories({Key? key, required this.category}) : super(key: key);
+  final String category;
 
   @override
   State<Categories> createState() => _CategoriesState();
@@ -19,23 +20,44 @@ class _CategoriesState extends State<Categories> {
   List<PostModel> postModels = [];
   bool isLoading = true;
 
+  void getAllPost() async {
+    postModels = await CategoriesFunction.getAllPost() ?? [];
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void getCategoryPosts() async {
     // TODO: sort this based on category
+    postModels = await CategoriesFunction.getPostsByCategory(
+            category: widget.category) ??
+        [];
+  }
+
+  void getTitlePost() async {
     postModels =
-        await CategoriesFunction.getPostsByCategory(category: "") ?? [];
-    setState(() {
-      isLoading = false;
-    });
+        await CategoriesFunction.getPostsByTitle(title: widget.category) ?? [];
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    getCategoryPosts();
+    getAllPost();
   }
 
   @override
   Widget build(BuildContext context) {
+    //this is for filtering based on search and tags
+    if (widget.category.isNotEmpty || widget.category != "") {
+      getTitlePost();
+    } else {
+      getAllPost();
+    }
     return isLoading
         ? const LoadingScreen()
         : postModels.isEmpty
@@ -49,7 +71,11 @@ class _CategoriesState extends State<Categories> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 10),
-                    child: SinglePost(post: post),
+                    child: Column(
+                      children: [
+                        SinglePost(post: post),
+                      ],
+                    ),
                   );
                 });
   }

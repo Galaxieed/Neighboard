@@ -30,7 +30,6 @@ class _RegisterPageState extends State<RegisterPage> {
           firstName.text,
           lastName.text,
           username.text);
-      print(username.text);
 
       if (isAccountSuccessfullyCreated) {
         // ignore: use_build_context_synchronously

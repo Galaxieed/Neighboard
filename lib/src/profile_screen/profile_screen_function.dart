@@ -16,7 +16,6 @@ class ProfileFunction {
 
       return userModel;
     } catch (e) {
-      print(e);
       return null;
     }
   }

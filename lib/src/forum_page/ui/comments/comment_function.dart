@@ -44,7 +44,6 @@ class CommentFunction {
         transaction.update(userReference, {"rank": rankCount + 5});
       });
     } catch (e) {
-      print(e);
       return;
     }
   }
@@ -99,7 +98,6 @@ class CommentFunction {
             .update(commentReference, {"no_of_replies": repliesCount + 1});
       });
     } catch (e) {
-      print(e);
       return;
     }
   }

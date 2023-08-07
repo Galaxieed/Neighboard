@@ -29,10 +29,8 @@ class NewPostFunction {
 
         transaction.update(userReference, {"rank": rankCount + 10});
       });
-      print("Post Created");
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }

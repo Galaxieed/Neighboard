@@ -17,7 +17,9 @@ import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
 
 class MyPosts extends StatefulWidget {
-  const MyPosts({Key? key}) : super(key: key);
+  const MyPosts({Key? key, required this.search}) : super(key: key);
+
+  final String search;
 
   @override
   State<MyPosts> createState() => _MyPostsState();
@@ -27,13 +29,10 @@ class _MyPostsState extends State<MyPosts> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   List<PostModel> postModels = [];
-  bool isLoading = false;
+  bool isLoading = true;
   bool isLoggedIn = false;
 
   void getMyPosts() async {
-    setState(() {
-      isLoading = true;
-    });
     try {
       postModels =
           await MyPostFunction.getMyPost(authorId: _auth.currentUser!.uid) ??
@@ -41,9 +40,22 @@ class _MyPostsState extends State<MyPosts> {
     } catch (e) {
       return;
     }
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void getMyPostsByTitle() async {
+    try {
+      postModels = await MyPostFunction.getMyPostByTitle(
+              authorId: _auth.currentUser!.uid, title: widget.search) ??
+          [];
+      setState(() {});
+    } catch (e) {
+      return;
+    }
   }
 
   @override
@@ -55,10 +67,16 @@ class _MyPostsState extends State<MyPosts> {
       isLoggedIn = true;
       getMyPosts();
     }
+    isLoading = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.search.isNotEmpty || widget.search != "") {
+      getMyPostsByTitle();
+    } else if (isLoggedIn) {
+      getMyPosts();
+    }
     return isLoading
         ? const Center(
             child: CircularProgressIndicator(),
@@ -145,9 +163,11 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
   void getAllComments() async {
     commentModel =
         await CommentFunction.getAllComments(postId: widget.post.postId) ?? [];
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void onPostComment() async {
@@ -173,9 +193,11 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
           postId: widget.post.postId, commentModel: comment);
       commentModel.add(comment);
       _comment.clear();
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     } else {
       return;
     }
@@ -216,7 +238,6 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllComments();
     checkIfUpVoted();

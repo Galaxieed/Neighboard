@@ -175,7 +175,6 @@ class _CommentUIState extends State<CommentUI> {
                   const SizedBox(
                     height: 10,
                   ),
-                  //TODO: Need Fixing
                   ActionBarComment(
                     postId: widget.post.postId,
                     comment: widget.comment,
@@ -243,7 +242,6 @@ class _RepliesContainerState extends State<RepliesContainer> {
     }
   }
 
-  //TODO: add comment to database and display it here
   addReplyCallback({required ReplyModel reply}) async {
     if (mounted) {
       setState(() {
@@ -265,7 +263,6 @@ class _RepliesContainerState extends State<RepliesContainer> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllReplies();
   }
@@ -419,7 +416,6 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getUserDetails();
   }
