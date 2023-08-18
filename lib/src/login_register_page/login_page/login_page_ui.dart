@@ -1,182 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:neighboard/routes/routes.dart';
-import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
-import 'package:neighboard/src/loading_screen/loading_screen.dart';
-import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
+import 'package:neighboard/src/login_register_page/login_page/login_page_desktop.dart';
+import 'package:neighboard/src/login_register_page/login_page/login_page_mobile.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController email = TextEditingController();
-  final TextEditingController password = TextEditingController();
-
-  bool isLoading = false;
-
-  void onLogin() async {
-    if (email.text.isNotEmpty && password.text.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-      });
-      bool isLoginSuccessful =
-          await LoginFunction.login(email.text, password.text);
-
-      if (isLoginSuccessful) {
-        // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ForumPage(),
-          ),
-        );
-      } else {
-        //something went wrong
-      }
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? const LoadingScreen()
-        : Scaffold(
-            body: Center(
-              child: Scaffold(
-                appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  title: const Text('NEIGHBOARD'),
-                  actions: [
-                    OutlinedButton(
-                      onPressed: () {
-                        Routes().navigate("Register", context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: const Text('Register'),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      icon: const Icon(Icons.person_2_outlined),
-                      label: const Text('Login'),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                  ],
-                ),
-                body: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                        flex: 4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 60, vertical: 0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Login',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 32,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              const Text(
-                                'Please enter your details',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextFormField(
-                                controller: email,
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: 'Email',
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextFormField(
-                                controller: password,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: 'Password',
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              ElevatedButton(
-                                onPressed: onLogin,
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize:
-                                      const Size(double.infinity, 50.0),
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  foregroundColor:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                ),
-                                child: const Text(
-                                  'LOGIN',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage("assets/home.jpg"),
-                            fit: BoxFit.cover,
-                            alignment: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+    return ResponsiveBuilder(builder: (context, sizingInformation) {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
+        return const LoginPageDesktop();
+      } else if (sizingInformation.deviceScreenType ==
+          DeviceScreenType.tablet) {
+        return const Placeholder();
+      } else {
+        return const LoginPageMobile(
+          deviceScreenType: DeviceScreenType.mobile,
+        );
+      }
+    });
   }
 }
