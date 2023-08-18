@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/src/community_page/ui/announcement_page/announcement_page.dart';
 import 'package:neighboard/src/community_page/ui/community_map_page/community_map.dart';
 import 'package:neighboard/src/community_page/ui/stores_page/stores.dart';
-import 'package:neighboard/src/forum_page/ui/forum_page.dart';
+import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/login_register_page/register_page/register_page_ui.dart';

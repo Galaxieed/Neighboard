@@ -37,7 +37,6 @@ class MyPostFunction {
 
       return postModels;
     } catch (e) {
-      print(e);
       return null;
     }
   }

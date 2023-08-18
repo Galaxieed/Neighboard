@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -51,13 +52,19 @@ class _CategoriesState extends State<Categories> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didUpdateWidget(covariant Categories oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
     //this is for filtering based on search and tags
     if (widget.category.isNotEmpty || widget.category != "") {
       getTitlePost();
     } else {
       getAllPost();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return isLoading
         ? const LoadingScreen()
         : postModels.isEmpty
@@ -69,8 +76,8 @@ class _CategoriesState extends State<Categories> {
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
                   return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 10),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 0.w, vertical: 5.h),
                     child: Column(
                       children: [
                         SinglePost(post: post),

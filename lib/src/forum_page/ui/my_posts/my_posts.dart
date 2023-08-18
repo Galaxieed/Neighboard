@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -71,12 +73,18 @@ class _MyPostsState extends State<MyPosts> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void didUpdateWidget(covariant MyPosts oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
     if (widget.search.isNotEmpty || widget.search != "") {
       getMyPostsByTitle();
     } else if (isLoggedIn) {
       getMyPosts();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return isLoading
         ? const Center(
             child: CircularProgressIndicator(),
@@ -111,8 +119,8 @@ class _MyPostsState extends State<MyPosts> {
                     itemBuilder: (context, index) {
                       PostModel post = postModels[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50, vertical: 10),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 0.w, vertical: 5.h),
                         child: Column(
                           children: [
                             ClipRRect(
@@ -244,6 +252,13 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    _comment.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return isLoading
         ? const Center(
@@ -251,6 +266,8 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
           )
         : ExpansionPanelList(
             expandedHeaderPadding: const EdgeInsets.all(0),
+            animationDuration: const Duration(milliseconds: 500),
+            elevation: 0,
             expansionCallback: (i, isOpen) {
               setState(() {
                 if (index == i) {
@@ -260,44 +277,43 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                 }
               });
             },
-            animationDuration: const Duration(milliseconds: 500),
-            elevation: 0,
             children: [
               ExpansionPanel(
-                backgroundColor: Theme.of(context).primaryColorLight,
+                backgroundColor: ccExpansionPostColor,
+                canTapOnHeader: true,
+                isExpanded: index == 0,
                 headerBuilder: (BuildContext context, bool isExpanded) {
                   return SingleMyPost(
                     post: widget.post,
                     upVote: upVoteFunc,
                     isUpvoted: isUpvoted,
+                    isCollapsed: index == 0,
                   );
                 },
-                canTapOnHeader: true,
                 body: Column(
                   children: [
-                    const SizedBox(
-                      height: 10,
+                    SizedBox(
+                      height: 5.h,
                     ),
                     Text(
                       'Comments',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
-                    const SizedBox(
-                      height: 10,
+                    SizedBox(
+                      height: 5.h,
                     ),
                     CommentBox(
                         comment: _comment,
                         addComment: onPostComment,
                         clearComment: clearComment),
-                    const SizedBox(
-                      height: 10,
+                    SizedBox(
+                      height: 5.h,
                     ),
                     for (CommentModel comment in commentModel)
                       CommentUI(post: widget.post, comment: comment),
                   ],
                 ),
-                isExpanded: index == 0,
               )
             ],
           );
@@ -319,7 +335,7 @@ class CommentBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 40),
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: Column(
           children: [
             TextField(
@@ -331,8 +347,8 @@ class CommentBox extends StatelessWidget {
               ),
               maxLines: 2,
             ),
-            const SizedBox(
-              height: 20,
+            SizedBox(
+              height: 10.h,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -344,8 +360,8 @@ class CommentBox extends StatelessWidget {
                   icon: const Icon(Icons.cancel_outlined),
                   label: const Text('Cancel'),
                 ),
-                const SizedBox(
-                  width: 10,
+                SizedBox(
+                  width: 2.w,
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
@@ -373,11 +389,12 @@ class SingleMyPost extends StatelessWidget {
     required this.post,
     required this.upVote,
     required this.isUpvoted,
+    required this.isCollapsed,
   });
 
   final Function upVote;
   final PostModel post;
-  final bool isUpvoted;
+  final bool isUpvoted, isCollapsed;
 
   @override
   Widget build(BuildContext context) {
@@ -417,11 +434,16 @@ class SingleMyPost extends StatelessWidget {
             const SizedBox(
               height: 5,
             ),
-            PostContentText(
-              content: post.content,
-              maxLine: 3,
-              textOverflow: TextOverflow.ellipsis,
-            ),
+            isCollapsed
+                ? PostContentText(
+                    content: post.content,
+                    textOverflow: TextOverflow.visible,
+                  )
+                : PostContentText(
+                    content: post.content,
+                    maxLine: 3,
+                    textOverflow: TextOverflow.ellipsis,
+                  ),
             const SizedBox(
               height: 10,
             ),

@@ -513,26 +513,19 @@ class ActionBarComment extends StatelessWidget {
             child: SizedBox(
           width: 10,
         )),
-        isRepliesVisible
-            ? TextButton.icon(
-                onPressed: () {
-                  setReplyBoxVisible(false);
-                  setRepliesVisible(false);
-                },
-                icon: const Icon(Icons.expand_less_rounded),
-                label: Text('Hide All Replies (${comment.noOfReplies})'),
-              )
-            : Container(),
-        const SizedBox(
-          width: 20,
-        ),
         TextButton.icon(
           onPressed: () {
-            setRepliesVisible(true);
-            setReplyBoxVisible(true);
+            if (isRepliesVisible) {
+              setReplyBoxVisible(false);
+              setRepliesVisible(false);
+            } else {
+              setRepliesVisible(true);
+              setReplyBoxVisible(true);
+            }
           },
           icon: const Icon(Icons.reply_outlined),
-          label: const Text('Reply'),
+          label: Text(
+              !isRepliesVisible ? 'Reply' : 'Reply (${comment.noOfReplies})'),
         ),
       ],
     );

@@ -1,17 +1,20 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
-import 'package:neighboard/src/forum_page/ui/forum_page.dart';
+import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/forum_page/ui/new_post/new_post_function.dart';
 import 'package:neighboard/src/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/others/alert_dialog.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class NewPost extends StatefulWidget {
-  const NewPost({Key? key}) : super(key: key);
+  const NewPost({Key? key, required this.deviceScreenType}) : super(key: key);
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<NewPost> createState() => _NewPostState();
@@ -107,6 +110,10 @@ class _NewPostState extends State<NewPost> {
   // if (_imageBytes != null) // Display the image if it has been uploaded
   // Image.memory(_imageBytes!), //Place it inside the widget tree
 
+  bool isMobilePlatform() {
+    return widget.deviceScreenType == DeviceScreenType.mobile;
+  }
+
   @override
   Widget build(BuildContext context) {
     return !isLoggedIn
@@ -130,119 +137,145 @@ class _NewPostState extends State<NewPost> {
               ],
             ),
           )
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 0),
-            child: SingleChildScrollView(
-              child: Card(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 30),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        DropdownButtonFormField(
-                          decoration: const InputDecoration(
-                              border: OutlineInputBorder()),
-                          value: _category,
-                          hint: const Text('Choose categories *'),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              _category = newValue;
-                            });
-                          },
-                          items: [
-                            'Category1',
-                            'Category2',
-                            'Category3',
-                          ].map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Please select a category';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _cTitlePost,
-                          onSaved: (value) => _postTitle = value!,
-                          decoration: const InputDecoration(
-                            labelText: "Enter Post Title",
-                            border: OutlineInputBorder(),
+        : Center(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SingleChildScrollView(
+                child: Card(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          DropdownButtonFormField(
+                            decoration: const InputDecoration(
+                                border: OutlineInputBorder()),
+                            value: _category,
+                            hint: const Text('Choose categories *'),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                _category = newValue;
+                              });
+                            },
+                            items: [
+                              'Category 1',
+                              'Category 2',
+                              'Category 3',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Please select a category';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value?.trim() == '') {
-                              return 'Please enter title';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _cContentPost,
-                          onSaved: (value) => _postContent = value!,
-                          decoration: const InputDecoration(
-                            labelText: "Enter Post Content",
-                            border: OutlineInputBorder(),
-                            alignLabelWithHint: true,
+                          SizedBox(
+                            height: 5.h,
                           ),
-                          keyboardType: TextInputType.multiline,
-                          expands: false,
-                          maxLines: 16,
-                          textAlignVertical: TextAlignVertical.top,
-                          validator: (value) {
-                            if (value?.trim() == '') {
-                              return 'Please enter content';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: _getImage,
-                              style: ElevatedButton.styleFrom(
-                                shape: const BeveledRectangleBorder(),
-                              ),
-                              icon: const Icon(Icons.image),
-                              label: const Text('Add Image'),
+                          TextFormField(
+                            controller: _cTitlePost,
+                            onSaved: (value) => _postTitle = value!,
+                            decoration: const InputDecoration(
+                              labelText: "Enter Post Title",
+                              border: OutlineInputBorder(),
                             ),
-                            const Spacer(),
-                            ElevatedButton.icon(
-                              onPressed: _draftPost,
-                              style: ElevatedButton.styleFrom(
-                                shape: const BeveledRectangleBorder(),
-                              ),
-                              icon: const Icon(Icons.drafts),
-                              label: const Text('Save as Draft'),
+                            validator: (value) {
+                              if (value?.trim() == '') {
+                                return 'Please enter title';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(
+                            height: 5.h,
+                          ),
+                          TextFormField(
+                            controller: _cContentPost,
+                            onSaved: (value) => _postContent = value!,
+                            decoration: const InputDecoration(
+                              labelText: "Enter Post Content",
+                              border: OutlineInputBorder(),
+                              alignLabelWithHint: true,
                             ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            ElevatedButton.icon(
-                              onPressed: _publishPost,
-                              style: ElevatedButton.styleFrom(
-                                shape: const BeveledRectangleBorder(),
-                              ),
-                              icon: const Icon(Icons.send),
-                              label: const Text('Publish'),
-                            ),
-                          ],
-                        ),
-                      ],
+                            keyboardType: TextInputType.multiline,
+                            expands: false,
+                            maxLines: 15,
+                            textAlignVertical: TextAlignVertical.top,
+                            validator: (value) {
+                              if (value?.trim() == '') {
+                                return 'Please enter content';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(
+                            height: 5.h,
+                          ),
+                          isMobilePlatform()
+                              ? Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: _getImage,
+                                      icon: const Icon(Icons.image),
+                                      tooltip: "Add Image",
+                                    ),
+                                    SizedBox(
+                                      width: 2.w,
+                                    ),
+                                    IconButton(
+                                      onPressed: _draftPost,
+                                      icon: const Icon(Icons.drafts),
+                                      tooltip: "Draft Post",
+                                    ),
+                                    const Spacer(),
+                                    IconButton(
+                                      onPressed: _publishPost,
+                                      icon: const Icon(Icons.send),
+                                      tooltip: "Publish",
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: _getImage,
+                                      style: ElevatedButton.styleFrom(
+                                        shape: const BeveledRectangleBorder(),
+                                      ),
+                                      icon: const Icon(Icons.image),
+                                      label: const Text('Add Image'),
+                                    ),
+                                    const Spacer(),
+                                    ElevatedButton.icon(
+                                      onPressed: _draftPost,
+                                      style: ElevatedButton.styleFrom(
+                                        shape: const BeveledRectangleBorder(),
+                                      ),
+                                      icon: const Icon(Icons.drafts),
+                                      label: const Text('Save as Draft'),
+                                    ),
+                                    SizedBox(
+                                      width: 2.w,
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: _publishPost,
+                                      style: ElevatedButton.styleFrom(
+                                        shape: const BeveledRectangleBorder(),
+                                      ),
+                                      icon: const Icon(Icons.send),
+                                      label: const Text('Publish'),
+                                    ),
+                                  ],
+                                ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/routes/routes.dart';
-import 'package:neighboard/src/forum_page/ui/forum_page.dart';
+import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/login_register_page/register_page/register_function.dart';
 
