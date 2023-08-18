@@ -209,7 +209,7 @@ class OtherAnnouncement extends StatelessWidget {
           child: Column(
             children: [
               SizedBox(
-                height: 100.h,
+                height: MediaQuery.of(context).size.height * .20,
               ),
               GestureDetector(
                 onTap: () {},
