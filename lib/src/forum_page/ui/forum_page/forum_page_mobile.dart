@@ -75,19 +75,18 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         ],
       ),
       bottomNavigationBar: Material(
-        color: ccBottomTabBarColor,
         child: TabBar(
           tabs: const [
             Tab(
               icon: Icon(Icons.category),
-              text: "Categories",
+              text: "Category",
             ),
             Tab(
-              icon: Icon(Icons.forum),
-              text: "All Posts",
+              icon: Icon(Icons.forum_rounded),
+              text: "Posts",
             ),
             Tab(
-              icon: Icon(Icons.my_library_books),
+              icon: Icon(Icons.my_library_books_rounded),
               text: "My Posts",
             ),
             Tab(

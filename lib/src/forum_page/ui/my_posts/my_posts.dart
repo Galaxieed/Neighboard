@@ -279,7 +279,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
             },
             children: [
               ExpansionPanel(
-                backgroundColor: ccExpansionPostColor,
+                backgroundColor: ccExpansionPostColor(context),
                 canTapOnHeader: true,
                 isExpanded: index == 0,
                 headerBuilder: (BuildContext context, bool isExpanded) {
@@ -370,8 +370,8 @@ class CommentBox extends StatelessWidget {
                   icon: const Icon(Icons.mode_comment_outlined),
                   label: const Text('Comment'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: ccMyPostCommentButtonBGColor(context),
+                    foregroundColor: ccMyPostCommentButtonFGColor(context),
                   ),
                 ),
               ],
@@ -492,9 +492,11 @@ class ActionBarMyPost extends StatelessWidget {
           label: Text(isUpvoted ? 'Voted' : 'Vote'),
           style: ElevatedButton.styleFrom(
             backgroundColor: isUpvoted
-                ? Theme.of(context).disabledColor
-                : Theme.of(context).primaryColor,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                ? ccMyPostUpVotedBGColor(context)
+                : ccMyPostUpVoteBGColor(context),
+            foregroundColor: isUpvoted
+                ? ccMyPostUpVotedFGColor(context)
+                : ccMyPostUpVoteFGColor(context),
           ),
         )
       ],

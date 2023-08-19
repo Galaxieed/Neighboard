@@ -11,4 +11,14 @@ class SharedPrefHelper {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(key) ?? "";
   }
+
+  static Future<void> saveThemeMode(bool isDarkMode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDarkMode);
+  }
+
+  static Future<bool> loadThemeMode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isDarkMode') ?? false;
+  }
 }

@@ -109,8 +109,8 @@ class MainAnnouncement extends StatelessWidget {
         GestureDetector(
           onTap: () {},
           child: Container(
-            decoration: const BoxDecoration(
-              color: ccMainAnnouncementBannerColor,
+            decoration: BoxDecoration(
+              color: ccMainAnnouncementBannerColor(context),
             ),
             child: Padding(
               padding: EdgeInsets.all(3.7.sp),
@@ -170,7 +170,7 @@ class OtherAnnouncement extends StatelessWidget {
                 onTap: () {},
                 child: Container(
                   decoration: BoxDecoration(
-                    color: ccOtherAnnouncementBannerColor,
+                    color: ccOtherAnnouncementBannerColor(context),
                     borderRadius: BorderRadius.circular(5),
                   ),
                   padding: EdgeInsets.all(3.5.sp),

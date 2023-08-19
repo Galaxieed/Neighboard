@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -68,8 +69,8 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
             body: Center(
               child: Scaffold(
                 appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  title: const Text('NEIGHBOARD'),
+                  automaticallyImplyLeading: true,
+                  title: const Text('Register'),
                   actions: [
                     OutlinedButton.icon(
                       onPressed: () {},
@@ -77,9 +78,8 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: ccRegisterButtonBGColor(context),
+                        foregroundColor: ccRegisterButtonFGColor(context),
                       ),
                       icon: const Icon(Icons.person_add_alt_1_outlined),
                       label: const Text('Register'),
@@ -95,6 +95,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        foregroundColor: ccRegisterLoginButtonFGColor(context),
                       ),
                       child: const Text('Login'),
                     ),
@@ -193,9 +194,9 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                     minimumSize:
                                         const Size(double.infinity, 50.0),
                                     backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                        ccRegisterButtonBGColor(context),
                                     foregroundColor:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                        ccRegisterButtonFGColor(context),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5)),
                                   ),

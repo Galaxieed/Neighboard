@@ -5,7 +5,7 @@ import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class LoginPageMobile extends StatefulWidget {
   const LoginPageMobile({super.key, required this.deviceScreenType});
@@ -55,8 +55,8 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
             body: Center(
               child: Scaffold(
                 appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  title: const Text('NEIGHBOARD'),
+                  automaticallyImplyLeading: true,
+                  title: const Text('Login'),
                   actions: [
                     OutlinedButton(
                       onPressed: () {
@@ -66,6 +66,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        foregroundColor: ccLoginRegisterButtonFGColor(context),
                       ),
                       child: const Text('Register'),
                     ),
@@ -78,9 +79,8 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: ccLoginButtonBGColor(context),
+                        foregroundColor: ccLoginButtonFGColor(context),
                       ),
                       icon: const Icon(Icons.person_2_outlined),
                       label: const Text('Login'),
@@ -155,9 +155,9 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                                     minimumSize:
                                         const Size(double.infinity, 50.0),
                                     backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                        ccLoginButtonBGColor(context),
                                     foregroundColor:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                        ccLoginButtonFGColor(context),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5)),
                                   ),

@@ -102,8 +102,8 @@ class LandPageButton extends StatelessWidget {
       },
       style: ElevatedButton.styleFrom(
           //padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-          backgroundColor: ccExploreButtonBGColor,
-          foregroundColor: ccExploreButtonFGColor,
+          backgroundColor: ccExploreButtonBGColor(context),
+          foregroundColor: ccExploreButtonFGColor(context),
           minimumSize: Size(double.infinity, 40.h)),
       child: Text(
         label,
@@ -129,7 +129,7 @@ class LandPageHeaderSmall extends StatelessWidget {
       header,
       style: TextStyle(
         fontSize: 20.sp,
-        color: ccSubHeaderFGColor,
+        color: ccSubHeaderFGColor(context),
       ),
       textAlign: TextAlign.center,
       softWrap: true,
@@ -151,7 +151,7 @@ class LandPageHeader extends StatelessWidget {
       header,
       style: TextStyle(
         fontSize: 37.sp,
-        color: ccHeaderFGColor,
+        color: ccHeaderFGColor(context),
       ),
       textAlign: TextAlign.center,
       softWrap: true,

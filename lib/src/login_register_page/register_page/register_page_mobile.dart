@@ -5,7 +5,7 @@ import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/login_register_page/register_page/register_function.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class RegisterPageMobile extends StatefulWidget {
   const RegisterPageMobile({super.key, required this.deviceScreenType});
@@ -73,8 +73,8 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
             body: Center(
               child: Scaffold(
                 appBar: AppBar(
-                  automaticallyImplyLeading: false,
-                  title: const Text('NEIGHBOARD'),
+                  automaticallyImplyLeading: true,
+                  title: const Text('Register'),
                   actions: [
                     OutlinedButton.icon(
                       onPressed: () {},
@@ -82,9 +82,8 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: ccRegisterButtonBGColor(context),
+                        foregroundColor: ccRegisterButtonFGColor(context),
                       ),
                       icon: const Icon(Icons.person_add_alt_1_outlined),
                       label: const Text('Register'),
@@ -100,6 +99,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        foregroundColor: ccRegisterLoginButtonFGColor(context),
                       ),
                       child: const Text('Login'),
                     ),
@@ -203,9 +203,9 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                     minimumSize:
                                         const Size(double.infinity, 50.0),
                                     backgroundColor:
-                                        Theme.of(context).primaryColor,
+                                        ccRegisterButtonBGColor(context),
                                     foregroundColor:
-                                        Theme.of(context).colorScheme.onPrimary,
+                                        ccRegisterButtonFGColor(context),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(5)),
                                   ),

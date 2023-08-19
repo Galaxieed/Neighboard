@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -37,7 +39,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        const NavBarBadges(count: '3'),
+        const LightDarkMode(),
         const SizedBox(
           width: 10,
         ),
@@ -143,6 +145,31 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
       },
       itemBuilder: (BuildContext context) => _popUpMenuItems,
     );
+  }
+}
+
+class LightDarkMode extends StatefulWidget {
+  const LightDarkMode({super.key});
+
+  @override
+  State<LightDarkMode> createState() => _LightDarkModeState();
+}
+
+class _LightDarkModeState extends State<LightDarkMode> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () {
+          isDarkMode = !isDarkMode;
+          SharedPrefHelper.saveThemeMode(isDarkMode);
+          themeNotifier.value = themeNotifier.value == ThemeMode.light
+              ? ThemeMode.dark
+              : ThemeMode.light;
+          setState(() {});
+        },
+        icon: isDarkMode
+            ? const Icon(Icons.light_mode)
+            : const Icon(Icons.dark_mode));
   }
 }
 

@@ -6,7 +6,7 @@ import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class StoresMobile extends StatefulWidget {
   const StoresMobile({super.key, required this.deviceScreenType});
@@ -143,7 +143,7 @@ class StoresCards extends StatelessWidget {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                      color: ccStoresBannerColor,
+                      color: ccStoresBannerColor(context),
                       borderRadius: BorderRadius.circular(5)),
                   padding: EdgeInsets.all(5.sp),
                   child: SizedBox(

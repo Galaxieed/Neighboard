@@ -424,39 +424,43 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
   Widget build(BuildContext context) {
     return Visibility(
       visible: widget.visibility,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: replyController,
-              autofocus: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Enter Reply..',
-                alignLabelWithHint: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: replyController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15))),
+                  labelText: 'Enter Reply..',
+                  alignLabelWithHint: true,
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-          IconButton(
-            onPressed: () {
-              final ReplyModel thisReply = ReplyModel(
-                replyId: DateTime.now().toIso8601String(),
-                senderId: _auth.currentUser!.uid,
-                senderName: userModel!.username,
-                recipientId: widget.recipientId,
-                recipientName: widget.recipientName,
-                replyMessage: replyController.text,
-              );
-              widget.addReply(reply: thisReply);
-              replyController.clear();
-              widget.setVisibility!(false);
-            },
-            icon: const Icon(Icons.send),
-          )
-        ],
+            const SizedBox(
+              width: 5,
+            ),
+            IconButton(
+              onPressed: () {
+                final ReplyModel thisReply = ReplyModel(
+                  replyId: DateTime.now().toIso8601String(),
+                  senderId: _auth.currentUser!.uid,
+                  senderName: userModel!.username,
+                  recipientId: widget.recipientId,
+                  recipientName: widget.recipientName,
+                  replyMessage: replyController.text,
+                );
+                widget.addReply(reply: thisReply);
+                replyController.clear();
+                widget.setVisibility!(false);
+              },
+              icon: const Icon(Icons.send),
+            )
+          ],
+        ),
       ),
     );
   }

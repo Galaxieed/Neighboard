@@ -27,15 +27,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return linux;
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -78,5 +72,23 @@ class DefaultFirebaseOptions {
     storageBucket: 'project-neighboard.appspot.com',
     iosClientId: '56236883198-a97tnef1sug8bjdd3igu2jegl893lfa2.apps.googleusercontent.com',
     iosBundleId: 'com.example.neighboard.RunnerTests',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyBOf1cSPtdC3XAVIgatCPtMC2GJqJFZxYg',
+    appId: '1:56236883198:web:6d38efad4e62d24f26f9af',
+    messagingSenderId: '56236883198',
+    projectId: 'project-neighboard',
+    authDomain: 'project-neighboard.firebaseapp.com',
+    storageBucket: 'project-neighboard.appspot.com',
+  );
+
+  static const FirebaseOptions linux = FirebaseOptions(
+    apiKey: 'AIzaSyBOf1cSPtdC3XAVIgatCPtMC2GJqJFZxYg',
+    appId: '1:56236883198:web:7a98d1ec693719f226f9af',
+    messagingSenderId: '56236883198',
+    projectId: 'project-neighboard',
+    authDomain: 'project-neighboard.firebaseapp.com',
+    storageBucket: 'project-neighboard.appspot.com',
   );
 }

@@ -138,7 +138,7 @@ class StoresCards extends StatelessWidget {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                      color: ccStoresBannerColor,
+                      color: ccStoresBannerColor(context),
                       borderRadius: BorderRadius.circular(5)),
                   padding: const EdgeInsets.all(20),
                   child: Row(

@@ -65,9 +65,9 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                   SearchBar(
                     leading: const Icon(Icons.search),
                     hintText: 'Search Post Title...',
-                    constraints: BoxConstraints(
+                    constraints: const BoxConstraints(
                       minWidth: double.infinity,
-                      minHeight: 30.h,
+                      minHeight: 50,
                     ),
                     onChanged: (String searchText) {
                       setState(() {
@@ -169,7 +169,6 @@ class ForumPageNavBar extends StatefulWidget {
 
 class _ForumPageNavBarState extends State<ForumPageNavBar> {
   String selectedSubButton = 'All Posts';
-  Color subButtonColor = ccForumButtonBGColor;
 
   changingButton(String newValue) {
     setState(() {
@@ -196,7 +195,6 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
       children: [
         ForumPageNavButton(
             selectedSubButton: selectedSubButton,
-            color: subButtonColor,
             label: 'Categories',
             callback: changingButton),
         SizedBox(
@@ -204,7 +202,6 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
         ),
         ForumPageNavButton(
             selectedSubButton: selectedSubButton,
-            color: subButtonColor,
             label: 'All Posts',
             callback: changingButton),
         SizedBox(
@@ -212,13 +209,11 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
         ),
         ForumPageNavButton(
             selectedSubButton: selectedSubButton,
-            color: subButtonColor,
             label: 'My Posts',
             callback: changingButton),
         const Spacer(),
         ForumPageNavButton(
             selectedSubButton: selectedSubButton,
-            color: subButtonColor,
             label: 'New Post',
             callback: changingButton),
       ],
@@ -231,14 +226,13 @@ class ForumPageNavButton extends StatelessWidget {
   ForumPageNavButton({
     super.key,
     required this.selectedSubButton,
-    required this.color,
     required this.label,
     required this.callback,
   });
 
   final Function callback;
   final String label;
-  Color color;
+
   String selectedSubButton;
 
   @override
@@ -252,15 +246,15 @@ class ForumPageNavButton extends StatelessWidget {
         side: BorderSide(
           color: selectedSubButton == label
               ? ccForumSelectedButtonBorderColor
-              : ccForumButtonBorderColor,
+              : ccForumButtonBorderColor(context),
         ),
         disabledBackgroundColor: Colors.grey,
         backgroundColor: selectedSubButton == label
-            ? color = ccForumSelectedButtonBGColor
-            : color = ccForumButtonBGColor,
+            ? ccForumSelectedButtonBGColor(context)
+            : ccForumButtonBGColor,
         foregroundColor: selectedSubButton == label
-            ? color = ccForumSelectedButtonFGColor
-            : color = ccForumButtonFGColor,
+            ? ccForumSelectedButtonFGColor
+            : ccForumButtonFGColor(context),
       ),
       child: Text(label),
     );

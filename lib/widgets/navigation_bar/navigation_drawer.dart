@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/main.dart';
+import 'package:neighboard/shared_preferences/shared_preferences.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({
@@ -10,12 +12,18 @@ class NavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: ccNavDrawerBGColor(context),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           const DrawerHeader(
-            decoration: BoxDecoration(color: ccNavDrawerHeaderColor),
-            child: Center(child: Text("NEIGHBOARD")),
+            //decoration: BoxDecoration(color: ccNavDrawerHeaderColor(context)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("NEIGHBOARD"),
+              ],
+            ),
           ),
           ListTile(
             leading: const Icon(Icons.home),
@@ -65,8 +73,39 @@ class NavDrawer extends StatelessWidget {
               Routes().navigate("Stores", context);
             },
           ),
+          const Divider(),
+          const LightDarkMode(),
         ],
       ),
+    );
+  }
+}
+
+class LightDarkMode extends StatefulWidget {
+  const LightDarkMode({super.key});
+
+  @override
+  State<LightDarkMode> createState() => _LightDarkModeState();
+}
+
+class _LightDarkModeState extends State<LightDarkMode> {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: isDarkMode
+          ? const Icon(Icons.light_mode)
+          : const Icon(Icons.dark_mode),
+      trailing:
+          AbsorbPointer(child: Switch(value: isDarkMode, onChanged: (val) {})),
+      title: isDarkMode ? const Text("Light Mode") : const Text("Dark Mode"),
+      onTap: () {
+        isDarkMode = !isDarkMode;
+        SharedPrefHelper.saveThemeMode(isDarkMode);
+        themeNotifier.value = themeNotifier.value == ThemeMode.light
+            ? ThemeMode.dark
+            : ThemeMode.light;
+        setState(() {});
+      },
     );
   }
 }

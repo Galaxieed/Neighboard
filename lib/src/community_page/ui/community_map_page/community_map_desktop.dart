@@ -61,7 +61,7 @@ class CommunityMapDesktop extends StatelessWidget {
                       height: 40.h,
                       builder: (context) => Icon(
                         Icons.location_pin,
-                        color: ccMapPinColor,
+                        color: ccMapPinColor(context),
                         weight: 4,
                         size: 20.sp,
                       ),
