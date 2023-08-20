@@ -38,17 +38,9 @@ class SearchScreenUI extends SearchDelegate {
           leading: CircleAvatar(
             backgroundImage: NetworkImage(postModels[index].profilePicture),
           ),
-          title: Row(
-            children: [
-              Text(
-                postModels[index].title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(postModels[index].timeStamp),
-            ],
+          title: Text(
+            postModels[index].title,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
             postModels[index].content,
@@ -77,10 +69,6 @@ class SearchScreenUI extends SearchDelegate {
                   postModels[index].title,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Text(postModels[index].timeStamp),
               ],
             ),
           ),

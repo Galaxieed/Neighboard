@@ -62,8 +62,11 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
-              showSearch(context: context, delegate: SearchScreenUI());
+            onPressed: () async {
+              await showSearch(context: context, delegate: SearchScreenUI());
+              if (mounted) {
+                setState(() {});
+              }
             },
             icon: const Icon(Icons.search),
             tooltip: "Search Post Title",

@@ -70,7 +70,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
               child: Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
-                  title: const Text('Register'),
+                  title: const Text('NEIGHBOARD'),
                   actions: [
                     OutlinedButton.icon(
                       onPressed: () {},

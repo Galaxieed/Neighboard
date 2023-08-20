@@ -15,9 +15,9 @@ Color ccExploreButtonBGColor([context]) => isDarkMode
 Color ccExploreButtonFGColor(context) =>
     Theme.of(context).colorScheme.onBackground;
 
-Color ccSubHeaderFGColor(context) => isDarkMode ? Colors.white : Colors.black;
+Color ccSubHeaderFGColor(context) => Theme.of(context).colorScheme.onBackground;
 
-Color ccHeaderFGColor(context) => isDarkMode ? Colors.white : Colors.black;
+Color ccHeaderFGColor(context) => Theme.of(context).colorScheme.onBackground;
 
 //NavDrawer Styles
 Color ccNavDrawerBGColor(context) =>
@@ -76,7 +76,7 @@ Color ccMyPostUpVoteFGColor(context) =>
 
 //announcements colors
 Color ccOtherAnnouncementBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8);
 
 Color ccMainAnnouncementBannerColor([context]) =>
     Theme.of(context).colorScheme.inversePrimary;
@@ -86,7 +86,7 @@ Color ccMapPinColor([context]) => Colors.red;
 
 //stores styles
 Color ccStoresBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5);
+    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8);
 
 //login and register styles
 Color ccLoginButtonBGColor(context) => Theme.of(context).primaryColor;

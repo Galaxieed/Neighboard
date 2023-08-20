@@ -74,7 +74,6 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
               child: Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
-                  title: const Text('Register'),
                   actions: [
                     OutlinedButton.icon(
                       onPressed: () {},

@@ -105,13 +105,13 @@ class StoresCards extends StatelessWidget {
                                         storeModel.storeName,
                                         style: Theme.of(context)
                                             .textTheme
-                                            .headlineMedium,
+                                            .titleLarge,
                                       ),
                                       Text(
                                         storeModel.storeAddress,
                                         style: Theme.of(context)
                                             .textTheme
-                                            .titleLarge,
+                                            .bodyLarge,
                                       ),
                                     ],
                                   ),
@@ -124,7 +124,7 @@ class StoresCards extends StatelessWidget {
                                   child: Container(
                                     width: MediaQuery.of(context).size.width,
                                     height:
-                                        MediaQuery.of(context).size.height / 2,
+                                        MediaQuery.of(context).size.height / 3,
                                     decoration: BoxDecoration(
                                       image: DecorationImage(
                                           image:

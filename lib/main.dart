@@ -10,7 +10,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  getTheme();
+  await getTheme();
   runApp(const MyApp());
 }
 
@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
 }
 
 bool isDarkMode = false;
-getTheme() async {
+Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
 }
 

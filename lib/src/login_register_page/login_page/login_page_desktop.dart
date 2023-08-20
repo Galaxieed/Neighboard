@@ -52,7 +52,7 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
               child: Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
-                  title: const Text('Login'),
+                  title: const Text('NEIGHBOARD'),
                   actions: [
                     OutlinedButton(
                       onPressed: () {

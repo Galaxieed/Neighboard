@@ -56,7 +56,6 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
               child: Scaffold(
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
-                  title: const Text('Login'),
                   actions: [
                     OutlinedButton(
                       onPressed: () {
