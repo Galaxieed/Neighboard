@@ -64,9 +64,6 @@ class _ForumPageMobileState extends State<ForumPageMobile>
           IconButton(
             onPressed: () async {
               await showSearch(context: context, delegate: SearchScreenUI());
-              if (mounted) {
-                setState(() {});
-              }
             },
             icon: const Icon(Icons.search),
             tooltip: "Search Post Title",
@@ -250,11 +247,11 @@ Widget otherLinks = Center(
               SizedBox(
                 width: 2.w,
               ),
-              Text(
+              const Text(
                 'Must-read posts',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 6.sp,
+                  //fontSize: 6.sp,
                 ),
               ),
             ],
@@ -267,9 +264,9 @@ Widget otherLinks = Center(
           ),
           RichText(
             text: TextSpan(
-              style: TextStyle(
+              style: const TextStyle(
                 color: ccForumLinksColor,
-                fontSize: 5.sp,
+                //fontSize: 5.sp,
               ),
               children: [
                 TextSpan(

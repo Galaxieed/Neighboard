@@ -3,6 +3,7 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({
@@ -75,6 +76,7 @@ class NavDrawer extends StatelessWidget {
           ),
           const Divider(),
           const LightDarkMode(),
+          const ThemeColorPicker(),
         ],
       ),
     );
@@ -100,11 +102,72 @@ class _LightDarkModeState extends State<LightDarkMode> {
       title: isDarkMode ? const Text("Light Mode") : const Text("Dark Mode"),
       onTap: () {
         isDarkMode = !isDarkMode;
-        SharedPrefHelper.saveThemeMode(isDarkMode);
         themeNotifier.value = themeNotifier.value == ThemeMode.light
             ? ThemeMode.dark
             : ThemeMode.light;
         setState(() {});
+        SharedPrefHelper.saveThemeMode(isDarkMode);
+      },
+    );
+  }
+}
+
+class ThemeColorPicker extends StatefulWidget {
+  const ThemeColorPicker({super.key});
+
+  @override
+  State<ThemeColorPicker> createState() => _ThemeColorPickerState();
+}
+
+class _ThemeColorPickerState extends State<ThemeColorPicker> {
+  Color pickerColor = const Color(0xffffc107);
+  void changeColor(Color color) {
+    setState(() => pickerColor = color);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.color_lens),
+      trailing: AbsorbPointer(
+          child: CircleAvatar(
+        backgroundColor: currentThemeColor,
+      )),
+      title: const Text("Change Theme"),
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Pick a color!'),
+            content: SingleChildScrollView(
+              // child: ColorPicker(
+              //   pickerColor: pickerColor,
+              //   onColorChanged: changeColor,
+              // ),
+              // child: MaterialPicker(
+              //   pickerColor: pickerColor,
+              //   onColorChanged: changeColor,
+              //   enableLabel: true, // only on portrait mode
+              // ),
+              child: BlockPicker(
+                pickerColor: currentThemeColor,
+                onColorChanged: changeColor,
+              ),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('Got it'),
+                onPressed: () {
+                  currentThemeColor = pickerColor;
+                  themeNotifier.value = currentThemeColor;
+                  setState(() {});
+                  SharedPrefHelper.saveThemeColor(currentThemeColor.value);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
       },
     );
   }

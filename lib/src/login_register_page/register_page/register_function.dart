@@ -6,7 +6,7 @@ class RegisterFunction {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future<bool> createAccout(
+  static Future<String> createAccout(
     String email,
     String password,
     String firstName,
@@ -26,13 +26,18 @@ class RegisterFunction {
           lastName: lastName,
           username: username,
         );
-        return true;
+        return "true";
       } else {
-        return false;
+        return "Email already in use";
       }
-    } catch (e) {
-      // the error is in e variable
-      return false;
+    } on FirebaseAuthException catch (e) {
+      String err = e.message
+          .toString()
+          .split("/")[1]
+          .split(")")[0]
+          .replaceAll(RegExp(r'-'), ' ');
+      err = err.substring(0, 1).toUpperCase() + err.substring(1);
+      return err;
     }
   }
 

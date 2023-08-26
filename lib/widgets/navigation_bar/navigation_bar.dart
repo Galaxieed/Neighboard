@@ -20,7 +20,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
-      elevation: 5,
+      elevation: 0,
       actions: [
         const SizedBox(
           width: 10,
@@ -115,7 +115,7 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
                   : value == 'Community Map'
                       ? const Icon(Icons.map)
                       : value == 'Stores'
-                          ? const Icon(Icons.shopping_cart)
+                          ? const Icon(Icons.store)
                           : value == 'HOA Voting'
                               ? const Icon(Icons.how_to_vote)
                               : Container(),

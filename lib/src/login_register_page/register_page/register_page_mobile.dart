@@ -23,18 +23,16 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
   final TextEditingController lastName = TextEditingController();
   final TextEditingController username = TextEditingController();
   bool isLoading = false;
+  String? registerResult;
 
   void onCreateAccount() async {
     if (email.text.isNotEmpty && password.text.isNotEmpty) {
       setState(() {
         isLoading = true;
       });
-      bool isAccountSuccessfullyCreated = await RegisterFunction.createAccout(
-          email.text,
-          password.text,
-          firstName.text,
-          lastName.text,
-          username.text);
+      registerResult = await RegisterFunction.createAccout(email.text,
+          password.text, firstName.text, lastName.text, username.text);
+      bool isAccountSuccessfullyCreated = registerResult == "true";
 
       if (isAccountSuccessfullyCreated) {
         // ignore: use_build_context_synchronously

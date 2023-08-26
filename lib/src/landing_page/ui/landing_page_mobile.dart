@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -55,7 +56,7 @@ class HomePage extends StatelessWidget {
           image: AssetImage(bgImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
-          opacity: 50,
+          opacity: ccLandPageBGOpacity,
         ),
       ),
       child: Center(
@@ -177,7 +178,7 @@ class AboutPage extends StatelessWidget {
           image: AssetImage(aboutImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
-          opacity: 100,
+          opacity: ccLandPageBGOpacity,
         ),
       ),
       child: Center(

@@ -3,21 +3,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 class LoginFunction {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static Future<bool> login(String email, String password) async {
+  static Future<String> login(String email, String password) async {
     try {
-      final result = await _auth.signInWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      if (result.user != null) {
-        return true;
+      return "true";
+    } on FirebaseAuthException catch (e) {
+      String err = e.message
+          .toString()
+          .split("/")[1]
+          .split(")")[0]
+          .replaceAll(RegExp(r'-'), ' ');
+      err = err.substring(0, 1).toUpperCase() + err.substring(1);
+      if (err == 'User not found') {
+        return err;
+      } else if (err == 'Wrong password') {
+        return err;
       } else {
-        return false;
+        return err;
       }
-    } catch (e) {
-      // the error is in e variable
-      return false;
     }
   }
 

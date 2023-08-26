@@ -23,6 +23,7 @@ class _CategoriesState extends State<Categories> {
 
   void getAllPost() async {
     postModels = await CategoriesFunction.getAllPost() ?? [];
+    postModels.sort((a, b) => b.postId.compareTo(a.postId));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -40,6 +41,7 @@ class _CategoriesState extends State<Categories> {
   void getTitlePost() async {
     postModels =
         await CategoriesFunction.getPostsByTitle(title: widget.category) ?? [];
+    postModels.sort((a, b) => a.title.compareTo(b.title));
     if (mounted) {
       setState(() {});
     }

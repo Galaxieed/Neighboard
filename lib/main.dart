@@ -23,12 +23,12 @@ class MyApp extends StatelessWidget {
     return ScreenUtilInit(builder: ((context, child) {
       return ValueListenableBuilder(
           valueListenable: themeNotifier,
-          builder: (_, ThemeMode currentMode, __) {
+          builder: (_, currentMode, __) {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
               title: 'Neighboard | Home',
               theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
+                colorScheme: ColorScheme.fromSeed(seedColor: currentThemeColor),
                 useMaterial3: true,
               ),
               darkTheme: ThemeData.dark(
@@ -42,9 +42,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
+final ValueNotifier themeNotifier = ValueNotifier(ThemeMode.system);
+
+Color currentThemeColor = Colors.amber;
 bool isDarkMode = false;
+
 Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
+  currentThemeColor = Color(await SharedPrefHelper.loadThemeColor());
 }
-
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);

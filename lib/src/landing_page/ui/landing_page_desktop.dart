@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+
 import 'package:neighboard/routes/routes.dart';
 
 class LandingPageDesktop extends StatelessWidget {
@@ -63,11 +64,21 @@ class AboutPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    LandPageHeader(header: header),
+                    Text(
+                      header,
+                      style: TextStyle(
+                        fontSize: 8.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(
                       height: 20,
                     ),
-                    LandPageHeaderSmall(header: subHeader)
+                    LandPageHeaderSmall(
+                      header: subHeader,
+                      size: 6,
+                      color: ccSubHeaderFGColor(context),
+                    )
                   ],
                 ),
               ),
@@ -80,10 +91,13 @@ class AboutPage extends StatelessWidget {
               borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(90),
                   bottomLeft: Radius.circular(90)),
-              child: Container(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage(aboutImage), fit: BoxFit.cover)),
+              child: Transform.flip(
+                flipX: true,
+                child: Container(
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(aboutImage), fit: BoxFit.cover)),
+                ),
               ),
             )),
           ],
@@ -111,48 +125,59 @@ class HomePage extends StatelessWidget {
           image: AssetImage(bgImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
-          opacity: 50,
+          opacity: ccLandPageBGOpacity,
         ),
       ),
       child: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 2,
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LandPageHeader(header: header),
-                      LandPageHeaderSmall(header: subHeader),
-                    ],
-                  ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 30.w),
+            scrollDirection: Axis.vertical,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                LandPageHeader(header: header),
+                LandPageHeaderSmall(
+                  header: subHeader,
+                  size: 5,
+                  color: Colors.white,
                 ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      SizedBox(height: MediaQuery.sizeOf(context).height / 2),
-                      LandPageButton(
-                          label: 'Explore', callback: Routes().navigate),
-                    ],
-                  ),
+                SizedBox(
+                  height: 15.h,
                 ),
-              ),
-            ],
+                LandPageButton(label: 'Explore', callback: Routes().navigate),
+                // Expanded(
+                //   flex: 2,
+                //   child: Container(
+                //     padding:
+                //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
+                //     child: Column(
+                //       mainAxisSize: MainAxisSize.max,
+                //       mainAxisAlignment: MainAxisAlignment.center,
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       children: [],
+                //     ),
+                //   ),
+                // ),
+                // Expanded(
+                //   flex: 1,
+                //   child: Padding(
+                //     padding:
+                //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
+                //     child: Column(
+                //       mainAxisSize: MainAxisSize.max,
+                //       mainAxisAlignment: MainAxisAlignment.end,
+                //       children: [
+                //         SizedBox(height: MediaQuery.sizeOf(context).height / 2),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         ),
       ),
@@ -172,19 +197,30 @@ class LandPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        callback('Forum', context);
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            ccExploreButtonBGColor(context),
+            ccExploreButtonBGColor(context).withOpacity(0.2),
+          ],
+        ).createShader(bounds);
       },
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-        backgroundColor: ccExploreButtonBGColor(context),
-        foregroundColor: ccExploreButtonFGColor(context),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 6.sp,
+      child: ElevatedButton(
+        onPressed: () {
+          callback('Forum', context);
+        },
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
+          foregroundColor: ccExploreButtonFGColor(context),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 6.sp,
+          ),
         ),
       ),
     );
@@ -195,17 +231,20 @@ class LandPageHeaderSmall extends StatelessWidget {
   const LandPageHeaderSmall({
     super.key,
     required this.header,
+    required this.size,
+    required this.color,
   });
-
+  final Color color;
   final String header;
+  final int size;
 
   @override
   Widget build(BuildContext context) {
     return Text(
       header,
       style: TextStyle(
-        fontSize: 7.sp,
-        color: ccSubHeaderFGColor(context),
+        fontSize: size.sp,
+        color: color,
       ),
       softWrap: true,
     );
@@ -225,8 +264,11 @@ class LandPageHeader extends StatelessWidget {
     return Text(
       header,
       style: TextStyle(
-        fontSize: 13.sp,
+        fontSize: 18.sp,
         color: ccHeaderFGColor(context),
+        letterSpacing: 10,
+        wordSpacing: 10,
+        fontWeight: FontWeight.w800,
       ),
       softWrap: true,
     );

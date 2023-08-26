@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/main.dart';
 
 const String homepageImage = 'assets/homepage.jpg';
-const String homeImage = 'assets/home.jpg';
+const String homeImage = 'assets/home.jpeg';
 const String bigScoopImage = 'assets/bigscoop.jpg';
 const String walterMartImage = 'assets/waltermart.jpg';
 const String guestIcon = 'assets/guest_icon.png';
 
 //LandPage Styles
+double ccLandPageBGOpacity = 1;
+
 Color ccExploreButtonBGColor([context]) => isDarkMode
     ? Theme.of(context).primaryColor
     : Theme.of(context).colorScheme.inversePrimary;
@@ -17,7 +19,7 @@ Color ccExploreButtonFGColor(context) =>
 
 Color ccSubHeaderFGColor(context) => Theme.of(context).colorScheme.onBackground;
 
-Color ccHeaderFGColor(context) => Theme.of(context).colorScheme.onBackground;
+Color ccHeaderFGColor(context) => Theme.of(context).colorScheme.inversePrimary;
 
 //NavDrawer Styles
 Color ccNavDrawerBGColor(context) =>
@@ -76,7 +78,7 @@ Color ccMyPostUpVoteFGColor(context) =>
 
 //announcements colors
 Color ccOtherAnnouncementBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8);
+    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.85);
 
 Color ccMainAnnouncementBannerColor([context]) =>
     Theme.of(context).colorScheme.inversePrimary;
@@ -86,7 +88,7 @@ Color ccMapPinColor([context]) => Colors.red;
 
 //stores styles
 Color ccStoresBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8);
+    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.85);
 
 //login and register styles
 Color ccLoginButtonBGColor(context) => Theme.of(context).primaryColor;

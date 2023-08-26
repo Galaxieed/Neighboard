@@ -8,7 +8,7 @@ class SearchFunction {
     try {
       final result = await _firestore
           .collection("posts")
-          .where("title", isGreaterThanOrEqualTo: query)
+          .where("title", isEqualTo: query)
           .get();
 
       List<PostModel> postModels = [];
