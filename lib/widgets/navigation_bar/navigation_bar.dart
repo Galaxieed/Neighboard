@@ -5,7 +5,8 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
-import 'package:neighboard/src/login_register_page/login_page/login_function.dart';
+import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
+import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
@@ -40,6 +41,22 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
           width: 10,
         ),
         const LightDarkMode(),
+        const SizedBox(
+          width: 10,
+        ),
+        NavBarBadges(
+          count: "1",
+          icon: const Icon(Icons.chat_outlined),
+          callback: () {},
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        NavBarBadges(
+          count: "2",
+          icon: const Icon(Icons.notifications_outlined),
+          callback: () {},
+        ),
         const SizedBox(
           width: 10,
         ),
@@ -168,15 +185,22 @@ class _LightDarkModeState extends State<LightDarkMode> {
           setState(() {});
         },
         icon: isDarkMode
-            ? const Icon(Icons.light_mode)
-            : const Icon(Icons.dark_mode));
+            ? const Icon(Icons.light_mode_outlined)
+            : const Icon(Icons.dark_mode_outlined));
   }
 }
 
 class NavBarBadges extends StatefulWidget {
-  const NavBarBadges({Key? key, required this.count}) : super(key: key);
+  const NavBarBadges({
+    Key? key,
+    required this.count,
+    required this.icon,
+    required this.callback,
+  }) : super(key: key);
 
   final String count;
+  final Icon icon;
+  final Function callback;
 
   @override
   State<NavBarBadges> createState() => _NavBarBadgesState();
@@ -187,12 +211,15 @@ class _NavBarBadgesState extends State<NavBarBadges> {
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(50),
-      onTap: () {},
+      onTap: () {
+        widget.callback();
+      },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Badge(
           label: Text(widget.count),
-          child: const Icon(Icons.notifications_outlined),
+          backgroundColor: Colors.blue,
+          child: widget.icon,
         ),
       ),
     );
@@ -215,7 +242,7 @@ class _NavBarCircularImageDropDownButtonState
   bool isLoading = true;
 
   Future<void> getUserDetails() async {
-    userModel = await ProfileFunction.getUserDetails();
+    userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
     setState(() {
       isLoading = false;
     });
@@ -266,11 +293,17 @@ class _NavBarCircularImageDropDownButtonState
         position: PopupMenuPosition.under,
         icon: isLoading
             ? !isLoggedIn
-                ? const CircleAvatar()
+                ? const CircleAvatar(
+                    child: Icon(Icons.person),
+                  )
                 : const CircularProgressIndicator()
-            : CircleAvatar(
-                backgroundImage: NetworkImage(userModel!.profilePicture),
-              ),
+            : userModel!.profilePicture.isEmpty
+                ? const CircleAvatar(
+                    child: Icon(Icons.person),
+                  )
+                : CircleAvatar(
+                    backgroundImage: NetworkImage(userModel!.profilePicture),
+                  ),
         //child: Icon(Icons.keyboard_arrow_down),
         onSelected: (String newValue) {
           if (newValue == "Logout") {
@@ -279,6 +312,13 @@ class _NavBarCircularImageDropDownButtonState
                 context,
                 MaterialPageRoute(builder: (context) => const LandingPage()),
                 (route) => false);
+          } else if (newValue == "User") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ProfileScreen(userId: userModel!.userId)),
+            );
           } else {
             selectedValue = newValue;
             widget.callback(newValue, context);
@@ -290,10 +330,12 @@ class _NavBarCircularImageDropDownButtonState
                       value: "User",
                       child: Row(
                         children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(userModel!.profilePicture),
-                          ),
+                          userModel!.profilePicture.isEmpty
+                              ? const CircleAvatar()
+                              : CircleAvatar(
+                                  backgroundImage:
+                                      NetworkImage(userModel!.profilePicture),
+                                ),
                           const SizedBox(
                             width: 10,
                           ),

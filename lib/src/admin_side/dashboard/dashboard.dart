@@ -1,0 +1,128 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class Dashboard extends StatelessWidget {
+  const Dashboard({super.key, required this.callback});
+
+  final Function callback;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              children: const <TextSpan>[
+                TextSpan(
+                    text: 'Welcome back, ',
+                    style: TextStyle(color: Colors.grey)),
+                TextSpan(text: ' Admin! 👋'),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 30.h,
+          ),
+          Expanded(
+            child: GridView(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 400,
+                childAspectRatio: 400 / 300,
+                mainAxisSpacing: 30,
+                crossAxisSpacing: 30,
+              ),
+              children: [
+                dashboardCards(
+                  context,
+                  Colors.orangeAccent.withAlpha(150),
+                  Icons.forum_outlined,
+                  "Forum",
+                  () {
+                    callback(2);
+                  },
+                ),
+                dashboardCards(
+                  context,
+                  Colors.yellowAccent.withAlpha(150),
+                  Icons.announcement_outlined,
+                  "Announcement",
+                  () {
+                    callback(3);
+                  },
+                ),
+                dashboardCards(
+                  context,
+                  Colors.blueAccent.withAlpha(150),
+                  Icons.map_outlined,
+                  "Community Map",
+                  () {
+                    callback(4);
+                  },
+                ),
+                dashboardCards(
+                  context,
+                  Colors.redAccent.withAlpha(150),
+                  Icons.store_outlined,
+                  "Stores",
+                  () {
+                    callback(5);
+                  },
+                ),
+                dashboardCards(
+                  context,
+                  Colors.greenAccent.withAlpha(150),
+                  Icons.how_to_vote_outlined,
+                  "HOA Voting",
+                  () {
+                    callback(7);
+                  },
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Card dashboardCards(
+    BuildContext context,
+    Color color,
+    IconData icon,
+    String text,
+    Function callback,
+  ) {
+    return Card(
+      elevation: 5,
+      color: color,
+      child: InkWell(
+        onTap: () {
+          callback();
+        },
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 25.sp,
+            ),
+            Text(
+              text,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

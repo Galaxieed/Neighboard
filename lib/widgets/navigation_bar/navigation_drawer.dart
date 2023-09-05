@@ -6,9 +6,7 @@ import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class NavDrawer extends StatelessWidget {
-  const NavDrawer({
-    super.key,
-  });
+  const NavDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {

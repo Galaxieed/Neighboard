@@ -6,6 +6,7 @@ const String homeImage = 'assets/home.jpeg';
 const String bigScoopImage = 'assets/bigscoop.jpg';
 const String walterMartImage = 'assets/waltermart.jpg';
 const String guestIcon = 'assets/guest_icon.png';
+const String noImage = 'assets/no_image.jpg';
 
 //LandPage Styles
 double ccLandPageBGOpacity = 1;
@@ -32,19 +33,18 @@ Color ccNavDrawerHeaderColor([context]) => Theme.of(context).primaryColor;
 const Color ccNavDrawerWelcomeColor = Colors.white;
 
 //forum styles
-const Color ccForumButtonBGColor = Colors.transparent;
+Color ccForumButtonBGColor(context) =>
+    Theme.of(context).disabledColor.withOpacity(0.1);
 
-Color ccForumSelectedButtonBGColor([context]) => isDarkMode
-    ? Theme.of(context).colorScheme.inversePrimary
-    : Theme.of(context).primaryColor;
+Color ccForumSelectedButtonBGColor([context]) =>
+    Theme.of(context).colorScheme.inversePrimary;
 
 Color ccForumButtonFGColor(context) => isDarkMode ? Colors.white : Colors.black;
 
-const Color ccForumSelectedButtonFGColor = Colors.white;
+Color ccForumSelectedButtonFGColor(context) =>
+    isDarkMode ? Colors.white : Colors.black;
 
-Color ccForumButtonBorderColor([context]) => isDarkMode
-    ? Theme.of(context).colorScheme.inversePrimary
-    : Theme.of(context).primaryColor;
+Color ccForumButtonBorderColor([context]) => Colors.transparent;
 
 const Color ccForumSelectedButtonBorderColor = Colors.transparent;
 
@@ -100,3 +100,32 @@ Color ccRegisterButtonBGColor(context) => Theme.of(context).primaryColor;
 Color ccRegisterButtonFGColor(context) => Colors.white;
 Color ccRegisterLoginButtonFGColor(context) =>
     isDarkMode ? Colors.white : Colors.black;
+
+//HOA Voting
+Color ccHOATitleBannerColor(context) =>
+    Theme.of(context).colorScheme.inversePrimary;
+Color ccHOANextButtonBGColor(context) =>
+    Theme.of(context).colorScheme.inversePrimary;
+Color ccHOANextButtonFGColor(context) =>
+    Theme.of(context).colorScheme.onBackground;
+
+//Profile Screen
+Color? ccProfileUserNameTextColor = Colors.grey[700];
+const Color ccProfileContainerBorderColor = Colors.grey;
+const Color ccProfileInfoTextColor = Colors.grey;
+
+//widgets
+Container hoaTitleBanner(BuildContext context, String title) {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(8.0),
+    color: ccHOATitleBannerColor(context),
+    child: Text(
+      title,
+      style: Theme.of(context)
+          .textTheme
+          .titleLarge!
+          .copyWith(fontWeight: FontWeight.w800),
+    ),
+  );
+}

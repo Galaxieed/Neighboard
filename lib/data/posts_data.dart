@@ -3,7 +3,7 @@ import 'package:english_words/english_words.dart';
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 
-String formattedDate =
+String formattedDate() =>
     DateFormat('MMMM d, yyyy | hh:mm a').format(DateTime.now());
 
 String randomName = WordPair.random().asPascalCase.toString();

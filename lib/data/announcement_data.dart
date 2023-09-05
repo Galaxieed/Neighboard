@@ -3,45 +3,45 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/announcement_model.dart';
 
-List<AnnouncementModel> announcements = [
+List<AnnouncementModel> announcementss = [
   AnnouncementModel(
     announcementId: generateRandomId(8),
     title: WordPair.random().asPascalCase,
     details: 'Announcement Main',
-    timeStamp: formattedDate,
+    timeStamp: formattedDate(),
+    datePosted: formattedDate(),
     image: guestIcon,
-    isMainAnnouncement: false,
   ),
   AnnouncementModel(
     announcementId: generateRandomId(8),
     title: WordPair.random().asPascalCase,
     details: 'Announcement 1',
-    timeStamp: formattedDate,
+    timeStamp: formattedDate(),
+    datePosted: formattedDate(),
     image: homeImage,
-    isMainAnnouncement: true,
   ),
   AnnouncementModel(
     announcementId: generateRandomId(8),
     title: WordPair.random().asPascalCase,
     details: 'Announcement 2',
-    timeStamp: formattedDate,
+    timeStamp: formattedDate(),
+    datePosted: formattedDate(),
     image: homepageImage,
-    isMainAnnouncement: false,
   ),
   AnnouncementModel(
     announcementId: generateRandomId(8),
     title: WordPair.random().asPascalCase,
     details: 'Announcement 2',
-    timeStamp: formattedDate,
+    timeStamp: formattedDate(),
+    datePosted: formattedDate(),
     image: bigScoopImage,
-    isMainAnnouncement: false,
   ),
   AnnouncementModel(
     announcementId: generateRandomId(8),
     title: WordPair.random().asPascalCase,
     details: 'Announcement 2',
-    timeStamp: formattedDate,
+    timeStamp: formattedDate(),
+    datePosted: formattedDate(),
     image: bigScoopImage,
-    isMainAnnouncement: false,
   ),
 ];

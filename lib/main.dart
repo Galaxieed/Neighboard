@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
+import 'package:neighboard/src/admin_side/admin_side.dart';
+
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 
 void main() async {
@@ -30,12 +32,19 @@ class MyApp extends StatelessWidget {
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: currentThemeColor),
                 useMaterial3: true,
+                scaffoldBackgroundColor: Colors.grey[100],
+                cardTheme: CardTheme(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                ),
               ),
               darkTheme: ThemeData.dark(
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: const LandingPage(),
+              home: const AdminSide(),
+              //home: const LandingPage(),
             );
           });
     }));
