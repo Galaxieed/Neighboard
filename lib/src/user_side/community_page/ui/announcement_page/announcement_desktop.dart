@@ -166,7 +166,12 @@ class MainAnnouncement extends StatelessWidget {
       children: [
         Flexible(
           child: announcementModel.image == ""
-              ? const Center(child: Text("No Image"))
+              ? Container(
+                  color: Colors.grey[350],
+                  child: const Center(
+                    child: Text("No Image"),
+                  ),
+                )
               : Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(
@@ -177,7 +182,69 @@ class MainAnnouncement extends StatelessWidget {
                 ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                announcementModel.title,
+                                style:
+                                    Theme.of(context).textTheme.headlineMedium,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                "${announcementModel.datePosted}\n${announcementModel.details}",
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 32,
+                        ),
+                        Flexible(
+                          flex: 3,
+                          child: Container(
+                            width: 600,
+                            height: 600,
+                            decoration: announcementModel.image == ""
+                                ? BoxDecoration(
+                                    image: const DecorationImage(
+                                      image: AssetImage(noImage),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5))
+                                : BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
+                                          NetworkImage(announcementModel.image),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
           child: Container(
             decoration: BoxDecoration(
               color: ccMainAnnouncementBannerColor(context),
@@ -242,7 +309,74 @@ class OtherAnnouncement extends StatelessWidget {
                 height: 100.h,
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        child: Container(
+                          padding: const EdgeInsets.all(32),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      announcementModel.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      "${announcementModel.datePosted}\n${announcementModel.details}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 32,
+                              ),
+                              Flexible(
+                                flex: 3,
+                                child: Container(
+                                  width: 600,
+                                  height: 600,
+                                  decoration: announcementModel.image == ""
+                                      ? BoxDecoration(
+                                          image: const DecorationImage(
+                                            image: AssetImage(noImage),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5))
+                                      : BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                announcementModel.image),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5)),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: ccOtherAnnouncementBannerColor(context),

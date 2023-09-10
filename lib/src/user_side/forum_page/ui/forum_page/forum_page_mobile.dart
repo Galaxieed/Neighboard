@@ -72,7 +72,10 @@ class _ForumPageMobileState extends State<ForumPageMobile>
             icon: const Icon(Icons.search),
             tooltip: "Search Post Title",
           ),
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          ),
           SizedBox(
             width: 2.5.w,
           )

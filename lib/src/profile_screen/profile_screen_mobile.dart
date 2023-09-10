@@ -16,9 +16,13 @@ import 'package:universal_io/io.dart';
 
 class ProfileScreenMobile extends StatefulWidget {
   const ProfileScreenMobile(
-      {super.key, required this.deviceScreenType, required this.userId});
+      {super.key,
+      required this.deviceScreenType,
+      required this.userId,
+      required this.isAdmin});
   final DeviceScreenType deviceScreenType;
   final String userId;
+  final bool isAdmin;
 
   @override
   State<ProfileScreenMobile> createState() => _ProfileScreenMobileState();
@@ -155,7 +159,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
               title: const Text("My Profile"),
               centerTitle: true,
               actions: [
-                NavBarCircularImageDropDownButton(callback: Routes().navigate),
+                NavBarCircularImageDropDownButton(
+                  callback: Routes().navigate,
+                  isAdmin: widget.isAdmin,
+                ),
                 SizedBox(
                   width: 2.5.w,
                 )

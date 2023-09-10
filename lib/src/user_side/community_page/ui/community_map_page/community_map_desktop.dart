@@ -30,58 +30,60 @@ class CommunityMapDesktop extends StatelessWidget {
               height: 30,
             ),
             Expanded(
-                child: FlutterMap(
-              options: MapOptions(
-                center: const LatLng(14.827335497500572, 120.87190527693967),
-                zoom: 17,
-                maxZoom: 18,
-              ),
-              nonRotatedChildren: [
-                RichAttributionWidget(
-                  attributions: [
-                    TextSourceAttribution(
-                      'OpenStreetMap contributors',
-                      onTap: () => launchUrl(
-                          Uri.parse('https://openstreetmap.org/copyright')),
-                    ),
-                  ],
+              child: FlutterMap(
+                options: MapOptions(
+                  center: const LatLng(14.827335497500572, 120.87190527693967),
+                  zoom: 17,
+                  maxZoom: 18,
                 ),
-              ],
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.app',
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point:
-                          const LatLng(14.827335497500572, 120.87190527693967),
-                      width: 20.w,
-                      height: 40.h,
-                      builder: (context) => Icon(
-                        Icons.location_pin,
-                        color: ccMapPinColor(context),
-                        weight: 4,
-                        size: 20.sp,
+                nonRotatedChildren: [
+                  RichAttributionWidget(
+                    attributions: [
+                      TextSourceAttribution(
+                        'OpenStreetMap contributors',
+                        onTap: () => launchUrl(
+                            Uri.parse('https://openstreetmap.org/copyright')),
                       ),
-                    ),
-                  ],
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point:
-                          const LatLng(14.827783593750764, 120.87393430014184),
-                      width: 80,
-                      height: 80,
-                      builder: (context) => const Image(
-                          image: AssetImage('assets/waltermart.png')),
-                    ),
-                  ],
-                ),
-              ],
-            )),
+                    ],
+                  ),
+                ],
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.app',
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: const LatLng(
+                            14.827335497500572, 120.87190527693967),
+                        width: 20.w,
+                        height: 40.h,
+                        builder: (context) => Icon(
+                          Icons.location_pin,
+                          color: ccMapPinColor(context),
+                          weight: 4,
+                          size: 20.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: const LatLng(
+                            14.827783593750764, 120.87393430014184),
+                        width: 80,
+                        height: 80,
+                        builder: (context) => const Image(
+                            image: AssetImage('assets/waltermart.png')),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

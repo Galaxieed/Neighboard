@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/admin_side/announcements/announcements.dart';
 import 'package:neighboard/src/admin_side/community_map/community_map.dart';
@@ -7,7 +8,10 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates.dart'
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voting/voting.dart';
 import 'package:neighboard/src/admin_side/navigation/navigation_bar.dart';
+import 'package:neighboard/src/admin_side/site_settings/site_settings.dart';
 import 'package:neighboard/src/admin_side/stores/stores.dart';
+import 'package:neighboard/src/landing_page/ui/landing_page.dart';
+import 'package:neighboard/src/profile_screen/profile_screen.dart';
 
 class AdminDesktop extends StatefulWidget {
   const AdminDesktop({super.key});
@@ -17,6 +21,19 @@ class AdminDesktop extends StatefulWidget {
 }
 
 class _AdminDesktopState extends State<AdminDesktop> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  bool isLoggedIn = false;
+
+  bool checkIfLoggedIn() {
+    if (_auth.currentUser != null) {
+      return isLoggedIn = true;
+    }
+    //Navigator.pop(context);
+
+    return isLoggedIn = false;
+  }
+
   String selectedPage = "Dashboard";
 
   bool isDrawerExpanded = true;
@@ -57,6 +74,13 @@ class _AdminDesktopState extends State<AdminDesktop> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkIfLoggedIn();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AdminNavBar(),
@@ -79,7 +103,12 @@ class _AdminDesktopState extends State<AdminDesktop> {
                   child: TabBarView(
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      const Placeholder(),
+                      isLoggedIn
+                          ? ProfileScreen(
+                              userId: _auth.currentUser!.uid,
+                              isAdmin: true,
+                            )
+                          : const Placeholder(),
                       Dashboard(callback: (i) {
                         switchPage(controller, i);
                       }),
@@ -92,7 +121,9 @@ class _AdminDesktopState extends State<AdminDesktop> {
                       ),
                       const AdminHOAVoting(),
                       const AdminHOAVoters(),
-                      const Placeholder(),
+                      AdminSiteSettings(
+                        drawer: onExpandCollapseDrawer,
+                      ),
                     ],
                   ),
                 )

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
-import 'package:neighboard/data/store_data.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -429,72 +428,72 @@ class StoresCards extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   showDialog(
-                      // The Modal
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Dialog(
-                          child: Container(
-                            padding: const EdgeInsets.all(32),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Flexible(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        storeModel.storeName,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium,
-                                      ),
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
-                                      Text(
-                                        "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge,
-                                      ),
-                                    ],
-                                  ),
+                    // The Modal
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        child: Container(
+                          padding: const EdgeInsets.all(32),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      storeModel.storeName,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineMedium,
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(
-                                  width: 32,
+                              ),
+                              const SizedBox(
+                                width: 32,
+                              ),
+                              Flexible(
+                                flex: 3,
+                                child: Container(
+                                  width: 600,
+                                  height: 600,
+                                  decoration: storeModel.storeImage == ""
+                                      ? BoxDecoration(
+                                          image: const DecorationImage(
+                                            image: AssetImage(noImage),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5))
+                                      : BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                storeModel.storeImage),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5)),
                                 ),
-                                Flexible(
-                                  flex: 3,
-                                  child: Container(
-                                    width: 600,
-                                    height: 600,
-                                    decoration: storeModel.storeImage == ""
-                                        ? BoxDecoration(
-                                            image: const DecorationImage(
-                                              image: AssetImage(noImage),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(5))
-                                        : BoxDecoration(
-                                            image: DecorationImage(
-                                              image: NetworkImage(
-                                                  storeModel.storeImage),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(5)),
-                                  ),
-                                )
-                              ],
-                            ),
+                              )
+                            ],
                           ),
-                        );
-                      });
+                        ),
+                      );
+                    },
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(

@@ -35,7 +35,10 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
         title: const Text("Board of Directors Election"),
         centerTitle: true,
         actions: [
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          ),
           SizedBox(
             width: 2.5.w,
           )

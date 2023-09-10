@@ -21,7 +21,10 @@ class AdminNavBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         const NavBarTitle(title: 'NEIGHBOARD'),
         const Spacer(),
-        NavBarCircularImageDropDownButton(callback: Routes().navigate),
+        NavBarCircularImageDropDownButton(
+          callback: Routes().navigate,
+          isAdmin: true,
+        ),
         const SizedBox(
           width: 10,
         ),

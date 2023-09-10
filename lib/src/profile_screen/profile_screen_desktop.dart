@@ -12,8 +12,10 @@ import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:universal_io/io.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
-  const ProfileScreenDesktop({super.key, required this.userId});
+  const ProfileScreenDesktop(
+      {super.key, required this.userId, required this.isAdmin});
   final String userId;
+  final bool isAdmin;
 
   @override
   State<ProfileScreenDesktop> createState() => _ProfileScreenDesktopState();
@@ -146,7 +148,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     return userModel == null || isLoading
         ? const LoadingScreen()
         : Scaffold(
-            appBar: const NavBar(),
+            appBar: widget.isAdmin ? null : const NavBar(),
             body: Padding(
               padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
               child: ListView(
@@ -315,6 +317,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             infoTitle(context, "Email Address"),
                             TextFormField(
                               controller: tcEmail,
+                              readOnly: true,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Email is required';
@@ -547,116 +550,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                               return StatefulBuilder(builder:
                                   (BuildContext context,
                                       StateSetter stateSetter) {
-                                return Dialog(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(32),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 120,
-                                          backgroundImage: profileImage !=
-                                                      null ||
-                                                  profileImageByte != null
-                                              ? kIsWeb
-                                                  ? MemoryImage(
-                                                      profileImageByte!.bytes!)
-                                                  : FileImage(profileImage!)
-                                                      as ImageProvider
-                                              : NetworkImage(
-                                                  userModel!.profilePicture),
-                                        ),
-                                        const SizedBox(
-                                          height: 32,
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            profileImage = null;
-                                            profileImageByte = null;
-                                            profileImageUrl = "";
-                                            checker = false;
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.cancel),
-                                          label: const Text("Cancel"),
-                                        ),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            try {
-                                              pickImage(stateSetter);
-                                            } catch (e) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(e.toString()),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.camera_alt),
-                                          label: const Text("Camera"),
-                                        ),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            try {
-                                              if ((profileImage != null ||
-                                                      profileImageByte !=
-                                                          null) &&
-                                                  checker) {
-                                                onSavingPic();
-                                                Navigator.pop(context);
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                        "Profile Picture Updated"),
-                                                  ),
-                                                );
-                                                //This will now allow user to upload picture
-                                                checker = false;
-                                                setState(() {});
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text("No changes"),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(e.toString()),
-                                                ),
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.save),
-                                          label: const Text("Save"),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
+                                return updateProfilePicModal(
+                                    context, stateSetter);
                               });
                             });
                       },
@@ -692,6 +587,104 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                 ),
               ],
             )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Dialog updateProfilePicModal(BuildContext context, StateSetter stateSetter) {
+    return Dialog(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 120,
+              backgroundImage: profileImage != null || profileImageByte != null
+                  ? kIsWeb
+                      ? MemoryImage(profileImageByte!.bytes!)
+                      : FileImage(profileImage!) as ImageProvider
+                  : NetworkImage(userModel!.profilePicture),
+            ),
+            const SizedBox(
+              height: 32,
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                profileImage = null;
+                profileImageByte = null;
+                profileImageUrl = "";
+                checker = false;
+              },
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size.fromWidth(240),
+              ),
+              icon: const Icon(Icons.cancel),
+              label: const Text("Cancel"),
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                try {
+                  pickImage(stateSetter);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size.fromWidth(240),
+              ),
+              icon: const Icon(Icons.camera_alt),
+              label: const Text("Camera"),
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                try {
+                  if ((profileImage != null || profileImageByte != null) &&
+                      checker) {
+                    onSavingPic();
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Profile Picture Updated"),
+                      ),
+                    );
+                    //This will now allow user to upload picture
+                    checker = false;
+                    setState(() {});
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("No changes"),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size.fromWidth(240),
+              ),
+              icon: const Icon(Icons.save),
+              label: const Text("Save"),
+            ),
           ],
         ),
       ),

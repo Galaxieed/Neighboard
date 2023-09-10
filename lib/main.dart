@@ -4,7 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/admin_side/admin_side.dart';
-
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 
 void main() async {

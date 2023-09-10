@@ -96,7 +96,13 @@ class _NewPostState extends State<NewPost> {
     }
   }
 
-  void _draftPost() {}
+  void _discardPost() {
+    setState(() {
+      _cTitlePost.clear();
+      _cContentPost.clear();
+      _category = null;
+    });
+  }
 
   Future<void> _getImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -234,9 +240,9 @@ class _NewPostState extends State<NewPost> {
                                       width: 2.w,
                                     ),
                                     IconButton(
-                                      onPressed: _draftPost,
-                                      icon: const Icon(Icons.drafts),
-                                      tooltip: "Draft Post",
+                                      onPressed: _discardPost,
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip: "Discard Post",
                                     ),
                                     const Spacer(),
                                     IconButton(
@@ -258,12 +264,12 @@ class _NewPostState extends State<NewPost> {
                                     ),
                                     const Spacer(),
                                     ElevatedButton.icon(
-                                      onPressed: _draftPost,
+                                      onPressed: _discardPost,
                                       style: ElevatedButton.styleFrom(
                                         shape: const BeveledRectangleBorder(),
                                       ),
-                                      icon: const Icon(Icons.drafts),
-                                      label: const Text('Save as Draft'),
+                                      icon: const Icon(Icons.delete_outline),
+                                      label: const Text('Discard'),
                                     ),
                                     SizedBox(
                                       width: 2.w,

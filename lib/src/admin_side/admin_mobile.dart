@@ -24,7 +24,10 @@ class _AdminMobileState extends State<AdminMobile> {
         title: const Text("Dashboard"),
         centerTitle: false,
         actions: [
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: true,
+          ),
           SizedBox(
             width: 2.5.w,
           )

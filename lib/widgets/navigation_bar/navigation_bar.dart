@@ -60,7 +60,10 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        NavBarCircularImageDropDownButton(callback: Routes().navigate),
+        NavBarCircularImageDropDownButton(
+          callback: Routes().navigate,
+          isAdmin: false,
+        ),
         const SizedBox(
           width: 10,
         ),
@@ -227,9 +230,12 @@ class _NavBarBadgesState extends State<NavBarBadges> {
 }
 
 class NavBarCircularImageDropDownButton extends StatefulWidget {
-  const NavBarCircularImageDropDownButton({Key? key, required this.callback})
+  const NavBarCircularImageDropDownButton(
+      {Key? key, required this.callback, required this.isAdmin})
       : super(key: key);
   final Function callback;
+  final bool isAdmin;
+
   @override
   State<NavBarCircularImageDropDownButton> createState() =>
       _NavBarCircularImageDropDownButtonState();
@@ -316,8 +322,10 @@ class _NavBarCircularImageDropDownButtonState
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      ProfileScreen(userId: userModel!.userId)),
+                  builder: (context) => ProfileScreen(
+                        userId: userModel!.userId,
+                        isAdmin: widget.isAdmin,
+                      )),
             );
           } else {
             selectedValue = newValue;

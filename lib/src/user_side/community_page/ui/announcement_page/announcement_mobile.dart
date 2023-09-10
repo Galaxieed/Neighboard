@@ -110,7 +110,10 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
             },
             itemBuilder: (BuildContext context) => _popUpMenuItem,
           ),
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          ),
           SizedBox(
             width: 2.5.w,
           )

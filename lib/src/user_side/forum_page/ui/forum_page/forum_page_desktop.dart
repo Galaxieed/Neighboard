@@ -147,7 +147,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                   padding:
                       EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
                   child: pageIndex == 0 || pageIndex == 1 || userModel == null
-                      ? otherLinks
+                      ? otherLinks(context)
                       : miniProfile(userModel!),
                 ),
               ),
@@ -349,128 +349,128 @@ Widget miniProfile(UserModel userModel) {
   );
 }
 
-Widget otherLinks = Center(
-  child: Align(
-    alignment: Alignment.topCenter,
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+Widget otherLinks(context) => Center(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              const Icon(
-                Icons.star_border,
-                weight: 3,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.star_border,
+                    weight: 3,
+                  ),
+                  SizedBox(
+                    width: 2.w,
+                  ),
+                  Text(
+                    'Must-read posts',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const Divider(
+                color: ccForumDividerColor,
               ),
               SizedBox(
-                width: 2.w,
+                height: 5.h,
               ),
-              Text(
-                'Must-read posts',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 6.sp,
+              RichText(
+                text: TextSpan(
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: ccForumLinksColor),
+                  children: [
+                    TextSpan(
+                      text:
+                          'Please read rules before you start working on the platform.\n\n',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launcherUrl('https://www.youtube.com');
+                        },
+                    ),
+                    TextSpan(
+                      text: 'Vision and Strategy of Alemhelp\n',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launcherUrl('https://www.youtube.com');
+                        },
+                    ),
+                  ],
                 ),
-                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(
+                height: 5.h,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.link,
+                    weight: 3,
+                  ),
+                  SizedBox(
+                    width: 2.w,
+                  ),
+                  Text(
+                    'Featured links',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const Divider(
+                color: ccForumDividerColor,
+              ),
+              SizedBox(
+                height: 5.h,
+              ),
+              RichText(
+                text: TextSpan(
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyLarge!
+                      .copyWith(color: ccForumLinksColor),
+                  children: [
+                    TextSpan(
+                      text: 'Alemhelp source code on GitHub.\n\n',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launcherUrl(
+                              'https://github.com/Galaxieed/Neighboard/tree/master');
+                        },
+                    ),
+                    TextSpan(
+                      text: 'Golang best practices\n\n',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launcherUrl('https://www.youtube.com');
+                        },
+                    ),
+                    TextSpan(
+                      text: 'Alem School dashboard',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          launcherUrl('https://www.youtube.com');
+                        },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          const Divider(
-            color: ccForumDividerColor,
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                color: ccForumLinksColor,
-                fontSize: 5.sp,
-              ),
-              children: [
-                TextSpan(
-                  text:
-                      'Please read rules before you start working on the platform.\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-                TextSpan(
-                  text: 'Vision and Strategy of Alemhelp\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.link,
-                weight: 3,
-              ),
-              SizedBox(
-                width: 2.w,
-              ),
-              Text(
-                'Featured links',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 6.sp,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-          const Divider(
-            color: ccForumDividerColor,
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                color: ccForumLinksColor,
-                fontSize: 5.sp,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Alemhelp source code on GitHub.\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl(
-                          'https://github.com/Galaxieed/Neighboard/tree/master');
-                    },
-                ),
-                TextSpan(
-                  text: 'Golang best practices\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-                TextSpan(
-                  text: 'Alem School dashboard',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
-    ),
-  ),
-);
+    );

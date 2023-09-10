@@ -21,7 +21,10 @@ class CommunityMapMobile extends StatelessWidget {
         title: const Text("Community Map"),
         centerTitle: true,
         actions: [
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          ),
           SizedBox(
             width: 2.5.w,
           )

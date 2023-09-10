@@ -25,7 +25,10 @@ class _StoresMobileState extends State<StoresMobile> {
         title: const Text("Stores"),
         centerTitle: true,
         actions: [
-          NavBarCircularImageDropDownButton(callback: Routes().navigate),
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          ),
           SizedBox(
             width: 2.5.w,
           )

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -5,6 +6,9 @@ import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_func
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/widgets/post/post_interactors.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
+import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
@@ -129,7 +133,7 @@ class _CategoriesState extends State<Categories> {
   }
 }
 
-class SinglePost extends StatelessWidget {
+class SinglePost extends StatefulWidget {
   const SinglePost({
     super.key,
     required this.post,
@@ -143,12 +147,50 @@ class SinglePost extends StatelessWidget {
   final Function denyPost, approvePost;
 
   @override
+  State<SinglePost> createState() => _SinglePostState();
+}
+
+class _SinglePostState extends State<SinglePost> {
+  bool isAlreadyViewed = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void checkIfAlreadyViewed() async {
+    isAlreadyViewed = await PostInteractorsFunctions.isAlreadyViewed(
+        postId: widget.post.postId);
+    setState(() {});
+  }
+
+  void onOpenPost() async {
+    if (!isAlreadyViewed && _auth.currentUser != null) {
+      setState(() {
+        isAlreadyViewed = true;
+        widget.post.noOfViews += 1;
+      });
+      await PostInteractorsFunctions.onViewPost(widget.post.postId, true);
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkIfAlreadyViewed();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
-        onTap: () {},
+        onTap: () {
+          onOpenPost();
+          showDialog(
+            context: context,
+            builder: (BuildContext context) =>
+                PostModal(postModel: widget.post),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -156,7 +198,7 @@ class SinglePost extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  SmallProfilePic(profilePic: post.profilePicture),
+                  SmallProfilePic(profilePic: widget.post.profilePicture),
                   const SizedBox(
                     width: 10,
                   ),
@@ -165,8 +207,8 @@ class SinglePost extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      AuthorNameText(authorName: post.authorName),
-                      PostTimeText(time: post.timeStamp)
+                      AuthorNameText(authorName: widget.post.authorName),
+                      PostTimeText(time: widget.post.timeStamp)
                     ],
                   )),
                   IconButton(
@@ -176,12 +218,12 @@ class SinglePost extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
-              PostTitleText(title: post.title),
+              PostTitleText(title: widget.post.title),
               const SizedBox(
                 height: 5,
               ),
               PostContentText(
-                content: post.content,
+                content: widget.post.content,
                 maxLine: 1,
                 textOverflow: TextOverflow.ellipsis,
               ),
@@ -189,10 +231,10 @@ class SinglePost extends StatelessWidget {
                 height: 10,
               ),
               ActionBarPosts(
-                post: post,
-                isAdmin: isAdmin,
-                denyPost: denyPost,
-                approvePost: approvePost,
+                post: widget.post,
+                isAdmin: widget.isAdmin,
+                denyPost: widget.denyPost,
+                approvePost: widget.approvePost,
               )
             ],
           ),
@@ -264,7 +306,15 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => PostInteractors(
+                      postModel: widget.post,
+                      collection: "views",
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.remove_red_eye_outlined),
               ),
               Text('${widget.post.noOfViews}'),
@@ -280,7 +330,15 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
                 width: 20,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => PostInteractors(
+                      postModel: widget.post,
+                      collection: "upvotes",
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.arrow_upward),
               ),
               Text('${widget.post.noOfUpVotes}'),
