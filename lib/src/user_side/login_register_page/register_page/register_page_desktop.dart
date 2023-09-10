@@ -67,7 +67,6 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     email.dispose();
     password.dispose();
     firstName.dispose();

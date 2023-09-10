@@ -46,7 +46,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       currentCenter = LatLng(newLatitude, newLongitude);
       setState(() {});
     } catch (e) {
-      print(e);
+      //TODO: Catch error
     }
   }
 

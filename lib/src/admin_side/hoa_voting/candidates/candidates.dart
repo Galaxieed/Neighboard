@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_desktop.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_mobile.dart';
-import 'package:neighboard/src/admin_side/hoa_voting/start_voting/start_voting.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminHOACandidates extends StatelessWidget {
@@ -13,6 +12,7 @@ class AdminHOACandidates extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
+        //TODO: make a starting and ending point of election
         //return StartVoting(drawer: drawer);
         return CandidatesDesktop(
           drawer: drawer,

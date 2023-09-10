@@ -68,7 +68,6 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     email.dispose();
     password.dispose();
     super.dispose();

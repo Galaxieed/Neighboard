@@ -92,7 +92,6 @@ class _CategoriesState extends State<Categories> {
 
   @override
   void didUpdateWidget(covariant Categories oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     //this is for filtering based on search and tags
     if (widget.category.isNotEmpty || widget.category != "") {
@@ -172,7 +171,6 @@ class _SinglePostState extends State<SinglePost> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfAlreadyViewed();
   }

@@ -123,14 +123,12 @@ class _StoresDesktopState extends State<StoresDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllStores();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _ctrlContactInfo.dispose();
     _ctrlHouseNo.dispose();
     _ctrlName.dispose();

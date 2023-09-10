@@ -143,14 +143,12 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllAnnouncements();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _ctrlContent.dispose();
     _ctrlTitle.dispose();
     super.dispose();

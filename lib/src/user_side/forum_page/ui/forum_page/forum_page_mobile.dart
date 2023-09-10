@@ -50,7 +50,6 @@ class _ForumPageMobileState extends State<ForumPageMobile>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _tabController.dispose();
     super.dispose();
   }

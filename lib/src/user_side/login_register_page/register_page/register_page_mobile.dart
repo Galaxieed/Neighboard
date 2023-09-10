@@ -54,7 +54,6 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     email.dispose();
     password.dispose();
     firstName.dispose();

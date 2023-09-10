@@ -140,7 +140,6 @@ class _PostModalCommentState extends State<PostModalComment> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllReplies(widget.commentModel);
     checkIfLikedOrDisliked();
@@ -235,8 +234,6 @@ class _PostModalCommentState extends State<PostModalComment> {
                                 const Spacer(),
                                 TextButton.icon(
                                   onPressed: () {
-                                    //TODO: open close all replies,
-
                                     showAllReplies();
                                   },
                                   icon: const Icon(Icons.reply),

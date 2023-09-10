@@ -107,7 +107,6 @@ class _PostModalState extends State<PostModal> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (_auth.currentUser != null) {
       getCurrentUser();
@@ -123,7 +122,6 @@ class _PostModalState extends State<PostModal> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _ctrlComment.dispose();
     super.dispose();
   }

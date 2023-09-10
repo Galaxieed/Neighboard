@@ -85,7 +85,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                             }
                             if (!ctrl.indexIsChanging && ctrl.index == 2) {
                               //TODO: save the voted HOA
-                              print("save");
                             }
                           },
                           style: ElevatedButton.styleFrom(

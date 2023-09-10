@@ -61,7 +61,6 @@ class _AllPostsState extends State<AllPosts> {
 
   @override
   void didUpdateWidget(covariant AllPosts oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     if (widget.category.isNotEmpty || widget.category != "") {
       getTitlePost();
@@ -132,7 +131,6 @@ class _SinglePostState extends State<SinglePost> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfAlreadyViewed();
   }

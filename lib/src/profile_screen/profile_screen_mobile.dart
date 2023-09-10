@@ -124,7 +124,6 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUserDetails();
   }
@@ -140,7 +139,6 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     tcAddress.dispose();
     tcCNo.dispose();
     tcEmail.dispose();

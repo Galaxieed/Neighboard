@@ -88,7 +88,6 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllAnnouncements();
   }
@@ -100,7 +99,6 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
         title: const Text("Announcements"),
         centerTitle: true,
         actions: [
-          //TODO: replace with SORT? instead of Filter
           PopupMenuButton(
             position: PopupMenuPosition.under,
             tooltip: "Filter announcements",

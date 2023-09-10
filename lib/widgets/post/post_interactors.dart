@@ -34,7 +34,6 @@ class _PostInteractorsState extends State<PostInteractors> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getData();
   }

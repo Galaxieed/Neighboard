@@ -29,6 +29,7 @@ class _AdminDesktopState extends State<AdminDesktop> {
     if (_auth.currentUser != null) {
       return isLoggedIn = true;
     }
+    //TODO: reject user when tried to open admin side without logging in
     //Navigator.pop(context);
 
     return isLoggedIn = false;
@@ -75,7 +76,6 @@ class _AdminDesktopState extends State<AdminDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfLoggedIn();
   }
@@ -193,14 +193,12 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     selectedSubButton = widget.selectedPage;
   }
 
   @override
   void didUpdateWidget(covariant MyDrawer oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     selectedSubButton = widget.selectedPage;
     if (selectedSubButton == "Voting") {

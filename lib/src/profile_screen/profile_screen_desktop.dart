@@ -117,7 +117,6 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUserDetails();
   }
@@ -133,7 +132,6 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     tcAddress.dispose();
     tcCNo.dispose();
     tcEmail.dispose();

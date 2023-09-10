@@ -74,7 +74,6 @@ class _MyPostsState extends State<MyPosts> {
 
   @override
   void didUpdateWidget(covariant MyPosts oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     if (widget.search.isNotEmpty || widget.search != "") {
       getMyPostsByTitle();
@@ -253,7 +252,6 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _comment.dispose();
     super.dispose();
   }

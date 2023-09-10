@@ -66,7 +66,6 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
   ];
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllAnnouncements();
   }
@@ -114,7 +113,6 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
                           flex: 5,
                           child: () {
                             Widget widget = Container();
-                            //TODO: Fix this announcement displaying
                             for (AnnouncementModel announcementModel
                                 in announcementModels) {
                               if (announcementModels[0] == announcementModel) {

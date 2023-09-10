@@ -23,7 +23,6 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller(context).dispose();
     super.dispose();
   }
@@ -103,7 +102,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                                 setState(() {});
                               }
                               if (!ctrl.indexIsChanging && ctrl.index == 2) {
-                                print("save");
+                                //TODO: save hoa voted candidates
                               }
                             },
                             style: ElevatedButton.styleFrom(

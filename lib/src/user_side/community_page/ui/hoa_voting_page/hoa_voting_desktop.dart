@@ -18,7 +18,6 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller(context).dispose();
     super.dispose();
   }
@@ -107,7 +106,6 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                     }
                     if (!ctrl.indexIsChanging && ctrl.index == 2) {
                       //TODO: save the voted HOA
-                      print("save");
                     }
                   },
                   style: ElevatedButton.styleFrom(
