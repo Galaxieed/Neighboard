@@ -10,10 +10,10 @@ import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
-  const NavBar({Key? key})
+  const NavBar({Key? key, this.openNotification, this.openChat})
       : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
-
+  final Function? openNotification, openChat;
   @override
   final Size preferredSize;
 
@@ -47,7 +47,9 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         NavBarBadges(
           count: "1",
           icon: const Icon(Icons.chat_outlined),
-          callback: () {},
+          callback: () {
+            openChat != null ? openChat!() : null;
+          },
         ),
         const SizedBox(
           width: 10,
@@ -55,7 +57,9 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         NavBarBadges(
           count: "2",
           icon: const Icon(Icons.notifications_outlined),
-          callback: () {},
+          callback: () {
+            openNotification != null ? openNotification!() : null;
+          },
         ),
         const SizedBox(
           width: 10,

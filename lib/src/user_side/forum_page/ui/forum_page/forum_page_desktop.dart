@@ -9,6 +9,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dar
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -20,6 +21,7 @@ class ForumPageDesktop extends StatefulWidget {
 }
 
 class _ForumPageDesktopState extends State<ForumPageDesktop> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String searchedText = "";
   int pageIndex = 0;
   changePage(int num) {
@@ -38,6 +40,47 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     }
   }
 
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void _openChat() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          width: 552,
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Text(
+                "Chats",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              Expanded(
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return const ListTile(
+                        leading: CircleAvatar(),
+                        title: Text("Sample Message"),
+                        isThreeLine: true,
+                        subtitle: Text("Subtitle"),
+                      );
+                    }),
+              ),
+              TextField(),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -48,112 +91,125 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SearchBar(
-                    leading: const Icon(Icons.search),
-                    hintText: 'Search Post Title...',
-                    constraints: const BoxConstraints(
-                      minWidth: double.infinity,
-                      minHeight: 50,
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: NavBar(
+        openNotification: _openNotification,
+        openChat: _openChat,
+      ),
+      endDrawer: const Drawer(
+        child: Column(
+          children: [Text("Notifications")],
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 4,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SearchBar(
+                      leading: const Icon(Icons.search),
+                      hintText: 'Search Post Title...',
+                      constraints: const BoxConstraints(
+                        minWidth: double.infinity,
+                        minHeight: 50,
+                      ),
+                      onChanged: (String searchText) {
+                        setState(() {
+                          searchedText = searchText;
+                        });
+                      },
+                      onTap: () {
+                        // showSearch(
+                        //     context: context, delegate: SearchScreenUI());
+                      },
                     ),
-                    onChanged: (String searchText) {
-                      setState(() {
-                        searchedText = searchText;
-                      });
-                    },
-                    onTap: () {
-                      // showSearch(
-                      //     context: context, delegate: SearchScreenUI());
-                    },
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  DefaultTabController(
-                    initialIndex: 1,
-                    length: 4,
-                    child: Builder(
-                      builder: (context) => Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10.w, vertical: 0),
-                              child: ForumPageNavBar(
-                                callback: (index) {
-                                  final TabController controller =
-                                      DefaultTabController.of(context);
-                                  if (!controller.indexIsChanging) {
-                                    controller.animateTo(index);
-                                    changePage(index);
-                                  }
-                                },
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    DefaultTabController(
+                      initialIndex: 1,
+                      length: 4,
+                      child: Builder(
+                        builder: (context) => Expanded(
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.w, vertical: 0),
+                                child: ForumPageNavBar(
+                                  callback: (index) {
+                                    final TabController controller =
+                                        DefaultTabController.of(context);
+                                    if (!controller.indexIsChanging) {
+                                      controller.animateTo(index);
+                                      changePage(index);
+                                    }
+                                  },
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 10.h,
-                            ),
-                            Expanded(
-                              child: TabBarView(
-                                children: [
-                                  Categories(
-                                    category: searchedText,
-                                    isAdmin: false,
-                                  ),
-                                  AllPosts(
-                                    category: searchedText,
-                                    isAdmin: false,
-                                  ),
-                                  MyPosts(search: searchedText),
-                                  const NewPost(
-                                    deviceScreenType: DeviceScreenType.desktop,
-                                  ),
-                                ],
+                              SizedBox(
+                                height: 10.h,
                               ),
-                            ),
-                          ],
+                              Expanded(
+                                child: TabBarView(
+                                  children: [
+                                    Categories(
+                                      category: searchedText,
+                                      isAdmin: false,
+                                    ),
+                                    AllPosts(
+                                      category: searchedText,
+                                      isAdmin: false,
+                                    ),
+                                    MyPosts(search: searchedText),
+                                    const NewPost(
+                                      deviceScreenType:
+                                          DeviceScreenType.desktop,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            width: 10.w,
-          ),
-          Expanded(
-            // MGA LINKS SA KANAN
-            flex: 2,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-              child: Card(
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-                  child: pageIndex == 0 || pageIndex == 1 || userModel == null
-                      ? otherLinks(context)
-                      : miniProfile(userModel!),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+            SizedBox(
+              width: 10.w,
+            ),
+            Expanded(
+              // MGA LINKS SA KANAN
+              flex: 2,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                child: Card(
+                  child: Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
+                    child: pageIndex == 0 || pageIndex == 1 || userModel == null
+                        ? otherLinks(context)
+                        : miniProfile(userModel!),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

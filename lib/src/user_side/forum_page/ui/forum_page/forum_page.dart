@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page_desktop.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page_mobile.dart';
-import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ForumPage extends StatelessWidget {
@@ -11,10 +11,7 @@ class ForumPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return const Scaffold(
-          appBar: NavBar(),
-          body: ForumPageDesktop(),
-        );
+        return const ForumPageDesktop();
       } else if (sizingInformation.deviceScreenType ==
           DeviceScreenType.tablet) {
         return const Placeholder();

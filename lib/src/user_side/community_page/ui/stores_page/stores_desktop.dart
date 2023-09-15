@@ -423,7 +423,7 @@ class StoresCards extends StatelessWidget {
           child: Column(
             children: [
               const Expanded(child: SizedBox()),
-              GestureDetector(
+              InkWell(
                 onTap: () {
                   showDialog(
                     // The Modal
@@ -501,14 +501,12 @@ class StoresCards extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            storeModel.storeName,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
+                      Expanded(
+                        child: Text(
+                          storeModel.storeName,
+                          style: Theme.of(context).textTheme.titleMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                       Text(
                         'View Details..',

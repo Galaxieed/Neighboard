@@ -35,15 +35,16 @@ class MyApp extends StatelessWidget {
                 cardTheme: CardTheme(
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                 ),
               ),
               darkTheme: ThemeData.dark(
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: const AdminSide(),
-              //home: const LandingPage(),
+              //home: const AdminSide(),
+              home: const LandingPage(),
             );
           });
     }));

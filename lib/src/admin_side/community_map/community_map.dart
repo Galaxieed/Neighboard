@@ -19,6 +19,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   double newLatitude = 14.852694046899718;
   double newLongitude = 120.81603489600447;
   double currentZoom = 13.0;
+  bool isLoading = false;
 
   void _moveMap() {
     mapController.move(LatLng(newLatitude, newLongitude), currentZoom);
@@ -28,32 +29,45 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
     List<Location> locations = await locationFromAddress(address);
 
     if (locations.isNotEmpty) {
+      setState(() {
+        isLoading = true;
+      });
       Location location = locations.first;
       newLatitude = location.latitude;
       newLongitude = location.longitude;
       currentCenter = LatLng(newLatitude, newLongitude);
-      setState(() {});
+      _moveMap();
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _getLatLngFromAddressWeb(String address) async {
     GeoCode geoCode = GeoCode(apiKey: '538204048447379774119x21710');
     try {
+      setState(() {
+        isLoading = true;
+      });
       Coordinates coordinates =
           await geoCode.forwardGeocoding(address: address);
       newLatitude = coordinates.latitude ?? 14.827335497500572;
       newLongitude = coordinates.longitude ?? 120.87190527693967;
       currentCenter = LatLng(newLatitude, newLongitude);
-      setState(() {});
+      _moveMap();
     } catch (e) {
       //TODO: Catch error
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   void _handleTap(point) {
     newLatitude = point.latitude;
     newLongitude = point.longitude;
     setState(() {});
+
     // Do something with the latitude and longitude
   }
 
@@ -84,40 +98,44 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
           ),
         ],
       ),
-      body: FlutterMap(
-        mapController: mapController,
-        options: MapOptions(
-          center: currentCenter,
-          zoom: currentZoom,
-          maxZoom: 18,
-          onTap: (tapPosition, point) => _handleTap(point),
-        ),
-        children: [
-          TileLayer(
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            userAgentPackageName: 'com.example.app',
-          ),
-          MarkerLayer(
-            markers: [
-              Marker(
-                height: 50,
-                width: 50,
-                point: LatLng(newLatitude, newLongitude),
-                builder: (context) => const Icon(
-                  Icons.location_pin,
-                  color: Colors.red,
-                  weight: 4,
-                  size: 50,
-                ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                center: currentCenter,
+                zoom: currentZoom,
+                maxZoom: 18,
+                onTap: (tapPosition, point) => _handleTap(point),
               ),
-            ],
-          ),
-        ],
-      ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.app',
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      height: 50,
+                      width: 50,
+                      point: LatLng(newLatitude, newLongitude),
+                      builder: (context) => const Icon(
+                        Icons.location_pin,
+                        color: Colors.red,
+                        weight: 4,
+                        size: 50,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton(
         onPressed: _moveMap,
         tooltip: 'Move Map',
-        child: const Icon(Icons.map),
+        child: const Icon(Icons.my_location_outlined),
       ),
     );
   }

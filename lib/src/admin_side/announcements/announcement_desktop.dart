@@ -158,193 +158,204 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   Widget build(BuildContext context) {
     return isLoading
         ? const LoadingScreen()
-        : Container(
-            padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TabHeader(
-                  title: "Announcements",
-                  callback: () {
-                    widget.drawer();
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return StatefulBuilder(
-                              builder: (BuildContext context,
-                                  StateSetter stateSetter) {
-                                return AlertDialog(
-                                  title: Text(
-                                    "New Announcement",
-                                    style:
-                                        Theme.of(context).textTheme.titleLarge,
-                                  ),
-                                  content: SingleChildScrollView(
-                                    child: Form(
-                                      key: _formKey,
-                                      child: SizedBox(
-                                        width: 720,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: <Widget>[
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: TextFormField(
-                                                controller: _ctrlTitle,
-                                                onSaved: (newValue) =>
-                                                    _postTitle = newValue!,
-                                                decoration:
-                                                    const InputDecoration(
-                                                  labelText:
-                                                      "Enter Announcement Title",
-                                                  border: OutlineInputBorder(),
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: TextFormField(
-                                                controller: _ctrlContent,
-                                                onSaved: (newValue) =>
-                                                    _postContent = newValue!,
-                                                decoration:
-                                                    const InputDecoration(
-                                                  labelText: "Type Text Here",
-                                                  alignLabelWithHint: true,
-                                                  border: OutlineInputBorder(),
-                                                ),
-                                                keyboardType:
-                                                    TextInputType.multiline,
-                                                expands: false,
-                                                maxLines: 15,
-                                                textAlignVertical:
-                                                    TextAlignVertical.top,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                ElevatedButton.icon(
-                                                  icon: const Icon(Icons.image),
-                                                  label:
-                                                      const Text('Add Image'),
-                                                  style:
-                                                      ElevatedButton.styleFrom(
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10)),
-                                                    backgroundColor:
-                                                        Colors.indigo[900],
-                                                    foregroundColor:
-                                                        Colors.white,
+        : Scaffold(
+            body: Container(
+              padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TabHeader(
+                    title: "Announcements",
+                    callback: () {
+                      widget.drawer();
+                    },
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return StatefulBuilder(
+                                builder: (BuildContext context,
+                                    StateSetter stateSetter) {
+                                  return AlertDialog(
+                                    title: Text(
+                                      "New Announcement",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                    ),
+                                    content: SingleChildScrollView(
+                                      child: Form(
+                                        key: _formKey,
+                                        child: SizedBox(
+                                          width: 720,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: TextFormField(
+                                                  controller: _ctrlTitle,
+                                                  onSaved: (newValue) =>
+                                                      _postTitle = newValue!,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText:
+                                                        "Enter Announcement Title",
+                                                    border:
+                                                        OutlineInputBorder(),
                                                   ),
-                                                  onPressed: () {
-                                                    pickImage(stateSetter);
-                                                  },
                                                 ),
-                                                const SizedBox(
-                                                  width: 10,
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: TextFormField(
+                                                  controller: _ctrlContent,
+                                                  onSaved: (newValue) =>
+                                                      _postContent = newValue!,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: "Type Text Here",
+                                                    alignLabelWithHint: true,
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                  ),
+                                                  keyboardType:
+                                                      TextInputType.multiline,
+                                                  expands: false,
+                                                  maxLines: 15,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.top,
                                                 ),
-                                                profileImage != null ||
-                                                        profileImageByte != null
-                                                    ? kIsWeb
-                                                        ? Text(profileImageByte!
-                                                            .name)
-                                                        : Text(
-                                                            profileImage!.path)
-                                                    : Container(),
-                                              ],
-                                            )
-                                          ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  ElevatedButton.icon(
+                                                    icon:
+                                                        const Icon(Icons.image),
+                                                    label:
+                                                        const Text('Add Image'),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                      backgroundColor:
+                                                          Colors.indigo[900],
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                    ),
+                                                    onPressed: () {
+                                                      pickImage(stateSetter);
+                                                    },
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  profileImage != null ||
+                                                          profileImageByte !=
+                                                              null
+                                                      ? kIsWeb
+                                                          ? Text(
+                                                              profileImageByte!
+                                                                  .name)
+                                                          : Text(profileImage!
+                                                              .path)
+                                                      : Container(),
+                                                ],
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  actions: <Widget>[
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .inversePrimary,
-                                        foregroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .onBackground,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 50, vertical: 2.h),
-                                      ),
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          _formKey.currentState!.save();
-                                          _postAnnouncement();
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                      child: Text(
-                                        'Post',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyLarge!
-                                            .copyWith(
-                                                fontWeight: FontWeight.bold),
-                                      ),
-                                    )
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text("New Announcement"),
-                    ),
-                    SizedBox(width: 2.w),
-                    PopupMenuButton(
-                      position: PopupMenuPosition.under,
-                      tooltip: "Filter announcements",
-                      child: AbsorbPointer(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.sort),
-                          label: const Text("Filter"),
-                        ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10)),
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .inversePrimary,
+                                          foregroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .onBackground,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 50, vertical: 2.h),
+                                        ),
+                                        onPressed: () {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            _formKey.currentState!.save();
+                                            _postAnnouncement();
+                                            Navigator.pop(context);
+                                          }
+                                        },
+                                        child: Text(
+                                          'Post',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyLarge!
+                                              .copyWith(
+                                                  fontWeight: FontWeight.bold),
+                                        ),
+                                      )
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text("New Announcement"),
                       ),
-                      onSelected: (value) {
-                        sortAnnouncement(value);
-                      },
-                      itemBuilder: (BuildContext context) => _popUpMenuItem,
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 45.w,
-                      right: 45.w,
-                      top: 20.h,
-                      bottom: 20.h,
-                    ),
-                    child: MainAnnouncement(
-                        announcementModel: announcementModels[0]),
+                      SizedBox(width: 2.w),
+                      PopupMenuButton(
+                        position: PopupMenuPosition.under,
+                        tooltip: "Filter announcements",
+                        child: AbsorbPointer(
+                          child: ElevatedButton.icon(
+                            onPressed: () {},
+                            icon: const Icon(Icons.sort),
+                            label: const Text("Filter"),
+                          ),
+                        ),
+                        onSelected: (value) {
+                          sortAnnouncement(value);
+                        },
+                        itemBuilder: (BuildContext context) => _popUpMenuItem,
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  //TODO: fix this when there is no announcement
+                  if (announcementModels.isNotEmpty)
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 45.w,
+                          right: 45.w,
+                          top: 20.h,
+                          bottom: 20.h,
+                        ),
+                        child: MainAnnouncement(
+                            announcementModel: announcementModels[0]),
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
   }
