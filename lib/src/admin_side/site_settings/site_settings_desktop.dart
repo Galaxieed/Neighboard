@@ -163,7 +163,8 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   }
 
   getSiteSettings() async {
-    siteModel = await SiteSettingsFunction.getSiteSettings();
+    siteModel =
+        await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
     tcHeader.text = siteModel?.siteHeader ?? "";
     tcSubHeader.text = siteModel?.siteSubheader ?? "";
     tcAbout.text = siteModel?.siteAbout ?? "";
@@ -322,6 +323,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                             border: OutlineInputBorder(),
                             hintText: "Homepage Header",
                           ),
+                          maxLines: 5,
                         ),
                         const SizedBox(
                           height: 10,

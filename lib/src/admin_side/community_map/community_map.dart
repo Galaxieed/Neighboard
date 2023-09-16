@@ -70,7 +70,8 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   }
 
   getSiteLocation() async {
-    siteModel = await SiteSettingsFunction.getSiteSettings();
+    siteModel =
+        await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
     if (siteModel == null || siteModel?.siteLocation == "") return;
     newLatitude = double.parse(siteModel!.siteLocation.split('|')[0]);
     newLongitude = double.parse(siteModel!.siteLocation.split('|')[1]);

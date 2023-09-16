@@ -95,8 +95,12 @@ class AboutPage extends StatelessWidget {
                 flipX: true,
                 child: Container(
                   decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(aboutImage), fit: BoxFit.cover)),
+                    image: DecorationImage(
+                        image: aboutImage == ''
+                            ? const AssetImage(noImage) as ImageProvider
+                            : NetworkImage(aboutImage),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             )),
@@ -122,7 +126,9 @@ class HomePage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(bgImage),
+          image: bgImage == ''
+              ? const AssetImage(noImage) as ImageProvider
+              : NetworkImage(bgImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
           opacity: ccLandPageBGOpacity,

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -53,7 +52,9 @@ class HomePage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(bgImage),
+          image: bgImage == ''
+              ? const AssetImage(noImage) as ImageProvider
+              : NetworkImage(bgImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
           opacity: ccLandPageBGOpacity,
@@ -175,7 +176,9 @@ class AboutPage extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(aboutImage),
+          image: aboutImage == ''
+              ? const AssetImage(noImage) as ImageProvider
+              : NetworkImage(aboutImage),
           fit: BoxFit.cover,
           alignment: Alignment.bottomCenter,
           opacity: ccLandPageBGOpacity,

@@ -37,12 +37,10 @@ class SiteSettingsFunction {
     }
   }
 
-  static Future<SiteModel?> getSiteSettings() async {
+  static Future<SiteModel?> getSiteSettings(docId) async {
     try {
-      final result = await _firestore
-          .collection("site_settings")
-          .doc(_auth.currentUser!.uid)
-          .get();
+      final result =
+          await _firestore.collection("site_settings").doc(docId).get();
       SiteModel siteModel = SiteModel.fromJson(result.data()!);
       return siteModel;
     } catch (e) {

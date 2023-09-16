@@ -2,8 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/firebase_options.dart';
+import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/admin_side/admin_side.dart';
+import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 
 void main() async {
@@ -43,8 +45,8 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: const AdminSide(),
-              //home: const LandingPage(),
+              //home: const AdminSide(),
+              home: const LandingPage(),
             );
           });
     }));
@@ -54,9 +56,16 @@ class MyApp extends StatelessWidget {
 final ValueNotifier themeNotifier = ValueNotifier(ThemeMode.system);
 
 Color currentThemeColor = Colors.amber;
+SiteModel? siteModel;
 bool isDarkMode = false;
 
 Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
+  //admin id
+  siteModel = await SiteSettingsFunction.getSiteSettings(
+      'ZYsPGzbJdoQutQdpDbZlCllwuj62');
+  if (siteModel != null) {
+    currentThemeColor = Color(siteModel!.siteThemeColor);
+  }
   currentThemeColor = Color(await SharedPrefHelper.loadThemeColor());
 }

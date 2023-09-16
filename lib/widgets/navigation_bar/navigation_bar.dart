@@ -103,10 +103,14 @@ class NavBarTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-        onPressed: () {
-          callback(text, context);
-        },
-        child: Text(text));
+      onPressed: () {
+        callback(text, context);
+      },
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
   }
 }
 
