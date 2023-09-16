@@ -4,6 +4,7 @@ import 'package:neighboard/constants/constants.dart';
 
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 
 class AnnouncementDesktop extends StatefulWidget {
@@ -70,10 +71,34 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
     getAllAnnouncements();
   }
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void _openChat() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return const MyChat();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavBar(),
+      key: _scaffoldKey,
+      appBar: NavBar(
+        openNotification: _openNotification,
+        openChat: _openChat,
+      ),
+      endDrawer: const Drawer(
+        child: Column(
+          children: [Text("Notifications")],
+        ),
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         child: announcementModels == []

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 
 class HOAVotingDesktop extends StatefulWidget {
@@ -22,10 +23,34 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     super.dispose();
   }
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void _openChat() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return const MyChat();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const NavBar(),
+      key: _scaffoldKey,
+      appBar: NavBar(
+        openNotification: _openNotification,
+        openChat: _openChat,
+      ),
+      endDrawer: const Drawer(
+        child: Column(
+          children: [Text("Notifications")],
+        ),
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         child: Column(

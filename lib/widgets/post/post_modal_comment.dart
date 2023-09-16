@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:neighboard/models/comment_model.dart';
@@ -26,6 +27,7 @@ class PostModalComment extends StatefulWidget {
 }
 
 class _PostModalCommentState extends State<PostModalComment> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<ReplyModel> replyModels = [];
   bool isLoading = true;
   bool isRepliesShown = false;
@@ -120,22 +122,11 @@ class _PostModalCommentState extends State<PostModalComment> {
   }
 
   addReplyCallback({required ReplyModel reply}) async {
-    if (mounted) {
-      setState(() {
-        isLoading = true;
-      });
-    }
     await CommentFunction.postReply(
       postId: widget.postModel.postId,
       commentId: widget.commentModel.commentId,
       replyModel: reply,
     );
-    replyModels.add(reply);
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
   }
 
   @override
@@ -237,7 +228,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                                     showAllReplies();
                                   },
                                   icon: const Icon(Icons.reply),
-                                  label: const Text("Reply"),
+                                  label: Text("Reply (${replyModels.length})"),
                                 )
                               ],
                             ),
@@ -268,18 +259,50 @@ class _PostModalCommentState extends State<PostModalComment> {
     );
   }
 
-  ListView commentReplies() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: replyModels.length,
-      itemBuilder: (context, index) {
-        ReplyModel reply = replyModels[index];
-        return ReplyItself(
-          replyModel: reply,
-          currentUser: widget.currentUser!,
-          isLoggedIn: widget.isLoggedIn,
-          addReply: addReplyCallback,
-        );
+  Widget commentReplies() {
+    return StreamBuilder(
+      stream: _firestore
+          .collection("posts")
+          .doc(widget.postModel.postId)
+          .collection("comments")
+          .doc(widget.commentModel.commentId)
+          .collection("replies")
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        } else {
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.active ||
+                  snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  return const Text('Error');
+                } else if (snapshot.hasData) {
+                  final result = snapshot.data!;
+                  replyModels = result.docs
+                      .map((e) => ReplyModel.fromJson(e.data()))
+                      .toList();
+                  ReplyModel reply = replyModels[index];
+                  return ReplyItself(
+                    replyModel: reply,
+                    currentUser: widget.currentUser!,
+                    isLoggedIn: widget.isLoggedIn,
+                    addReply: addReplyCallback,
+                  );
+                } else {
+                  return const Text('Empty data');
+                }
+              } else {
+                return Text('State: ${snapshot.connectionState}');
+              }
+            },
+          );
+        }
       },
     );
   }

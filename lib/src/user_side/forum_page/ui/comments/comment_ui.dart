@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -229,69 +230,98 @@ class RepliesContainer extends StatefulWidget {
 
 class _RepliesContainerState extends State<RepliesContainer> {
   List<ReplyModel> replyModel = [];
-  bool isLoading = true;
+  // bool isLoading = true;
 
-  void getAllReplies() async {
-    replyModel = await CommentFunction.getAllReplies(
-            postId: widget.post.postId, commentId: widget.comment.commentId) ??
-        [];
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  // void getAllReplies() async {
+  //   replyModel = await CommentFunction.getAllReplies(
+  //           postId: widget.post.postId, commentId: widget.comment.commentId) ??
+  //       [];
+  //   if (mounted) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
   addReplyCallback({required ReplyModel reply}) async {
-    if (mounted) {
-      setState(() {
-        isLoading = true;
-      });
-    }
+    // if (mounted) {
+    //   setState(() {
+    //     isLoading = true;
+    //   });
+    // }
     await CommentFunction.postReply(
       postId: widget.post.postId,
       commentId: widget.comment.commentId,
       replyModel: reply,
     );
     replyModel.add(reply);
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    // if (mounted) {
+    //   setState(() {
+    //     isLoading = false;
+    //   });
+    // }
   }
 
   @override
   void initState() {
     super.initState();
-    getAllReplies();
+    //getAllReplies();
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : Visibility(
-            visible: widget.isRepliesVisible,
-            child: Column(
-              children: [
-                ReplyTextField(
-                  visibility: widget.isReplyBoxVisible,
-                  addReply: addReplyCallback,
-                  setVisibility: widget.setReplyBoxVisible,
-                  recipientId: widget.comment.senderId,
-                  recipientName: widget.comment.senderName,
-                ),
-                for (ReplyModel singleReply in replyModel)
-                  SingleReplyUI(
-                    replyModel: singleReply,
-                    addReply: addReplyCallback,
-                  ),
-              ],
-            ),
-          );
+    // return isLoading
+    //     ? const Center(
+    //         child: CircularProgressIndicator(),
+    //       )
+    //     :
+    return Visibility(
+      visible: widget.isRepliesVisible,
+      child: Column(
+        children: [
+          ReplyTextField(
+            visibility: widget.isReplyBoxVisible,
+            addReply: addReplyCallback,
+            setVisibility: widget.setReplyBoxVisible,
+            recipientId: widget.comment.senderId,
+            recipientName: widget.comment.senderName,
+          ),
+          StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection("posts")
+                .doc(widget.post.postId)
+                .collection("comments")
+                .doc(widget.comment.commentId)
+                .collection("replies")
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    final result = snapshot.data!;
+                    replyModel = result.docs
+                        .map((e) => ReplyModel.fromJson(e.data()))
+                        .toList();
+                    ReplyModel reply = replyModel[index];
+                    return SingleReplyUI(
+                        replyModel: reply, addReply: addReplyCallback);
+                  },
+                );
+              }
+            },
+          ),
+          // for (ReplyModel singleReply in replyModel)
+          //   SingleReplyUI(
+          //     replyModel: singleReply,
+          //     addReply: addReplyCallback,
+          //   ),
+        ],
+      ),
+    );
   }
 }
 

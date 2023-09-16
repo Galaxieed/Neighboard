@@ -165,10 +165,10 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
     }
   }
 
-  List<CommentModel> commentModel = [];
+  List<CommentModel> commentModels = [];
 
   void getAllComments() async {
-    commentModel =
+    commentModels =
         await CommentFunction.getAllComments(postId: widget.post.postId) ?? [];
     if (mounted) {
       setState(() {
@@ -179,9 +179,9 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
 
   void onPostComment() async {
     if (_comment.text.isNotEmpty) {
-      setState(() {
-        isLoading = true;
-      });
+      // setState(() {
+      //   isLoading = true;
+      // });
       await getCurrentUser();
 
       CommentModel comment = CommentModel(
@@ -198,13 +198,13 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
 
       await CommentFunction.postComment(
           postId: widget.post.postId, commentModel: comment);
-      commentModel.add(comment);
+      //commentModel.add(comment);
       _comment.clear();
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      // if (mounted) {
+      //   setState(() {
+      //     isLoading = false;
+      //   });
+      // }
     } else {
       return;
     }
@@ -222,7 +222,9 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
     isUpvoted =
         await MyPostFunction.isAlreadyUpvoted(postId: widget.post.postId);
     if (mounted) {
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -246,7 +248,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
   @override
   void initState() {
     super.initState();
-    getAllComments();
+    // getAllComments();
     checkIfUpVoted();
   }
 
@@ -277,7 +279,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
             },
             children: [
               ExpansionPanel(
-                backgroundColor: ccExpansionPostColor(context),
+                //backgroundColor: ccExpansionPostColor(context),
                 canTapOnHeader: true,
                 isExpanded: index == 0,
                 headerBuilder: (BuildContext context, bool isExpanded) {
@@ -308,8 +310,35 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                     SizedBox(
                       height: 5.h,
                     ),
-                    for (CommentModel comment in commentModel)
-                      CommentUI(post: widget.post, comment: comment),
+                    StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("posts")
+                          .doc(widget.post.postId)
+                          .collection("comments")
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else {
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              final result = snapshot.data!;
+                              commentModels = result.docs
+                                  .map((e) => CommentModel.fromJson(e.data()))
+                                  .toList();
+                              CommentModel comment = commentModels[index];
+                              return CommentUI(
+                                  post: widget.post, comment: comment);
+                            },
+                          );
+                        }
+                      },
+                    ),
+                    // for (CommentModel comment in commentModel)
+                    //   CommentUI(post: widget.post, comment: comment),
                   ],
                 ),
               )

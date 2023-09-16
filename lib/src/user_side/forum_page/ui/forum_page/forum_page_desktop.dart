@@ -9,6 +9,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dar
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -48,35 +49,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return Container(
-          width: 552,
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Text(
-                "Chats",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              Expanded(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: 10,
-                    itemBuilder: (context, index) {
-                      return const ListTile(
-                        leading: CircleAvatar(),
-                        title: Text("Sample Message"),
-                        isThreeLine: true,
-                        subtitle: Text("Subtitle"),
-                      );
-                    }),
-              ),
-              TextField(),
-            ],
-          ),
-        );
+        return const MyChat();
       },
     );
   }

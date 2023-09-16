@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
@@ -54,7 +55,6 @@ class _PostModalState extends State<PostModal> {
         postId: widget.postModel.postId,
         commentModel: commentModel,
       );
-      commentModels.add(commentModel);
       commentModels.sort((a, b) => b.commentId.compareTo(a.commentId));
       _ctrlComment.clear();
       if (mounted) {
@@ -67,16 +67,25 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
-  Future<void> getAllComments() async {
-    commentModels =
-        await CommentFunction.getAllComments(postId: widget.postModel.postId) ??
-            [];
-    commentModels.sort((a, b) => b.commentId.compareTo(a.commentId));
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+  // Future<void> getAllComments() async {
+  //   commentModels =
+  //       await CommentFunction.getAllComments(postId: widget.postModel.postId) ??
+  //           [];
+  //   commentModels.sort((a, b) => b.commentId.compareTo(a.commentId));
+  //   if (mounted) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+  Future<void> timer() async {
+    await Future.delayed(const Duration(milliseconds: 750), () {
+      if (commentModels != []) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   void checkIfUpVoted() async {
@@ -117,7 +126,8 @@ class _PostModalState extends State<PostModal> {
       isLoggedIn = false;
       setState(() {});
     }
-    getAllComments();
+    timer();
+    // getAllComments();
   }
 
   @override
@@ -197,7 +207,39 @@ class _PostModalState extends State<PostModal> {
                             ? postActions()
                             : const Center(child: Text("Login First")),
                         const Divider(),
-                        postComments(),
+                        //postComments(),
+                        StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection("posts")
+                              .doc(widget.postModel.postId)
+                              .collection("comments")
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else {
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: snapshot.data!.docs.length,
+                                itemBuilder: (context, index) {
+                                  final result = snapshot.data!;
+                                  commentModels = result.docs
+                                      .map((e) =>
+                                          CommentModel.fromJson(e.data()))
+                                      .toList();
+                                  CommentModel comment = commentModels[index];
+                                  return PostModalComment(
+                                    currentUser: currentUser,
+                                    postModel: widget.postModel,
+                                    commentModel: comment,
+                                    isLoggedIn: isLoggedIn,
+                                  );
+                                },
+                              );
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -207,21 +249,21 @@ class _PostModalState extends State<PostModal> {
     );
   }
 
-  ListView postComments() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: commentModels.length,
-      itemBuilder: (context, index) {
-        CommentModel comment = commentModels[index];
-        return PostModalComment(
-          currentUser: currentUser,
-          postModel: widget.postModel,
-          commentModel: comment,
-          isLoggedIn: isLoggedIn,
-        );
-      },
-    );
-  }
+  // ListView postComments(List<CommentModel> commentModels) {
+  //   return ListView.builder(
+  //     shrinkWrap: true,
+  //     itemCount: commentModels.length,
+  //     itemBuilder: (context, index) {
+  //       CommentModel comment = commentModels[index];
+  //       return PostModalComment(
+  //         currentUser: currentUser,
+  //         postModel: widget.postModel,
+  //         commentModel: comment,
+  //         isLoggedIn: isLoggedIn,
+  //       );
+  //     },
+  //   );
+  // }
 
   Row postActions() {
     return Row(
