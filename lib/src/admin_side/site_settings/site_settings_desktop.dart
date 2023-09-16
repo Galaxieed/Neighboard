@@ -107,13 +107,13 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     }
   }
 
-  void onSavingSettings() async {
+  void onSavingSettings(context) async {
     setState(() {
       isLoading = true;
     });
     if (siteModel == null) {
       await onSavingPic();
-      SiteModel siteModel = SiteModel(
+      SiteModel site = SiteModel(
         siteId: _auth.currentUser!.uid,
         siteName: '',
         siteLocation: '',
@@ -126,31 +126,36 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         siteAboutImage: aboutImgUrl,
       );
 
-      bool isSuccessful =
-          await SiteSettingsFunction.saveNewSiteSettings(siteModel);
+      bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Announcement successfully posted"),
+            content: Text("Site settings successfully added"),
           ),
         );
       }
       return;
+    } else {
+      await onSavingPic();
+      Map<String, dynamic> siteDetails = {
+        'site_header': tcHeader.text,
+        'site_subheader': tcSubHeader.text,
+        'site_about': tcAbout.text,
+        'site_theme_color': currentThemeColor.value,
+        'site_logo': logoImgUrl,
+        'site_homepage_image': homeImgUrl,
+        'site_about_image': aboutImgUrl,
+      };
+      await SiteSettingsFunction.updateSiteSettings(siteDetails);
+      await getSiteSettings();
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Site settings successfully updated"),
+        ),
+      );
     }
-
-    await onSavingPic();
-    Map<String, dynamic> siteDetails = {
-      "site_header": tcHeader.text,
-      "site_subheader": tcSubHeader.text,
-      "site_about": tcAbout.text,
-      'site_homepage_image': homeImgUrl,
-      'site_about_image': aboutImgUrl,
-      'site_logo': aboutImgUrl,
-    };
-    await SiteSettingsFunction.updateSiteSettings(siteDetails);
-    await getSiteSettings();
 
     setState(() {
       isLoading = false;
@@ -164,6 +169,8 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     tcAbout.text = siteModel?.siteAbout ?? "";
     homeImgUrl = siteModel?.siteHomepageImage ?? "";
     aboutImgUrl = siteModel?.siteAboutImage ?? "";
+    logoImgUrl = siteModel?.siteLogo ?? "";
+
     setState(() {});
   }
 
@@ -353,7 +360,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                             ),
                             ElevatedButton.icon(
                                 onPressed: () {
-                                  onSavingSettings();
+                                  onSavingSettings(context);
                                 },
                                 icon: const Icon(Icons.save_outlined),
                                 label: const Text("Save")),

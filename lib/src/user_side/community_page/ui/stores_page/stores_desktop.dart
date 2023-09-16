@@ -157,16 +157,20 @@ class _StoresDesktopState extends State<StoresDesktop> {
     return isLoading
         ? const LoadingScreen()
         : Scaffold(
-            key: _scaffoldKey,
-            appBar: NavBar(
-              openNotification: _openNotification,
-              openChat: _openChat,
-            ),
-            endDrawer: const Drawer(
-              child: Column(
-                children: [Text("Notifications")],
-              ),
-            ),
+            key: widget.isAdmin ? null : _scaffoldKey,
+            appBar: widget.isAdmin
+                ? null
+                : NavBar(
+                    openNotification: _openNotification,
+                    openChat: _openChat,
+                  ),
+            endDrawer: widget.isAdmin
+                ? null
+                : const Drawer(
+                    child: Column(
+                      children: [Text("Notifications")],
+                    ),
+                  ),
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               transitionBuilder: (Widget child, Animation<double> animation) {

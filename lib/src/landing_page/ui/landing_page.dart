@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_desktop.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_mobile.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -28,11 +29,34 @@ class LandingPage extends StatelessWidget {
 
     String backgroundImage = homepageImage;
     String aboutImage = homeImage;
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+    void _openNotification() {
+      _scaffoldKey.currentState!.openEndDrawer();
+    }
+
+    void _openChat() {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return const MyChat();
+        },
+      );
+    }
 
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
         return Scaffold(
-          appBar: const NavBar(),
+          key: _scaffoldKey,
+          appBar: NavBar(
+            openNotification: _openNotification,
+            openChat: _openChat,
+          ),
+          endDrawer: const Drawer(
+            child: Column(
+              children: [Text("Notifications")],
+            ),
+          ),
           body: LandingPageDesktop(
             header: header,
             subHeader: subHeader,
