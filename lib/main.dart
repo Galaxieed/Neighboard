@@ -45,8 +45,8 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              //home: const AdminSide(),
-              home: const LandingPage(),
+              home: const AdminSide(),
+              //home: const LandingPage(),
             );
           });
     }));

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_desktop.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_mobile.dart';

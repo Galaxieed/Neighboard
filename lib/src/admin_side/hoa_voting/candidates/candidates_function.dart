@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:neighboard/models/candidates_model.dart';
+import 'package:neighboard/models/election_model.dart';
 
 class CandidatesFunctions {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -10,6 +11,18 @@ class CandidatesFunctions {
           .collection("candidates")
           .doc(candidateModel.candidateId)
           .set(candidateModel.toJson());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> startElection(ElectionModel electionModel) async {
+    try {
+      await _firestore
+          .collection("election")
+          .doc(electionModel.electionId)
+          .set(electionModel.toJson());
       return true;
     } catch (e) {
       return false;

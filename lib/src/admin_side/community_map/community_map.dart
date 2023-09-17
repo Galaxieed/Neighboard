@@ -70,20 +70,24 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   }
 
   getSiteLocation() async {
-    siteModel =
-        await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
-    if (siteModel == null || siteModel?.siteLocation == "") return;
-    newLatitude = double.parse(siteModel!.siteLocation.split('|')[0]);
-    newLongitude = double.parse(siteModel!.siteLocation.split('|')[1]);
-    currentCenter = LatLng(newLatitude, newLongitude);
-    setState(() {});
-    _moveMap();
+    if (_auth.currentUser != null) {
+      siteModel =
+          await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
+      if (siteModel == null || siteModel?.siteLocation == "") return;
+      newLatitude = double.parse(siteModel!.siteLocation.split('|')[0]);
+      newLongitude = double.parse(siteModel!.siteLocation.split('|')[1]);
+      currentCenter = LatLng(newLatitude, newLongitude);
+      setState(() {});
+      _moveMap();
+    }
   }
 
   void onUpdateLocation(context) async {
     // setState(() {
     //   isLoading = true;
     // });
+    if (_auth.currentUser == null) return;
+
     if (siteModel == null) {
       SiteModel site = SiteModel(
         siteId: _auth.currentUser!.uid,
