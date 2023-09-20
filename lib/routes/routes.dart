@@ -11,7 +11,7 @@ import 'package:neighboard/src/user_side/login_register_page/register_page/regis
 class Routes {
   navigate(String route, [BuildContext? context]) {
     if (route == 'Home') {
-      Navigator.pushReplacement(
+      Navigator.push(
           context!,
           MaterialPageRoute(
               builder: (BuildContext context) => const LandingPage()));

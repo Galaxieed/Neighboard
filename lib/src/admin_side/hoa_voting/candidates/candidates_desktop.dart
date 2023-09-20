@@ -41,6 +41,8 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   List<List> profileImages = [];
 
   bool isTherePres = false, isThereVP = false, isThereBD = false;
+  bool isLoading = true;
+  bool isElectionOngoing = false;
 
   void pickImage(StateSetter modalStateSetter) async {
     if (kIsWeb) {
@@ -60,7 +62,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     }
   }
 
-  void onSavingPic(ppImage, ppImageByte) async {
+  Future<void> onSavingPic(ppImage, ppImageByte) async {
     if (ppImage != null || ppImageByte != null) {
       profileImageUrl = kIsWeb
           ? await ProfileFunction.uploadImageWeb(ppImageByte!.bytes!,
@@ -71,6 +73,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   }
 
   void onStartElection() async {
+    setState(() {
+      isLoading = true;
+    });
     electionModel = ElectionModel(
       electionId: '$startingDate-$endingDate',
       electionStartDate: startingDate,
@@ -82,12 +87,44 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
 
     if (isSuccessful) {
       //TODO: add candidates in new collection after starting election.
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Announcement successfully posted"),
-        ),
-      );
+      //save the candidate 1 by 1
+      try {
+        for (int i = 0; i < candidateModels.length; i++) {
+          //Get the profile pic from the list of profileImages
+          int imageIndex = profileImages.indexWhere(
+              (element) => element.contains(candidateModels[i].candidateId));
+          await onSavingPic(
+              profileImages[imageIndex][1], profileImages[imageIndex][2]);
+
+          //set the profile pic of each candidates
+          candidateModels[i].profilePicture = profileImageUrl;
+
+          //save the candidate in firebase
+          await CandidatesFunctions.addCandidate(
+            electionModel!.electionId,
+            candidateModels[i],
+          );
+        }
+        isElectionOngoing = true;
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Election successfully started"),
+          ),
+        );
+      } catch (e) {
+        // ignore: use_build_context_synchronously
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Something went wrong.."),
+          ),
+        );
+      }
+    }
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
   //TODO: add new candidate in firebase at the save button
@@ -117,119 +154,182 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     profileImageUrl = '';
   }
 
+  checkIfElectionOngoing() async {
+    electionModel = await CandidatesFunctions.getLatestElection();
+    if (electionModel != null) {
+      DateTime elecStartDate = DateTime.parse(electionModel!.electionStartDate);
+      DateTime elecEndDate = DateTime.parse(electionModel!.electionEndDate);
+      DateTime now = DateTime.now();
+      elecStartDate =
+          DateTime(elecStartDate.year, elecStartDate.month, elecStartDate.day);
+      elecEndDate =
+          DateTime(elecEndDate.year, elecEndDate.month, elecEndDate.day);
+      now = DateTime(now.year, now.month, now.day);
+
+      if (now.isAfter(elecStartDate) && now.isBefore(elecEndDate)) {
+        // print('The date is within the range');
+        setState(() {
+          isElectionOngoing = true;
+        });
+      } else if (now.isAtSameMomentAs(elecStartDate) ||
+          now.isAtSameMomentAs(elecEndDate)) {
+        // print('The date is within the range');
+        setState(() {
+          isElectionOngoing = true;
+        });
+      } else {
+        // print('The date is not within the range');
+        setState(() {
+          isElectionOngoing = false;
+        });
+      }
+    } else {
+      print("No Model");
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkIfElectionOngoing();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TabHeader(
-            title: "Candidates List",
-            callback: () {
-              widget.drawer();
-            },
-          ),
-          SizedBox(
-            height: 20.h,
-          ),
-          Expanded(
-            child: DefaultTabController(
-              length: 4,
-              child: Builder(
-                builder: (BuildContext context) => Column(
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : isElectionOngoing
+            ? const Center(
+                child: Text("Election Ongoing"),
+              )
+            : Container(
+                padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TabBarView(
-                        children: [
-                          hoaAdminTab(context, "PRESIDENT"),
-                          hoaAdminTab(context, "VICE PRESIDENT"),
-                          hoaAdminTab(context, "BOARD OF DIRECTORS"),
-                          hoaAdminTab(context, "VOTING DETAILS"),
-                        ],
-                      ),
+                    TabHeader(
+                      title: "Candidates List",
+                      callback: () {
+                        widget.drawer();
+                      },
                     ),
                     SizedBox(
-                      height: 15.h,
+                      height: 20.h,
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Visibility(
-                          visible: controller(context).index > 0,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              TabController ctrl = controller(context);
-                              if (!ctrl.indexIsChanging && (ctrl.index > 0)) {
-                                ctrl.animateTo(ctrl.index - 1);
-                                setState(() {});
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: ccHOANextButtonBGColor(context),
-                              foregroundColor: ccHOANextButtonFGColor(context),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
+                    Expanded(
+                      child: DefaultTabController(
+                        length: 4,
+                        child: Builder(
+                          builder: (BuildContext context) => Column(
+                            children: [
+                              Expanded(
+                                child: TabBarView(
+                                  children: [
+                                    hoaAdminTab(context, "PRESIDENT"),
+                                    hoaAdminTab(context, "VICE PRESIDENT"),
+                                    hoaAdminTab(context, "BOARD OF DIRECTORS"),
+                                    hoaAdminTab(context, "VOTING DETAILS"),
+                                  ],
+                                ),
                               ),
-                            ),
-                            child: const Text("Back"),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 2.w,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            TabController ctrl = controller(context);
-                            if (!ctrl.indexIsChanging && ctrl.index < 3) {
-                              if (ctrl.index == 0 && isTherePres) {
-                                ctrl.animateTo(1);
-                              } else {
-                                print("Choose Pres");
-                              }
-                              if (ctrl.index == 1 && isThereVP) {
-                                ctrl.animateTo(2);
-                              } else {
-                                print("Choose VPres");
-                              }
-                              if (ctrl.index == 2 && isThereBD) {
-                                ctrl.animateTo(3);
-                              } else {
-                                print("Choose BD");
-                              }
+                              SizedBox(
+                                height: 15.h,
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Visibility(
+                                    visible: controller(context).index > 0,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        TabController ctrl =
+                                            controller(context);
+                                        if (!ctrl.indexIsChanging &&
+                                            (ctrl.index > 0)) {
+                                          ctrl.animateTo(ctrl.index - 1);
+                                          setState(() {});
+                                        }
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            ccHOANextButtonBGColor(context),
+                                        foregroundColor:
+                                            ccHOANextButtonFGColor(context),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                      ),
+                                      child: const Text("Back"),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 2.w,
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      TabController ctrl = controller(context);
+                                      if (!ctrl.indexIsChanging &&
+                                          ctrl.index < 3) {
+                                        if (ctrl.index == 0 && isTherePres) {
+                                          ctrl.animateTo(1);
+                                        } else {
+                                          print("Choose Pres");
+                                        }
+                                        if (ctrl.index == 1 && isThereVP) {
+                                          ctrl.animateTo(2);
+                                        } else {
+                                          print("Choose VPres");
+                                        }
+                                        if (ctrl.index == 2 && isThereBD) {
+                                          ctrl.animateTo(3);
+                                        } else {
+                                          print("Choose BD");
+                                        }
 
-                              setState(() {});
-                            }
-                            if (!ctrl.indexIsChanging && ctrl.index == 3) {
-                              //TODO: save the voted HOA
-                              if (candidateModels != [] &&
-                                  startingDate != '' &&
-                                  endingDate != '') {
-                                onStartElection();
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ccHOANextButtonBGColor(context),
-                            foregroundColor: ccHOANextButtonFGColor(context),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
+                                        setState(() {});
+                                      }
+                                      if (!ctrl.indexIsChanging &&
+                                          ctrl.index == 3) {
+                                        //TODO: save the voted HOA
+
+                                        if (candidateModels != [] &&
+                                            startingDate != '' &&
+                                            endingDate != '') {
+                                          onStartElection();
+                                        }
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          ccHOANextButtonBGColor(context),
+                                      foregroundColor:
+                                          ccHOANextButtonFGColor(context),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    child: Text(controller(context).index < 3
+                                        ? "Next"
+                                        : "Save"),
+                                  )
+                                ],
+                              ),
+                            ],
                           ),
-                          child: Text(
-                              controller(context).index < 3 ? "Next" : "Save"),
-                        )
-                      ],
-                    ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
+              );
   }
 
   Column hoaAdminTab(BuildContext context, String title) {
@@ -441,8 +541,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                       .format(fromRange.start);
                                   String endDate =
                                       DateFormat.yMMMd().format(fromRange.end);
-                                  setStartDate(startDate);
-                                  setEndDate(endDate);
+                                  setStartDate(fromRange.start.toString());
+                                  setEndDate(fromRange.end.toString());
+
                                   final String range = '$startDate - $endDate';
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
@@ -459,7 +560,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                         const SizedBox(
                           width: 10,
                         ),
-                        Text('$startingDate - $endingDate'),
+                        if (startingDate != '' || endingDate != '')
+                          Text(
+                              '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}'),
                       ],
                     ),
                     const SizedBox(

@@ -1,6 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/candidates_model.dart';
+import 'package:neighboard/models/election_model.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 
@@ -12,15 +18,124 @@ class HOAVotingDesktop extends StatefulWidget {
 }
 
 class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   String? chosenPresident;
   String? chosenVicePresident;
-  String? chosenBoardOfDirector;
-  TabController controller(context) => DefaultTabController.of(context);
+  Map<String, bool> optionsBD = {};
+  List selectedBD = [];
+  int maxDirectors = 5, startCount = 0;
 
-  @override
-  void dispose() {
-    controller(context).dispose();
-    super.dispose();
+  TabController controller(context) => DefaultTabController.of(context);
+  bool isLoading = true, isElectionOngoing = true, isAlreadyVoted = false;
+  bool isLoggedIn = false;
+  List<CandidateModel> candidateModels = [];
+  ElectionModel? electionModel;
+
+  checkIfLoggedIn() async {
+    if (_auth.currentUser != null) {
+      isLoggedIn = true;
+      checkIfElectionOngoing();
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  checkIfAlreadyVoted() async {
+    isAlreadyVoted =
+        await HOAVotingFunction.isAlreadyVoted(electionModel!.electionId);
+    isLoading = false;
+    setState(() {});
+  }
+
+  checkIfElectionOngoing() async {
+    electionModel = await CandidatesFunctions.getLatestElection();
+    //there is election
+    if (electionModel != null) {
+      DateTime elecStartDate = DateTime.parse(electionModel!.electionStartDate);
+      DateTime elecEndDate = DateTime.parse(electionModel!.electionEndDate);
+      DateTime now = DateTime.now();
+      elecStartDate =
+          DateTime(elecStartDate.year, elecStartDate.month, elecStartDate.day);
+      elecEndDate =
+          DateTime(elecEndDate.year, elecEndDate.month, elecEndDate.day);
+      now = DateTime(now.year, now.month, now.day);
+
+      //election is within the set date
+      if (now.isAfter(elecStartDate) && now.isBefore(elecEndDate)) {
+        await checkIfAlreadyVoted();
+        if (isAlreadyVoted) return;
+        await getAllCandidates();
+        setState(() {
+          isElectionOngoing = true;
+        });
+      } else if (now.isAtSameMomentAs(elecStartDate) ||
+          now.isAtSameMomentAs(elecEndDate)) {
+        await checkIfAlreadyVoted();
+        if (isAlreadyVoted) return;
+        await getAllCandidates();
+        setState(() {
+          isElectionOngoing = true;
+        });
+      } else {
+        // print('The date is not within the range');
+        setState(() {
+          isElectionOngoing = false;
+          isLoading = false;
+        });
+      }
+    } else {
+      // print('The date is not within the range');
+      setState(() {
+        isElectionOngoing = false;
+        isLoading = false;
+      });
+    }
+  }
+
+  getAllCandidates() async {
+    candidateModels =
+        await CandidatesFunctions.getAllCandidate(electionModel!.electionId) ??
+            [];
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+        initializeBDs();
+      });
+    }
+  }
+
+  void initializeBDs() {
+    for (CandidateModel candidate in candidateModels) {
+      if (candidate.position == "BOARD OF DIRECTORS") {
+        optionsBD.addAll({candidate.candidateId: false});
+      }
+    }
+  }
+
+  void onSaveVote() async {
+    setState(() {
+      isLoading = true;
+    });
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenPresident!);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenVicePresident!);
+    for (String id in selectedBD) {
+      await HOAVotingFunction.voteCandidate(electionModel!.electionId, id);
+    }
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Your vote is successful.'),
+      ),
+    );
+    setState(() {
+      isLoading = false;
+      isAlreadyVoted = true;
+    });
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -39,6 +154,18 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    checkIfLoggedIn();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller(context).dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -51,31 +178,48 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
           children: [Text("Notifications")],
         ),
       ),
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(
-              height: 15,
+      body: isLoading
+          ? const LoadingScreen()
+          : Container(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Text(
+                    'Board of Directors Election',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Expanded(
+                    child: !isLoggedIn
+                        ? const Center(
+                            child: Text("Login First"),
+                          )
+                        : !isElectionOngoing
+                            ? const Center(
+                                child: Text("There is no election right now"),
+                              )
+                            : isAlreadyVoted
+                                ? const Center(
+                                    child: Text(
+                                        "You already voted. Thank you for participation"),
+                                  )
+                                : gridOfCandidates(),
+                  ),
+                ],
+              ),
             ),
-            Text(
-              'Board of Directors Election',
-              style: Theme.of(context).textTheme.headlineLarge,
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Expanded(
-              child: gridOfCandidates(),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
+  //TODO: save the voted hoa. collect all then save.
+  //update the no of votes of voted candidate
   DefaultTabController gridOfCandidates() {
     return DefaultTabController(
       initialIndex: 0,
@@ -129,18 +273,30 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                       ctrl.animateTo(ctrl.index + 1);
                       setState(() {});
                     }
-                    if (!ctrl.indexIsChanging && ctrl.index == 2) {
+                    if (!ctrl.indexIsChanging &&
+                        ctrl.index == 2 &&
+                        (startCount == 5 &&
+                            chosenPresident != null &&
+                            chosenVicePresident != null)) {
                       //TODO: save the voted HOA
+                      onSaveVote();
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ccHOANextButtonBGColor(context),
+                    backgroundColor: controller(context).index == 2 &&
+                            (startCount != 5 ||
+                                chosenPresident == null ||
+                                chosenVicePresident == null)
+                        ? Theme.of(context).disabledColor
+                        : ccHOANextButtonBGColor(context),
                     foregroundColor: ccHOANextButtonFGColor(context),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  child: Text(controller(context).index < 2 ? "Next" : "Save"),
+                  child: Text(
+                    controller(context).index < 2 ? "Next" : "Save",
+                  ),
                 )
               ],
             )
@@ -164,9 +320,15 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
               mainAxisSpacing: 20,
               crossAxisSpacing: 20,
             ),
-            itemCount: 15,
+            itemCount: candidateModels
+                .where((element) => element.position == title)
+                .length,
             itemBuilder: (context, index) {
-              return voteCandidatesCard(index, context, title);
+              CandidateModel candidate = candidateModels
+                  .where((element) => element.position == title)
+                  .elementAt(index);
+
+              return voteCandidatesCard(context, title, candidate);
             },
           ),
         ),
@@ -174,19 +336,37 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     );
   }
 
-  Widget voteCandidatesCard(int index, BuildContext context, String position) {
+  Widget voteCandidatesCard(
+      BuildContext context, String position, CandidateModel candidate) {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
         onTap: () {
           if (position == "PRESIDENT") {
-            chosenPresident = index.toString();
+            chosenPresident = candidate.candidateId;
           }
           if (position == "VICE PRESIDENT") {
-            chosenVicePresident = index.toString();
+            chosenVicePresident = candidate.candidateId;
           }
           if (position == "BOARD OF DIRECTORS") {
-            chosenBoardOfDirector = index.toString();
+            if (!optionsBD[candidate.candidateId]! && startCount >= 5) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('You can only select up to 5 Candidates.'),
+                ),
+              );
+              return;
+            } else {
+              optionsBD[candidate.candidateId] =
+                  !optionsBD[candidate.candidateId]!;
+              if (optionsBD[candidate.candidateId]!) {
+                selectedBD.add(candidate.candidateId);
+                startCount += 1;
+              } else {
+                selectedBD.remove(candidate.candidateId);
+                startCount -= 1;
+              }
+            }
           }
           setState(() {});
         },
@@ -194,41 +374,72 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
           children: [
             Align(
               alignment: Alignment.topLeft,
-              child: Radio(
-                value: index.toString(),
-                groupValue: position == "PRESIDENT"
-                    ? chosenPresident
-                    : position == "VICE PRESIDENT"
-                        ? chosenVicePresident
-                        : position == "BOARD OF DIRECTORS"
-                            ? chosenBoardOfDirector
-                            : null,
-                onChanged: (val) {
-                  if (position == "PRESIDENT") {
-                    chosenPresident = val.toString();
-                  }
-                  if (position == "VICE PRESIDENT") {
-                    chosenVicePresident = val.toString();
-                  }
-                  if (position == "BOARD OF DIRECTORS") {
-                    chosenBoardOfDirector = val.toString();
-                  }
-                  setState(() {});
-                },
-              ),
+              child: position == "BOARD OF DIRECTORS"
+                  ? Checkbox.adaptive(
+                      value: optionsBD[candidate.candidateId],
+                      onChanged: (bool? value) {
+                        setState(() {
+                          // idsOfSelectedDirectors[candidate.candidateId] =
+                          //     value!;
+                          //TODO: FIX selecting multiple BD and saving them in a list
+                          if (!optionsBD[candidate.candidateId]! &&
+                              startCount >= 5) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'You can only select up to 5 options.'),
+                              ),
+                            );
+                            return;
+                          } else {
+                            optionsBD[candidate.candidateId] =
+                                !optionsBD[candidate.candidateId]!;
+                            if (optionsBD[candidate.candidateId]!) {
+                              selectedBD.add(candidate.candidateId);
+                              startCount += 1;
+                            } else {
+                              selectedBD.remove(candidate.candidateId);
+                              startCount -= 1;
+                            }
+                          }
+                        });
+                      },
+                    )
+                  : Radio(
+                      value: candidate.candidateId,
+                      groupValue: position == "PRESIDENT"
+                          ? chosenPresident
+                          : position == "VICE PRESIDENT"
+                              ? chosenVicePresident
+                              : null,
+                      onChanged: (val) {
+                        if (position == "PRESIDENT") {
+                          chosenPresident = val.toString();
+                        }
+                        if (position == "VICE PRESIDENT") {
+                          chosenVicePresident = val.toString();
+                        }
+
+                        setState(() {});
+                      },
+                    ),
             ),
-            const Expanded(
+            Expanded(
               child: FittedBox(
-                child: CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                child: candidate.profilePicture == ''
+                    ? const CircleAvatar(
+                        child: Icon(Icons.person),
+                      )
+                    : CircleAvatar(
+                        backgroundImage: NetworkImage(candidate.profilePicture),
+                      ),
               ),
             ),
             SizedBox(
               height: 5.h,
             ),
             Text(
-              "Sample Name",
+              "${candidate.firstName} ${candidate.lastName}",
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -238,7 +449,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
               height: 5.h,
             ),
             Text(
-              "Blk 12 Lot 18, Zaragoza St.",
+              candidate.address,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             SizedBox(

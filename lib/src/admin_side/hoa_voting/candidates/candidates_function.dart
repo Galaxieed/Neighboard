@@ -5,18 +5,6 @@ import 'package:neighboard/models/election_model.dart';
 class CandidatesFunctions {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future<bool> addCandidates(CandidateModel candidateModel) async {
-    try {
-      await _firestore
-          .collection("candidates")
-          .doc(candidateModel.candidateId)
-          .set(candidateModel.toJson());
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
   static Future<bool> startElection(ElectionModel electionModel) async {
     try {
       await _firestore
@@ -29,9 +17,44 @@ class CandidatesFunctions {
     }
   }
 
-  static Future<List<CandidateModel>?> getAllCandidate() async {
+  static Future<void> addCandidate(
+      String electionId, CandidateModel candidateModel) async {
     try {
-      final result = await _firestore.collection("candidates").get();
+      await _firestore
+          .collection("election")
+          .doc(electionId)
+          .collection("candidates")
+          .doc(candidateModel.candidateId)
+          .set(candidateModel.toJson());
+    } catch (e) {
+      return;
+    }
+  }
+
+  static Future<ElectionModel?> getLatestElection() async {
+    try {
+      final result = await _firestore
+          .collection("election")
+          .orderBy('election_start_date', descending: true)
+          .limit(1)
+          .get();
+
+      ElectionModel electionModel =
+          ElectionModel.fromJson(result.docs.first.data());
+      return electionModel;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<List<CandidateModel>?> getAllCandidate(
+      String electionId) async {
+    try {
+      final result = await _firestore
+          .collection("election")
+          .doc(electionId)
+          .collection("candidates")
+          .get();
       List<CandidateModel> candidatesModel = [];
       candidatesModel =
           result.docs.map((e) => CandidateModel.fromJson(e.data())).toList();

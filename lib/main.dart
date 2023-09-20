@@ -45,8 +45,8 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: const AdminSide(),
-              //home: const LandingPage(),
+              //home: const AdminSide(),
+              home: const LandingPage(),
             );
           });
     }));
@@ -61,7 +61,7 @@ bool isDarkMode = false;
 
 Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
-  //admin id
+  //TODO: change this id based on admin id
   siteModel = await SiteSettingsFunction.getSiteSettings(
       'ZYsPGzbJdoQutQdpDbZlCllwuj62');
   if (siteModel != null) {
