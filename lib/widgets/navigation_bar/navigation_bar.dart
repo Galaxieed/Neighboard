@@ -83,9 +83,18 @@ class NavBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.headlineSmall,
+    return Row(
+      children: [
+        siteModel == null
+            ? const Icon(Icons.api_sharp)
+            : siteModel!.siteLogo == ''
+                ? const Icon(Icons.api_sharp)
+                : Image.network(siteModel!.siteLogo),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+      ],
     );
   }
 }

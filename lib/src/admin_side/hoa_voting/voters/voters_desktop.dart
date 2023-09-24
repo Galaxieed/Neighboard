@@ -56,9 +56,15 @@ class _VotersDesktopState extends State<VotersDesktop> {
         userModels.where((element) => element.role != "ADMIN").toList();
 
     //deduct the voter to users then save to not voted
-    notVotedUsersModel = userModels
-        .where((element) => voterModels.any((v) => v.voterId != element.userId))
-        .toList();
+    if (voterModels.isEmpty) {
+      notVotedUsersModel = userModels;
+    } else {
+      notVotedUsersModel = userModels
+          .where(
+              (element) => voterModels.any((v) => v.voterId != element.userId))
+          .toList();
+    }
+
     if (mounted) {
       setState(() {
         isLoading = false;

@@ -89,10 +89,13 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       try {
         for (int i = 0; i < candidateModels.length; i++) {
           //Get the profile pic from the list of profileImages
+          profileImageUrl = '';
           int imageIndex = profileImages.indexWhere(
               (element) => element.contains(candidateModels[i].candidateId));
-          await onSavingPic(
-              profileImages[imageIndex][1], profileImages[imageIndex][2]);
+          if (imageIndex != -1) {
+            await onSavingPic(
+                profileImages[imageIndex][1], profileImages[imageIndex][2]);
+          }
 
           //set the profile pic of each candidates
           candidateModels[i].profilePicture = profileImageUrl;
