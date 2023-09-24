@@ -2,10 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/models/voter_model.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
@@ -34,6 +38,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   checkIfLoggedIn() async {
     if (_auth.currentUser != null) {
       isLoggedIn = true;
+      getUserDetails();
       checkIfElectionOngoing();
     } else {
       setState(() {
@@ -114,17 +119,30 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     }
   }
 
+  UserModel? userModel;
+  getUserDetails() async {
+    userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
+    setState(() {});
+  }
+
   void onSaveVote() async {
     setState(() {
       isLoading = true;
     });
+    VoterModel voter = VoterModel(
+      voterId: userModel!.userId,
+      name: "${userModel!.lastName}, ${userModel!.firstName}",
+      address: userModel!.address,
+      timeVoted: formattedDate(),
+    );
     await HOAVotingFunction.voteCandidate(
-        electionModel!.electionId, chosenPresident!);
+        electionModel!.electionId, chosenPresident!, voter);
 
     await HOAVotingFunction.voteCandidate(
-        electionModel!.electionId, chosenVicePresident!);
+        electionModel!.electionId, chosenVicePresident!, voter);
     for (String id in selectedBD) {
-      await HOAVotingFunction.voteCandidate(electionModel!.electionId, id);
+      await HOAVotingFunction.voteCandidate(
+          electionModel!.electionId, id, voter);
     }
     // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(

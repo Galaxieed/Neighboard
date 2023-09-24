@@ -47,6 +47,19 @@ class CandidatesFunctions {
     }
   }
 
+  static Future<List<ElectionModel>?> getAllElection() async {
+    try {
+      final result = await _firestore.collection("election").get();
+      List<ElectionModel> electionModel = [];
+      electionModel =
+          result.docs.map((e) => ElectionModel.fromJson(e.data())).toList();
+
+      return electionModel;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<List<CandidateModel>?> getAllCandidate(
       String electionId) async {
     try {

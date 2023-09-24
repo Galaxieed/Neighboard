@@ -12,8 +12,6 @@ class AdminHOACandidates extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        //TODO: make a starting and ending point of election
-        //return StartVoting(drawer: drawer);
         return CandidatesDesktop(
           drawer: drawer,
         );

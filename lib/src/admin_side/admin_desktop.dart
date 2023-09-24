@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/admin_side/announcements/announcements.dart';
 import 'package:neighboard/src/admin_side/community_map/community_map.dart';
 import 'package:neighboard/src/admin_side/dashboard/dashboard.dart';
@@ -11,7 +13,9 @@ import 'package:neighboard/src/admin_side/navigation/navigation_bar.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings.dart';
 import 'package:neighboard/src/admin_side/stores/stores.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 
 class AdminDesktop extends StatefulWidget {
   const AdminDesktop({super.key});
@@ -22,16 +26,24 @@ class AdminDesktop extends StatefulWidget {
 
 class _AdminDesktopState extends State<AdminDesktop> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  UserModel? userModel;
   bool isLoggedIn = false;
+  bool isLoading = true;
+
+  getCurrentUserDetails() async {
+    userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
+
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   bool checkIfLoggedIn() {
     if (_auth.currentUser != null) {
+      getCurrentUserDetails();
       return isLoggedIn = true;
     }
     //TODO: reject user when tried to open admin side without logging in
-    //Navigator.pop(context);
-
     return isLoggedIn = false;
   }
 
@@ -84,54 +96,62 @@ class _AdminDesktopState extends State<AdminDesktop> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const AdminNavBar(),
-      body: DefaultTabController(
-        initialIndex: 1,
-        length: 10,
-        child: Builder(
-          builder: (context) {
-            final TabController controller = DefaultTabController.of(context);
-            return Row(
-              children: [
-                MyDrawer(
-                  selectedPage: selectedPage,
-                  isDrawerExpanded: isDrawerExpanded,
-                  callback: (index) {
-                    switchPage(controller, index);
-                  },
-                ),
-                Expanded(
-                  child: TabBarView(
-                    physics: const NeverScrollableScrollPhysics(),
+      body: isLoading
+          ? const LoadingScreen()
+          : DefaultTabController(
+              initialIndex: 1,
+              length: 10,
+              child: Builder(
+                builder: (context) {
+                  final TabController controller =
+                      DefaultTabController.of(context);
+                  return Row(
                     children: [
-                      isLoggedIn
-                          ? ProfileScreen(
-                              userId: _auth.currentUser!.uid,
-                              isAdmin: true,
-                            )
-                          : const Placeholder(),
-                      Dashboard(callback: (i) {
-                        switchPage(controller, i);
-                      }),
-                      const AdminForum(),
-                      AdminAnnouncement(drawer: onExpandCollapseDrawer),
-                      const AdminCommunityMap(),
-                      AdminStores(drawer: onExpandCollapseDrawer),
-                      AdminHOACandidates(
-                        drawer: onExpandCollapseDrawer,
+                      MyDrawer(
+                        userModel: userModel!,
+                        selectedPage: selectedPage,
+                        isDrawerExpanded: isDrawerExpanded,
+                        callback: (index) {
+                          switchPage(controller, index);
+                        },
                       ),
-                      const AdminHOAVoting(),
-                      const AdminHOAVoters(),
-                      AdminSiteSettings(
-                        drawer: onExpandCollapseDrawer,
-                      ),
+                      Expanded(
+                        child: TabBarView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            isLoggedIn
+                                ? ProfileScreen(
+                                    userId: _auth.currentUser!.uid,
+                                    isAdmin: true,
+                                  )
+                                : const Placeholder(),
+                            Dashboard(callback: (i) {
+                              switchPage(controller, i);
+                            }),
+                            const AdminForum(),
+                            AdminAnnouncement(drawer: onExpandCollapseDrawer),
+                            const AdminCommunityMap(),
+                            AdminStores(drawer: onExpandCollapseDrawer),
+                            AdminHOACandidates(
+                              drawer: onExpandCollapseDrawer,
+                            ),
+                            AdminHOAVoting(
+                              drawer: onExpandCollapseDrawer,
+                            ),
+                            AdminHOAVoters(
+                              drawer: onExpandCollapseDrawer,
+                            ),
+                            AdminSiteSettings(
+                              drawer: onExpandCollapseDrawer,
+                            ),
+                          ],
+                        ),
+                      )
                     ],
-                  ),
-                )
-              ],
-            );
-          },
-        ),
-      ),
+                  );
+                },
+              ),
+            ),
     );
   }
 }
@@ -141,8 +161,10 @@ class MyDrawer extends StatefulWidget {
       {super.key,
       required this.callback,
       required this.selectedPage,
-      required this.isDrawerExpanded});
+      required this.isDrawerExpanded,
+      required this.userModel});
 
+  final UserModel userModel;
   final Function callback;
   final String selectedPage;
   final bool isDrawerExpanded;
@@ -210,7 +232,7 @@ class _MyDrawerState extends State<MyDrawer> {
   Widget build(BuildContext context) {
     return AnimatedContainer(
       color: Colors.grey[300]!.withOpacity(0.3),
-      width: widget.isDrawerExpanded ? 304 : 95,
+      width: widget.isDrawerExpanded ? 254 : 95,
       duration: const Duration(milliseconds: 500),
       curve: Curves.decelerate,
       child: ListView.separated(
@@ -226,12 +248,14 @@ class _MyDrawerState extends State<MyDrawer> {
           if (index == 0) {
             return ListTile(
               minVerticalPadding: 30,
-              leading: const CircleAvatar(
+              leading: CircleAvatar(
                 radius: 25,
-                child: Icon(Icons.person),
+                backgroundImage: widget.userModel.profilePicture != ''
+                    ? NetworkImage(widget.userModel.profilePicture)
+                    : const AssetImage(guestIcon) as ImageProvider,
               ),
-              title: const Text(
-                "User",
+              title: Text(
+                widget.userModel.username,
                 overflow: TextOverflow.ellipsis,
               ),
               onTap: () {

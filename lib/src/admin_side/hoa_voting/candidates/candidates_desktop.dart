@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -183,8 +181,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
           isElectionOngoing = false;
         });
       }
-    } else {
-      print("No Model");
     }
     setState(() {
       isLoading = false;
@@ -204,57 +200,103 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
         ? const Center(
             child: CircularProgressIndicator(),
           )
-        : isElectionOngoing
-            ? const Center(
-                child: Text("Election Ongoing"),
-              )
-            : Container(
-                padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TabHeader(
-                      title: "Candidates List",
-                      callback: () {
-                        widget.drawer();
-                      },
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                    ),
-                    Expanded(
-                      child: DefaultTabController(
-                        length: 4,
-                        child: Builder(
-                          builder: (BuildContext context) => Column(
-                            children: [
-                              Expanded(
-                                child: TabBarView(
-                                  children: [
-                                    hoaAdminTab(context, "PRESIDENT"),
-                                    hoaAdminTab(context, "VICE PRESIDENT"),
-                                    hoaAdminTab(context, "BOARD OF DIRECTORS"),
-                                    hoaAdminTab(context, "VOTING DETAILS"),
-                                  ],
+        : Container(
+            padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TabHeader(
+                  title: "Candidates List",
+                  callback: () {
+                    widget.drawer();
+                  },
+                ),
+                SizedBox(
+                  height: 20.h,
+                ),
+                Expanded(
+                  child: isElectionOngoing
+                      ? const Center(
+                          child: Text("Election Ongoing"),
+                        )
+                      : DefaultTabController(
+                          length: 4,
+                          child: Builder(
+                            builder: (BuildContext context) => Column(
+                              children: [
+                                Expanded(
+                                  child: TabBarView(
+                                    children: [
+                                      hoaAdminTab(context, "PRESIDENT"),
+                                      hoaAdminTab(context, "VICE PRESIDENT"),
+                                      hoaAdminTab(
+                                          context, "BOARD OF DIRECTORS"),
+                                      hoaAdminTab(context, "VOTING DETAILS"),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 15.h,
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Visibility(
-                                    visible: controller(context).index > 0,
-                                    child: ElevatedButton(
+                                SizedBox(
+                                  height: 15.h,
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Visibility(
+                                      visible: controller(context).index > 0,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          TabController ctrl =
+                                              controller(context);
+                                          if (!ctrl.indexIsChanging &&
+                                              (ctrl.index > 0)) {
+                                            ctrl.animateTo(ctrl.index - 1);
+                                            setState(() {});
+                                          }
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              ccHOANextButtonBGColor(context),
+                                          foregroundColor:
+                                              ccHOANextButtonFGColor(context),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                        child: const Text("Back"),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 2.w,
+                                    ),
+                                    ElevatedButton(
                                       onPressed: () {
                                         TabController ctrl =
                                             controller(context);
                                         if (!ctrl.indexIsChanging &&
-                                            (ctrl.index > 0)) {
-                                          ctrl.animateTo(ctrl.index - 1);
+                                            ctrl.index < 3) {
+                                          if (ctrl.index == 0 && isTherePres) {
+                                            ctrl.animateTo(1);
+                                          }
+                                          if (ctrl.index == 1 && isThereVP) {
+                                            ctrl.animateTo(2);
+                                          }
+                                          if (ctrl.index == 2 && isThereBD) {
+                                            ctrl.animateTo(3);
+                                          }
+
                                           setState(() {});
+                                        }
+                                        if (!ctrl.indexIsChanging &&
+                                            ctrl.index == 3) {
+                                          //TODO: save the voted HOA
+
+                                          if (candidateModels != [] &&
+                                              startingDate != '' &&
+                                              endingDate != '') {
+                                            onStartElection();
+                                          }
                                         }
                                       },
                                       style: ElevatedButton.styleFrom(
@@ -267,69 +309,20 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                               BorderRadius.circular(4),
                                         ),
                                       ),
-                                      child: const Text("Back"),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 2.w,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      TabController ctrl = controller(context);
-                                      if (!ctrl.indexIsChanging &&
-                                          ctrl.index < 3) {
-                                        if (ctrl.index == 0 && isTherePres) {
-                                          ctrl.animateTo(1);
-                                        } else {
-                                          print("Choose Pres");
-                                        }
-                                        if (ctrl.index == 1 && isThereVP) {
-                                          ctrl.animateTo(2);
-                                        } else {
-                                          print("Choose VPres");
-                                        }
-                                        if (ctrl.index == 2 && isThereBD) {
-                                          ctrl.animateTo(3);
-                                        } else {
-                                          print("Choose BD");
-                                        }
-
-                                        setState(() {});
-                                      }
-                                      if (!ctrl.indexIsChanging &&
-                                          ctrl.index == 3) {
-                                        //TODO: save the voted HOA
-
-                                        if (candidateModels != [] &&
-                                            startingDate != '' &&
-                                            endingDate != '') {
-                                          onStartElection();
-                                        }
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor:
-                                          ccHOANextButtonBGColor(context),
-                                      foregroundColor:
-                                          ccHOANextButtonFGColor(context),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                    child: Text(controller(context).index < 3
-                                        ? "Next"
-                                        : "Save"),
-                                  )
-                                ],
-                              ),
-                            ],
+                                      child: Text(controller(context).index < 3
+                                          ? "Next"
+                                          : "Save"),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
-              );
+                )
+              ],
+            ),
+          );
   }
 
   Column hoaAdminTab(BuildContext context, String title) {
@@ -645,7 +638,145 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
             height: 5.h,
           ),
           ElevatedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              //TODO: Edit candidate
+              tcFName.text = candidate.firstName;
+              tcLName.text = candidate.lastName;
+              tcAddress.text = candidate.address;
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Dialog(
+                    child: StatefulBuilder(
+                      builder: (BuildContext context, StateSetter mySetState) =>
+                          Container(
+                        padding: const EdgeInsets.all(8.0),
+                        width: 700,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Edit Candidate",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 80,
+                                    backgroundImage: (profileImages[index][1] !=
+                                                null ||
+                                            profileImages[index][2] != null)
+                                        ? profileImage != null ||
+                                                profileImageByte != null
+                                            ? kIsWeb
+                                                ? MemoryImage(
+                                                    profileImageByte!.bytes!)
+                                                : FileImage(profileImage!)
+                                                    as ImageProvider
+                                            : kIsWeb
+                                                ? MemoryImage(
+                                                    profileImages[index][2]!
+                                                        .bytes!)
+                                                : FileImage(profileImages[index]
+                                                    [1]!) as ImageProvider
+                                        : const AssetImage(guestIcon),
+                                  ),
+                                  Positioned(
+                                    bottom: 5,
+                                    right: 8,
+                                    child: CircleAvatar(
+                                      backgroundColor: Colors.grey,
+                                      child: IconButton(
+                                        onPressed: () {
+                                          //update picture
+                                          pickImage(mySetState);
+                                        },
+                                        icon: const Icon(Icons.camera_alt),
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              myTextFormField(tcFName, "First Name"),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              myTextFormField(tcLName, "Last Name"),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              myTextFormField(tcAddress, "Address", 5),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                children: [
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      mySetState(() {
+                                        onClearForm();
+                                      });
+                                    },
+                                    icon: const Icon(Icons.delete_outline),
+                                    label: const Text("Discard"),
+                                  ),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        //update candidateModels specific index
+                                        int candidateIndex = candidateModels
+                                            .indexWhere((element) =>
+                                                element.candidateId ==
+                                                candidate.candidateId);
+
+                                        candidateModels[candidateIndex] =
+                                            CandidateModel(
+                                                candidateId:
+                                                    candidate.candidateId,
+                                                firstName: tcFName.text,
+                                                lastName: tcLName.text,
+                                                profilePicture:
+                                                    candidate.profilePicture,
+                                                address: tcAddress.text,
+                                                position: candidate.position,
+                                                noOfVotes: candidate.noOfVotes);
+
+                                        //update profileImages specific index
+                                        profileImages[index][2] =
+                                            profileImageByte ??
+                                                profileImages[index][2];
+                                        profileImages[index][1] =
+                                            profileImage ??
+                                                profileImages[index][1];
+
+                                        onClearForm();
+                                        setState(() {});
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                    icon: const Icon(Icons.save),
+                                    label: const Text("Update"),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
             icon: const Icon(Icons.edit),
             label: const Text("Edit"),
             style: ElevatedButton.styleFrom(

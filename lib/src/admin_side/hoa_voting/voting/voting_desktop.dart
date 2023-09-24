@@ -1,0 +1,273 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/candidates_model.dart';
+import 'package:neighboard/models/election_model.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/widgets/others/tab_header.dart';
+import 'package:intl/intl.dart';
+
+class VotingDesktop extends StatefulWidget {
+  const VotingDesktop({super.key, required this.drawer});
+
+  final Function drawer;
+
+  @override
+  State<VotingDesktop> createState() => _VotingDesktopState();
+}
+
+class _VotingDesktopState extends State<VotingDesktop> {
+  TabController mycontroller(context) => DefaultTabController.of(context);
+  List<ElectionModel> electionModels = [];
+  List<CandidateModel> candidateModels = [];
+  List<DropdownMenuItem<String>> dropdownItems = [];
+  String? selectedVal;
+
+  bool isLoading = true;
+
+  getAllCandidates(String electionId) async {
+    candidateModels =
+        await CandidatesFunctions.getAllCandidate(electionId) ?? [];
+    candidateModels.sort(((a, b) => b.noOfVotes.compareTo(a.noOfVotes)));
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  getAllElection() async {
+    electionModels = await CandidatesFunctions.getAllElection() ?? [];
+    electionModels.sort((a, b) => b.electionId.compareTo(a.electionId));
+    for (ElectionModel election in electionModels) {
+      String dateText =
+          '${DateFormat.yMMMd().format(DateTime.parse(election.electionStartDate))} - ${DateFormat.yMMMd().format(DateTime.parse(election.electionEndDate))}';
+      var newItem = DropdownMenuItem(
+        value: election.electionId,
+        child: Text(dateText),
+      );
+      dropdownItems.add(newItem);
+      selectedVal = election.electionId;
+      getAllCandidates(election.electionId);
+    }
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAllElection();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return isLoading
+        ? const LoadingScreen()
+        : Container(
+            padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TabHeader(
+                  title: "Voting Analytics",
+                  callback: () {
+                    widget.drawer();
+                  },
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: DropdownButton(
+                      underline: Container(),
+                      hint: const Text("Election History"),
+                      value: selectedVal,
+                      items: dropdownItems,
+                      onChanged: (String? value) {
+                        getAllCandidates(value!);
+                        setState(() {
+                          selectedVal = value;
+                        });
+                      }),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Expanded(
+                  child: candidatesTabs(),
+                ),
+              ],
+            ),
+          );
+  }
+
+  DefaultTabController candidatesTabs() {
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 3,
+      child: Builder(
+        builder: (context) => Column(
+          children: [
+            Expanded(
+              child: TabBarView(
+                children: [
+                  hoaAdminTab(context, "PRESIDENT"),
+                  hoaAdminTab(context, "VICE PRESIDENT"),
+                  hoaAdminTab(context, "BOARD OF DIRECTORS"),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 15.h,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Visibility(
+                  visible: mycontroller(context).index > 0,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      TabController ctrl = mycontroller(context);
+                      if (!ctrl.indexIsChanging && ctrl.index > 0) {
+                        ctrl.animateTo(ctrl.index - 1);
+                        setState(() {});
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ccHOANextButtonBGColor(context),
+                      foregroundColor: ccHOANextButtonFGColor(context),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: const Text("Back"),
+                  ),
+                ),
+                SizedBox(
+                  width: 2.w,
+                ),
+                mycontroller(context).index >= 2
+                    ? Container()
+                    : ElevatedButton(
+                        onPressed: () {
+                          TabController ctrl = mycontroller(context);
+                          if (!ctrl.indexIsChanging && ctrl.index < 2) {
+                            ctrl.animateTo(ctrl.index + 1);
+                            setState(() {});
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ccHOANextButtonBGColor(context),
+                          foregroundColor: ccHOANextButtonFGColor(context),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        child: const Text("Next"))
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Column hoaAdminTab(BuildContext context, String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        hoaTitleBanner(context, title),
+        Expanded(
+          child: GridView.builder(
+            padding: EdgeInsets.only(
+                left: 15.w, right: 15.w, bottom: 15.h, top: 15.h),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 350,
+              childAspectRatio: 350 / 350,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
+            ),
+            itemCount: candidateModels
+                .where((element) => element.position == title)
+                .length,
+            itemBuilder: (context, index) {
+              CandidateModel candidate = candidateModels
+                  .where((element) => element.position == title)
+                  .elementAt(index);
+              return candidatesCard(context, title, candidate);
+            },
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget candidatesCard(
+      BuildContext context, String position, CandidateModel candidate) {
+    return Card(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 25.h,
+          ),
+          Expanded(
+            child: FittedBox(
+              child: candidate.profilePicture == ''
+                  ? const CircleAvatar(
+                      child: Icon(Icons.person),
+                    )
+                  : CircleAvatar(
+                      backgroundImage: NetworkImage(candidate.profilePicture),
+                    ),
+            ),
+          ),
+          SizedBox(
+            height: 5.h,
+          ),
+          Text(
+            "${candidate.firstName} ${candidate.lastName}",
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge!
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          SizedBox(
+            height: 5.h,
+          ),
+          Text(
+            candidate.address,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          SizedBox(
+            height: 5.h,
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(5),
+            color: Theme.of(context).colorScheme.inversePrimary,
+            child: Text(
+              "Votes: ${candidate.noOfVotes}",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(
+            height: 10.h,
+          ),
+        ],
+      ),
+    );
+  }
+}
