@@ -360,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  hidable:
+    dependency: "direct main"
+    description:
+      name: hidable
+      sha256: c6c246c59d0c0f30cb47cf8af8a9856214389a4a67763861b1d9dd0a063f18c6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.5"
   http:
     dependency: transitive
     description:

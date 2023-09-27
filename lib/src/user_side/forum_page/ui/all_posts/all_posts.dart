@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -13,16 +14,19 @@ import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class AllPosts extends StatefulWidget {
   const AllPosts({
     super.key,
     required this.isAdmin,
     required this.category,
+    required this.deviceScreenType,
   });
 
   final bool isAdmin;
   final String category;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<AllPosts> createState() => _AllPostsState();
@@ -86,7 +90,11 @@ class _AllPostsState extends State<AllPosts> {
                         EdgeInsets.symmetric(horizontal: 0.w, vertical: 5.h),
                     child: Column(
                       children: [
-                        SinglePost(post: post, isAdmin: widget.isAdmin),
+                        SinglePost(
+                          post: post,
+                          isAdmin: widget.isAdmin,
+                          deviceScreenType: widget.deviceScreenType,
+                        ),
                       ],
                     ),
                   );
@@ -100,8 +108,9 @@ class SinglePost extends StatefulWidget {
     super.key,
     required this.post,
     required this.isAdmin,
+    required this.deviceScreenType,
   });
-
+  final DeviceScreenType deviceScreenType;
   final PostModel post;
   final bool isAdmin;
 
@@ -139,61 +148,55 @@ class _SinglePostState extends State<SinglePost> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          onOpenPost();
-          showDialog(
-            context: context,
-            builder: (BuildContext context) =>
-                PostModal(postModel: widget.post),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  SmallProfilePic(profilePic: widget.post.profilePicture),
-                  const SizedBox(
-                    width: 10,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SmallProfilePic(profilePic: widget.post.profilePicture),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      AuthorNameText(authorName: widget.post.authorName),
+                      PostTimeText(time: widget.post.timeStamp)
+                    ],
                   ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        AuthorNameText(authorName: widget.post.authorName),
-                        PostTimeText(time: widget.post.timeStamp)
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_vert),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              PostTitleText(title: widget.post.title),
-              const SizedBox(
-                height: 5,
-              ),
-              PostContentText(
-                content: widget.post.content,
-                maxLine: 1,
-                textOverflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ActionBarPosts(post: widget.post, isAdmin: widget.isAdmin)
-            ],
-          ),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.more_vert),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            PostTitleText(title: widget.post.title),
+            const SizedBox(
+              height: 5,
+            ),
+            PostContentText(
+              content: widget.post.content,
+              maxLine: 1,
+              textOverflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ActionBarPosts(
+              post: widget.post,
+              isAdmin: widget.isAdmin,
+              onOpenPost: onOpenPost,
+              deviceScreenType: widget.deviceScreenType,
+            )
+          ],
         ),
       ),
     );
@@ -205,10 +208,14 @@ class ActionBarPosts extends StatefulWidget {
     super.key,
     required this.post,
     required this.isAdmin,
+    required this.deviceScreenType,
+    required this.onOpenPost,
   });
 
   final PostModel post;
   final bool isAdmin;
+  final Function onOpenPost;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<ActionBarPosts> createState() => _ActionBarPostsState();
@@ -238,7 +245,28 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
           width: 20,
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            widget.onOpenPost();
+            widget.deviceScreenType != DeviceScreenType.mobile
+                ? showDialog(
+                    context: context,
+                    builder: (BuildContext context) => Dialog(
+                        child: PostModal(
+                      postModel: widget.post,
+                      deviceScreenType: widget.deviceScreenType,
+                    )),
+                  )
+                : showModalBottomSheet(
+                    useSafeArea: true,
+                    useRootNavigator: true,
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => PostModal(
+                      postModel: widget.post,
+                      deviceScreenType: widget.deviceScreenType,
+                    ),
+                  );
+          },
           icon: const Icon(Icons.mode_comment_outlined),
         ),
         Text('${widget.post.noOfComments}'),

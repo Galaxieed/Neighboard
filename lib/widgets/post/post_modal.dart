@@ -1,21 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
+import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
 import 'package:neighboard/widgets/post/post_modal_comment.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class PostModal extends StatefulWidget {
-  const PostModal({super.key, required this.postModel});
+  const PostModal(
+      {super.key, required this.postModel, required this.deviceScreenType});
 
   final PostModel postModel;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<PostModal> createState() => _PostModalState();
@@ -30,6 +35,7 @@ class _PostModalState extends State<PostModal> {
   bool isUpvoted = false;
   bool isLoading = true;
   bool isLoggedIn = false;
+  String? respondType, cmntId, recipientId, recipientName;
 
   void getCurrentUser() async {
     currentUser = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
@@ -37,6 +43,14 @@ class _PostModalState extends State<PostModal> {
 
   void addComment() async {
     if (_ctrlComment.text.isNotEmpty) {
+      //for reply in mobile layout
+      if (respondType != null && respondType == "REPLY") {
+        addReplyMobile();
+        _ctrlComment.clear();
+        respondType = '';
+        FocusManager.instance.primaryFocus?.unfocus();
+        return;
+      }
       setState(() {
         isLoading = true;
       });
@@ -67,17 +81,6 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
-  // Future<void> getAllComments() async {
-  //   commentModels =
-  //       await CommentFunction.getAllComments(postId: widget.postModel.postId) ??
-  //           [];
-  //   commentModels.sort((a, b) => b.commentId.compareTo(a.commentId));
-  //   if (mounted) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
   Future<void> timer() async {
     await Future.delayed(const Duration(milliseconds: 750), () {
       if (commentModels != []) {
@@ -114,6 +117,47 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
+  onTypeReply({
+    required String recipientName,
+    required String recipientId,
+    required String response,
+    required String commentId,
+  }) {
+    if (widget.deviceScreenType == DeviceScreenType.mobile) {
+      _ctrlComment.text = "$recipientName ";
+      focusComment.requestFocus();
+      respondType = response;
+      cmntId = commentId;
+      this.recipientId = recipientId;
+      this.recipientName = recipientName;
+    }
+  }
+
+  addReplyMobile() async {
+    ReplyModel newReply = ReplyModel(
+      replyId: DateTime.now().toIso8601String(),
+      senderId: currentUser!.userId,
+      senderName: currentUser!.username,
+      recipientId: recipientId!,
+      recipientName: recipientName!,
+      replyMessage: _ctrlComment.text,
+    );
+    await CommentFunction.postReply(
+      postId: widget.postModel.postId,
+      commentId: cmntId!,
+      replyModel: newReply,
+    );
+  }
+
+  addReplyCallback(
+      {required ReplyModel reply, required String commentId}) async {
+    await CommentFunction.postReply(
+      postId: widget.postModel.postId,
+      commentId: commentId,
+      replyModel: reply,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,113 +182,124 @@ class _PostModalState extends State<PostModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      elevation: 4,
-      child: SizedBox(
-        width: 720,
-        child: isLoading
-            ? const LoadingScreen()
-            : Scaffold(
-                appBar: AppBar(
-                  title: Text(
-                    "${widget.postModel.authorName}'s Post",
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  centerTitle: true,
-                ),
-                bottomNavigationBar: isLoggedIn
-                    ? ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: currentUser!.profilePicture != ""
-                              ? NetworkImage(currentUser!.profilePicture)
-                              : null,
-                        ),
-                        title: Card(
-                          child: TextField(
-                            controller: _ctrlComment,
-                            focusNode: focusComment,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: "Write a public comment...",
-                            ),
-                          ),
-                        ),
-                        trailing: IconButton(
-                          onPressed: () {
-                            addComment();
-                          },
-                          icon: const Icon(Icons.send_outlined),
-                        ),
-                      )
+    return kIsWeb
+        ? SizedBox(
+            width: 720,
+            child: isLoading ? const LoadingScreen() : thisPost(context),
+          )
+        : Container(
+            width: 720,
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: isLoading ? const LoadingScreen() : thisPost(context),
+          );
+  }
+
+  Widget thisPost(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: Text(
+          "${widget.postModel.authorName}'s Post",
+          style: Theme.of(context)
+              .textTheme
+              .titleMedium!
+              .copyWith(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+      ),
+      bottomNavigationBar: isLoggedIn
+          ? ListTile(
+              leading: CircleAvatar(
+                backgroundImage: currentUser!.profilePicture != ""
+                    ? NetworkImage(currentUser!.profilePicture)
                     : null,
-                body: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        postDetails(context),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          widget.postModel.title,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(widget.postModel.content),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        const Divider(),
-                        isLoggedIn
-                            ? postActions()
-                            : const Center(child: Text("Login First")),
-                        const Divider(),
-                        //postComments(),
-                        StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection("posts")
-                              .doc(widget.postModel.postId)
-                              .collection("comments")
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            } else {
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: snapshot.data!.docs.length,
-                                itemBuilder: (context, index) {
-                                  final result = snapshot.data!;
-                                  commentModels = result.docs
-                                      .map((e) =>
-                                          CommentModel.fromJson(e.data()))
-                                      .toList();
-                                  CommentModel comment = commentModels[index];
-                                  return PostModalComment(
-                                    currentUser: currentUser,
-                                    postModel: widget.postModel,
-                                    commentModel: comment,
-                                    isLoggedIn: isLoggedIn,
-                                  );
-                                },
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+              ),
+              title: Card(
+                child: TextField(
+                  controller: _ctrlComment,
+                  focusNode: focusComment,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Write a public comment...",
                   ),
                 ),
               ),
+              trailing: IconButton(
+                onPressed: () {
+                  addComment();
+                },
+                icon: const Icon(Icons.send_outlined),
+              ),
+            )
+          : null,
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              postDetails(context),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                widget.postModel.title,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              Text(widget.postModel.content),
+              const SizedBox(
+                width: 10,
+              ),
+              const Divider(),
+              isLoggedIn
+                  ? postActions()
+                  : const Center(child: Text("Login First")),
+              const Divider(),
+              //postComments(),
+              StreamBuilder(
+                stream: FirebaseFirestore.instance
+                    .collection("posts")
+                    .doc(widget.postModel.postId)
+                    .collection("comments")
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else {
+                    return ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: snapshot.data!.docs.length,
+                      itemBuilder: (context, index) {
+                        final result = snapshot.data!;
+                        commentModels = result.docs
+                            .map((e) => CommentModel.fromJson(e.data()))
+                            .toList();
+                        CommentModel comment = commentModels[index];
+
+                        //TODO: Create a callback that will get the input from this to the comment box
+                        return PostModalComment(
+                          currentUser: currentUser,
+                          postModel: widget.postModel,
+                          commentModel: comment,
+                          isLoggedIn: isLoggedIn,
+                          addReplyFunc: addReplyCallback,
+                          onTypeReply: onTypeReply,
+                          deviceScreenType: widget.deviceScreenType,
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

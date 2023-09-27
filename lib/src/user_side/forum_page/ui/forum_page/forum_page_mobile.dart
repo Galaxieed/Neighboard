@@ -11,9 +11,11 @@ import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/search_page/search_ui.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
+import 'package:hidable/hidable.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ForumPageMobile extends StatefulWidget {
@@ -27,16 +29,28 @@ class ForumPageMobile extends StatefulWidget {
 
 class _ForumPageMobileState extends State<ForumPageMobile>
     with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String searchedText = "";
   late TabController _tabController;
   UserModel? userModel;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final scrollController = ScrollController();
 
   void getCurrentUserDetails() async {
     userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
     if (mounted) {
       setState(() {});
     }
+  }
+
+  void _openChat() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return const MyChat();
+      },
+    );
   }
 
   @override
@@ -57,19 +71,27 @@ class _ForumPageMobileState extends State<ForumPageMobile>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text("NEIGHBOARD"),
-        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () async {
               await showSearch(
                 context: context,
-                delegate: SearchScreenUI(),
+                delegate: SearchScreenUI(widget.screenType),
               );
             },
             icon: const Icon(Icons.search),
             tooltip: "Search Post Title",
+          ),
+          IconButton(
+            onPressed: () {
+              _openChat();
+            },
+            icon: const Icon(Icons.chat_outlined),
+            tooltip: "Global Chat",
           ),
           NavBarCircularImageDropDownButton(
             callback: Routes().navigate,
@@ -119,10 +141,13 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                   Categories(
                     category: searchedText,
                     isAdmin: false,
+                    scrollController: scrollController,
+                    deviceScreenType: widget.screenType,
                   ),
                   AllPosts(
                     category: searchedText,
                     isAdmin: false,
+                    deviceScreenType: widget.screenType,
                   ),
                   MyPosts(search: searchedText),
                   NewPost(

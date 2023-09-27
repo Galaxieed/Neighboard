@@ -13,15 +13,16 @@ class PostTagChip extends StatelessWidget {
     return ActionChip(
       avatar: CircleAvatar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
-        child: Text(tag.substring(0,1)),
+        child: Text(tag.substring(0, 1)),
       ),
-      label: Text(tag,
-        style: Theme.of(context).textTheme.labelSmall,),
+      label: Text(
+        tag,
+        overflow: TextOverflow.ellipsis,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
       backgroundColor: Theme.of(context).disabledColor,
       side: BorderSide.none,
-      onPressed: (){
-
-      },
+      onPressed: () {},
     );
   }
 }

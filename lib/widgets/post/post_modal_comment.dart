@@ -7,6 +7,7 @@ import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class PostModalComment extends StatefulWidget {
   const PostModalComment({
@@ -15,12 +16,23 @@ class PostModalComment extends StatefulWidget {
     required this.commentModel,
     required this.postModel,
     required this.isLoggedIn,
+    required this.addReplyFunc,
+    required this.onTypeReply,
+    required this.deviceScreenType,
   });
 
   final UserModel? currentUser;
   final PostModel postModel;
   final CommentModel commentModel;
   final bool isLoggedIn;
+  final DeviceScreenType deviceScreenType;
+  final Function(
+      {required String recipientId,
+      required String recipientName,
+      required String response,
+      required String commentId}) onTypeReply;
+  final Function({required String commentId, required ReplyModel reply})
+      addReplyFunc;
 
   @override
   State<PostModalComment> createState() => _PostModalCommentState();
@@ -108,7 +120,14 @@ class _PostModalCommentState extends State<PostModalComment> {
     }
   }
 
-  void showAllReplies() {
+  void showAllReplies(recipientId, recipientName) {
+    if (widget.deviceScreenType == DeviceScreenType.mobile) {
+      widget.onTypeReply(
+          recipientId: recipientId,
+          recipientName: recipientName,
+          response: "REPLY",
+          commentId: widget.commentModel.commentId);
+    }
     setState(() {
       isRepliesShown = !isRepliesShown;
     });
@@ -122,11 +141,18 @@ class _PostModalCommentState extends State<PostModalComment> {
   }
 
   addReplyCallback({required ReplyModel reply}) async {
-    await CommentFunction.postReply(
-      postId: widget.postModel.postId,
-      commentId: widget.commentModel.commentId,
-      replyModel: reply,
-    );
+    widget.addReplyFunc(reply: reply, commentId: widget.commentModel.commentId);
+  }
+
+  onTypeReply(
+      {required String recipientId,
+      required String recipientName,
+      required String response}) async {
+    widget.onTypeReply(
+        recipientId: recipientId,
+        recipientName: recipientName,
+        response: response,
+        commentId: widget.commentModel.commentId);
   }
 
   @override
@@ -225,7 +251,8 @@ class _PostModalCommentState extends State<PostModalComment> {
                                 const Spacer(),
                                 TextButton.icon(
                                   onPressed: () {
-                                    showAllReplies();
+                                    showAllReplies(widget.commentModel.senderId,
+                                        widget.commentModel.senderName);
                                   },
                                   icon: const Icon(Icons.reply),
                                   label: Text("Reply (${replyModels.length})"),
@@ -239,12 +266,13 @@ class _PostModalCommentState extends State<PostModalComment> {
               isRepliesShown
                   ? Column(
                       children: [
-                        ReplyTextBox(
-                          currentUser: widget.currentUser!,
-                          recipientName: widget.commentModel.senderName,
-                          recipientId: widget.commentModel.senderId,
-                          addReply: addReplyCallback,
-                        ),
+                        if (widget.deviceScreenType != DeviceScreenType.mobile)
+                          ReplyTextBox(
+                            currentUser: widget.currentUser!,
+                            recipientName: widget.commentModel.senderName,
+                            recipientId: widget.commentModel.senderId,
+                            addReply: addReplyCallback,
+                          ),
                         commentReplies(),
                       ],
                     )
@@ -273,11 +301,12 @@ class _PostModalCommentState extends State<PostModalComment> {
           return const Center(child: CircularProgressIndicator());
         } else {
           return ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
+                return const LinearProgressIndicator();
               } else if (snapshot.connectionState == ConnectionState.active ||
                   snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
@@ -293,6 +322,8 @@ class _PostModalCommentState extends State<PostModalComment> {
                     currentUser: widget.currentUser!,
                     isLoggedIn: widget.isLoggedIn,
                     addReply: addReplyCallback,
+                    onTypeReply: onTypeReply,
+                    deviceScreenType: widget.deviceScreenType,
                   );
                 } else {
                   return const Text('Empty data');
@@ -315,11 +346,17 @@ class ReplyItself extends StatefulWidget {
     required this.currentUser,
     required this.isLoggedIn,
     required this.addReply,
+    required this.onTypeReply,
+    required this.deviceScreenType,
   });
-
+  final DeviceScreenType deviceScreenType;
   final ReplyModel replyModel;
   final UserModel currentUser;
   final bool isLoggedIn;
+  final Function(
+      {required String recipientId,
+      required String recipientName,
+      required String response}) onTypeReply;
   final Function({required ReplyModel reply}) addReply;
 
   @override
@@ -329,7 +366,11 @@ class ReplyItself extends StatefulWidget {
 class _ReplyItselfState extends State<ReplyItself> {
   bool isReplyBoxShown = false;
 
-  void showReplyBox() {
+  void showReplyBox(recipientId, recipientName) {
+    widget.onTypeReply(
+        recipientId: recipientId,
+        recipientName: recipientName,
+        response: "REPLY");
     setState(() {
       isReplyBoxShown = !isReplyBoxShown;
     });
@@ -380,7 +421,8 @@ class _ReplyItselfState extends State<ReplyItself> {
                           )),
                           TextButton.icon(
                             onPressed: () {
-                              showReplyBox();
+                              showReplyBox(widget.replyModel.senderId,
+                                  widget.replyModel.senderName);
                             },
                             icon: const Icon(Icons.reply_outlined),
                             label: const Text('Reply'),
@@ -391,16 +433,17 @@ class _ReplyItselfState extends State<ReplyItself> {
             ),
           ),
         ),
-        widget.isLoggedIn
-            ? isReplyBoxShown
-                ? ReplyTextBox(
-                    currentUser: widget.currentUser,
-                    recipientName: widget.replyModel.senderName,
-                    recipientId: widget.replyModel.senderId,
-                    addReply: widget.addReply,
-                  )
-                : Container()
-            : Container(),
+        if (widget.deviceScreenType != DeviceScreenType.mobile)
+          widget.isLoggedIn
+              ? isReplyBoxShown
+                  ? ReplyTextBox(
+                      currentUser: widget.currentUser,
+                      recipientName: widget.replyModel.senderName,
+                      recipientId: widget.replyModel.senderId,
+                      addReply: widget.addReply,
+                    )
+                  : Container()
+              : Container(),
       ],
     );
   }

@@ -322,6 +322,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                               child: CircularProgressIndicator());
                         } else {
                           return ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             itemCount: snapshot.data!.docs.length,
                             itemBuilder: (context, index) {
@@ -383,6 +384,7 @@ class CommentBox extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     clearComment();
+                    FocusManager.instance.primaryFocus?.unfocus();
                   },
                   icon: const Icon(Icons.cancel_outlined),
                   label: const Text('Cancel'),
@@ -393,6 +395,7 @@ class CommentBox extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     addComment();
+                    FocusManager.instance.primaryFocus?.unfocus();
                   },
                   icon: const Icon(Icons.mode_comment_outlined),
                   label: const Text('Comment'),
@@ -504,13 +507,14 @@ class ActionBarMyPost extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Wrap(
-          spacing: 16,
-          children: [
-            for (String tag in post.tags) PostTagChip(tag: tag),
-          ],
+        Expanded(
+          child: Wrap(
+            spacing: 16,
+            children: [
+              for (String tag in post.tags) PostTagChip(tag: tag),
+            ],
+          ),
         ),
-        const Spacer(),
         ElevatedButton.icon(
           onPressed: () {
             upVote(postId: post.postId);

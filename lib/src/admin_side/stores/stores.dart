@@ -18,6 +18,7 @@ class AdminStores extends StatelessWidget {
       } else {
         return const StoresMobile(
           deviceScreenType: DeviceScreenType.mobile,
+          isAdmin: true,
         );
       }
     });

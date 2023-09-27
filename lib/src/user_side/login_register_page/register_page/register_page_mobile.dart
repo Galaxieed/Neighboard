@@ -43,6 +43,24 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
           ),
         );
       } else {
+        // ignore: use_build_context_synchronously
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Neighboard Says..'),
+              content: Text(registerResult!),
+              actions: <Widget>[
+                ElevatedButton(
+                  child: const Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
         // something went wrong
       }
 

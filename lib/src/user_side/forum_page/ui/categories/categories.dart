@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -14,13 +15,20 @@ import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class Categories extends StatefulWidget {
-  const Categories({Key? key, required this.category, required this.isAdmin})
+  const Categories(
+      {Key? key,
+      required this.category,
+      required this.isAdmin,
+      this.scrollController,
+      required this.deviceScreenType})
       : super(key: key);
   final String category;
   final bool isAdmin;
-
+  final ScrollController? scrollController;
+  final DeviceScreenType deviceScreenType;
   @override
   State<Categories> createState() => _CategoriesState();
 }
@@ -110,6 +118,7 @@ class _CategoriesState extends State<Categories> {
                 child: Text("No Posts"),
               )
             : ListView.builder(
+                controller: widget.scrollController,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
@@ -123,6 +132,7 @@ class _CategoriesState extends State<Categories> {
                           isAdmin: widget.isAdmin,
                           denyPost: _denyPost,
                           approvePost: _approvePost,
+                          deviceScreenType: widget.deviceScreenType,
                         ),
                       ],
                     ),
@@ -139,8 +149,9 @@ class SinglePost extends StatefulWidget {
     required this.isAdmin,
     required this.approvePost,
     required this.denyPost,
+    required this.deviceScreenType,
   });
-
+  final DeviceScreenType deviceScreenType;
   final PostModel post;
   final bool isAdmin;
   final Function denyPost, approvePost;
@@ -179,63 +190,53 @@ class _SinglePostState extends State<SinglePost> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(10),
-        onTap: () {
-          onOpenPost();
-          showDialog(
-            context: context,
-            builder: (BuildContext context) =>
-                PostModal(postModel: widget.post),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  SmallProfilePic(profilePic: widget.post.profilePicture),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      AuthorNameText(authorName: widget.post.authorName),
-                      PostTimeText(time: widget.post.timeStamp)
-                    ],
-                  )),
-                  IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.more_vert)),
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              PostTitleText(title: widget.post.title),
-              const SizedBox(
-                height: 5,
-              ),
-              PostContentText(
-                content: widget.post.content,
-                maxLine: 1,
-                textOverflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ActionBarPosts(
-                post: widget.post,
-                isAdmin: widget.isAdmin,
-                denyPost: widget.denyPost,
-                approvePost: widget.approvePost,
-              )
-            ],
-          ),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                SmallProfilePic(profilePic: widget.post.profilePicture),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    AuthorNameText(authorName: widget.post.authorName),
+                    PostTimeText(time: widget.post.timeStamp)
+                  ],
+                )),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            PostTitleText(title: widget.post.title),
+            const SizedBox(
+              height: 5,
+            ),
+            PostContentText(
+              content: widget.post.content,
+              maxLine: 1,
+              textOverflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ActionBarPosts(
+              post: widget.post,
+              isAdmin: widget.isAdmin,
+              denyPost: widget.denyPost,
+              approvePost: widget.approvePost,
+              onOpenPost: onOpenPost,
+              deviceScreenType: widget.deviceScreenType,
+            )
+          ],
         ),
       ),
     );
@@ -249,8 +250,11 @@ class ActionBarPosts extends StatefulWidget {
     required this.isAdmin,
     required this.approvePost,
     required this.denyPost,
+    required this.onOpenPost,
+    required this.deviceScreenType,
   });
-
+  final DeviceScreenType deviceScreenType;
+  final Function onOpenPost;
   final PostModel post;
   final bool isAdmin;
   final Function denyPost, approvePost;
@@ -320,7 +324,28 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
                 width: 20,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  widget.onOpenPost();
+                  widget.deviceScreenType != DeviceScreenType.mobile
+                      ? showDialog(
+                          context: context,
+                          builder: (BuildContext context) => Dialog(
+                              child: PostModal(
+                            postModel: widget.post,
+                            deviceScreenType: widget.deviceScreenType,
+                          )),
+                        )
+                      : showModalBottomSheet(
+                          useSafeArea: true,
+                          useRootNavigator: true,
+                          isScrollControlled: true,
+                          context: context,
+                          builder: (context) => PostModal(
+                            postModel: widget.post,
+                            deviceScreenType: widget.deviceScreenType,
+                          ),
+                        );
+                },
                 icon: const Icon(Icons.mode_comment_outlined),
               ),
               Text('${widget.post.noOfComments}'),

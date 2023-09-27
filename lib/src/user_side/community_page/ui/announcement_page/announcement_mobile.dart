@@ -4,6 +4,7 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
+import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -28,8 +29,6 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
     _mainAnnouncementWidget();
     if (mounted) {
       setState(() {
-        announcementModels.sort((a, b) =>
-            b.datePosted.toString().compareTo(a.datePosted.toString()));
         isLoading = false;
       });
     }
@@ -85,6 +84,14 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
       ),
     ),
   ];
+  void _openChat() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return const MyChat();
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -97,7 +104,6 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Announcements"),
-        centerTitle: true,
         actions: [
           PopupMenuButton(
             position: PopupMenuPosition.under,
@@ -107,6 +113,13 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
               sortAnnouncement(value);
             },
             itemBuilder: (BuildContext context) => _popUpMenuItem,
+          ),
+          IconButton(
+            onPressed: () {
+              _openChat();
+            },
+            icon: const Icon(Icons.chat_outlined),
+            tooltip: "Global Chat",
           ),
           NavBarCircularImageDropDownButton(
             callback: Routes().navigate,
@@ -223,7 +236,74 @@ class MainAnnouncement extends StatelessWidget {
                 ),
         ),
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+            showModalBottomSheet(
+              showDragHandle: true,
+              useSafeArea: true,
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                return SingleChildScrollView(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            width: 600,
+                            height: 300,
+                            decoration: announcementModel.image == ""
+                                ? BoxDecoration(
+                                    image: const DecorationImage(
+                                      image: AssetImage(noImage),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5))
+                                : BoxDecoration(
+                                    image: DecorationImage(
+                                      image:
+                                          NetworkImage(announcementModel.image),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    borderRadius: BorderRadius.circular(5)),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Flexible(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                announcementModel.title,
+                                style: Theme.of(context).textTheme.titleLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                "${announcementModel.datePosted}\n${announcementModel.details}",
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
           child: Container(
             decoration: BoxDecoration(
               color: ccMainAnnouncementBannerColor(context),
@@ -288,7 +368,80 @@ class OtherAnnouncement extends StatelessWidget {
                 height: MediaQuery.of(context).size.height * .20,
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  showModalBottomSheet(
+                    showDragHandle: true,
+                    useSafeArea: true,
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SingleChildScrollView(
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Container(
+                                  width: 600,
+                                  height: 300,
+                                  decoration: announcementModel.image == ""
+                                      ? BoxDecoration(
+                                          image: const DecorationImage(
+                                            image: AssetImage(noImage),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5))
+                                      : BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                                announcementModel.image),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(5)),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              Flexible(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      announcementModel.title,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      "${announcementModel.datePosted}\n${announcementModel.details}",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: ccOtherAnnouncementBannerColor(context),

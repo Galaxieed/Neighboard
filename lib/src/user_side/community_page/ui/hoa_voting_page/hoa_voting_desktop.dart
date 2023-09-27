@@ -236,8 +236,6 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     );
   }
 
-  //TODO: save the voted hoa. collect all then save.
-  //update the no of votes of voted candidate
   DefaultTabController gridOfCandidates() {
     return DefaultTabController(
       initialIndex: 0,

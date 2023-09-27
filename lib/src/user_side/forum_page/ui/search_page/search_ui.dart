@@ -1,9 +1,31 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/search_page/search_function.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
+import 'package:neighboard/widgets/post/post_modal.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class SearchScreenUI extends SearchDelegate {
   List<PostModel> postModels = [];
+  bool isAlreadyViewed = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  SearchScreenUI(this.screenType);
+  final DeviceScreenType screenType;
+
+  void checkIfAlreadyViewed(postId) async {
+    isAlreadyViewed =
+        await PostInteractorsFunctions.isAlreadyViewed(postId: postId);
+  }
+
+  void onOpenPost(postId) async {
+    if (!isAlreadyViewed && _auth.currentUser != null) {
+      isAlreadyViewed = true;
+      await PostInteractorsFunctions.onViewPost(postId, true);
+    }
+  }
+
   void searchPost() async {
     query.isEmpty
         ? postModels.clear()
@@ -34,7 +56,29 @@ class SearchScreenUI extends SearchDelegate {
       itemCount: postModels.length,
       itemBuilder: (context, index) {
         return ListTile(
-          onTap: () {},
+          onTap: () {
+            checkIfAlreadyViewed(postModels[index].postId);
+            onOpenPost(postModels[index].postId);
+            screenType != DeviceScreenType.mobile
+                ? showDialog(
+                    context: context,
+                    builder: (BuildContext context) => Dialog(
+                        child: PostModal(
+                      postModel: postModels[index],
+                      deviceScreenType: screenType,
+                    )),
+                  )
+                : showModalBottomSheet(
+                    useSafeArea: true,
+                    useRootNavigator: true,
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => PostModal(
+                      postModel: postModels[index],
+                      deviceScreenType: screenType,
+                    ),
+                  );
+          },
           leading: CircleAvatar(
             backgroundImage: NetworkImage(postModels[index].profilePicture),
           ),
@@ -58,7 +102,29 @@ class SearchScreenUI extends SearchDelegate {
       itemCount: postModels.length,
       itemBuilder: (context, index) {
         return ListTile(
-          onTap: () {},
+          onTap: () {
+            checkIfAlreadyViewed(postModels[index].postId);
+            onOpenPost(postModels[index].postId);
+            screenType != DeviceScreenType.mobile
+                ? showDialog(
+                    context: context,
+                    builder: (BuildContext context) => Dialog(
+                        child: PostModal(
+                      postModel: postModels[index],
+                      deviceScreenType: screenType,
+                    )),
+                  )
+                : showModalBottomSheet(
+                    useSafeArea: true,
+                    useRootNavigator: true,
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => PostModal(
+                      postModel: postModels[index],
+                      deviceScreenType: screenType,
+                    ),
+                  );
+          },
           leading: CircleAvatar(
             backgroundImage: NetworkImage(postModels[index].profilePicture),
           ),

@@ -57,6 +57,7 @@ dependencies:
   geocoding: ^2.1.0
   geocode: ^1.0.3
   latlong2: 
+  hidable: ^1.0.5
 
 dev_dependencies:
   flutter_test:

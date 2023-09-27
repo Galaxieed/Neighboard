@@ -6,6 +6,7 @@ import 'package:neighboard/models/chatmessage_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat_function.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class MyChat extends StatefulWidget {
   const MyChat({super.key});
@@ -72,7 +73,11 @@ class _MyChatState extends State<MyChat> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.only(
+          top: 12,
+          left: 12,
+          right: 12,
+          bottom: MediaQuery.of(context).viewInsets.bottom),
       child: isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -114,23 +119,26 @@ class _MyChatState extends State<MyChat> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                      flex: 2,
+                                      flex: 3,
                                       child:
                                           Text(chat.timestamp.split('| ')[1]),
                                     ),
                                     Expanded(
-                                      flex: 2,
-                                      child: Text(chat.senderName,
-                                          textAlign: TextAlign.end,
-                                          style: TextStyle(
-                                            color: chat.senderId ==
-                                                    currentUser!.userId
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .primary
-                                                : null,
-                                            fontWeight: FontWeight.bold,
-                                          )),
+                                      flex: 4,
+                                      child: Text(
+                                        chat.senderName,
+                                        textAlign: TextAlign.end,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: chat.senderId ==
+                                                  currentUser!.userId
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
+                                              : null,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(
                                       width: 10,
@@ -146,18 +154,6 @@ class _MyChatState extends State<MyChat> {
                           }
                         },
                       ),
-                      // child: ListView.builder(
-                      //   shrinkWrap: true,
-                      //   itemCount: 10,
-                      //   itemBuilder: (context, index) {
-                      //     return const ListTile(
-                      //       leading: CircleAvatar(),
-                      //       title: Text("Sample Message"),
-                      //       isThreeLine: true,
-                      //       subtitle: Text("Subtitle"),
-                      //     );
-                      //   },
-                      // ),
                     ),
                     TextField(
                       autofocus: true,

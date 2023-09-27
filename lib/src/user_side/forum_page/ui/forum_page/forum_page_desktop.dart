@@ -140,10 +140,14 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                     Categories(
                                       category: searchedText,
                                       isAdmin: false,
+                                      deviceScreenType:
+                                          DeviceScreenType.desktop,
                                     ),
                                     AllPosts(
                                       category: searchedText,
                                       isAdmin: false,
+                                      deviceScreenType:
+                                          DeviceScreenType.desktop,
                                     ),
                                     MyPosts(search: searchedText),
                                     const NewPost(

@@ -71,10 +71,12 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                           Categories(
                             category: searchedText,
                             isAdmin: true,
+                            deviceScreenType: DeviceScreenType.desktop,
                           ),
                           AllPosts(
                             category: searchedText,
                             isAdmin: true,
+                            deviceScreenType: DeviceScreenType.desktop,
                           ),
                           MyPosts(search: searchedText),
                           const NewPost(

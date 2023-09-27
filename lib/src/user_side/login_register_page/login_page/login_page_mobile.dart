@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/src/admin_side/admin_side.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
@@ -31,14 +32,23 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
       isLoading = true;
     });
     loginResult = await LoginFunction.login(email.text.trim(), password.text);
-    bool isLoginSuccessful = loginResult == "true";
+    bool isUser = loginResult == "USER";
+    bool isAdmin = loginResult == "ADMIN";
 
-    if (isLoginSuccessful) {
+    if (isUser) {
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const ForumPage(),
+        ),
+      );
+    } else if (isAdmin) {
+      // ignore: use_build_context_synchronously
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AdminSide(),
         ),
       );
     } else {

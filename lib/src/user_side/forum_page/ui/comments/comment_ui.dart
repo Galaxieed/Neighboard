@@ -299,6 +299,7 @@ class _RepliesContainerState extends State<RepliesContainer> {
                 return const Center(child: CircularProgressIndicator());
               } else {
                 return ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {

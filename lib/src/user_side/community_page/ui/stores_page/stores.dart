@@ -19,6 +19,7 @@ class StoresPage extends StatelessWidget {
       } else {
         return const StoresMobile(
           deviceScreenType: DeviceScreenType.mobile,
+          isAdmin: false,
         );
       }
     });
