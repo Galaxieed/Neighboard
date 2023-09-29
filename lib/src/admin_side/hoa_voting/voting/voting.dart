@@ -13,15 +13,13 @@ class AdminHOAVoting extends StatelessWidget {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
         return VotingDesktop(
-          drawer: drawer,
-        );
+            drawer: drawer, deviceScreenType: DeviceScreenType.desktop);
       } else if (sizingInformation.deviceScreenType ==
           DeviceScreenType.tablet) {
         return const Placeholder();
       } else {
-        return const VotingMobile(
-          deviceScreenType: DeviceScreenType.mobile,
-        );
+        return VotingDesktop(
+            drawer: drawer, deviceScreenType: DeviceScreenType.mobile);
       }
     });
   }

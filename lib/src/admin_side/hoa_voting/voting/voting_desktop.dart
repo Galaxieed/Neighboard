@@ -7,11 +7,14 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_builder/src/device_screen_type.dart';
 
 class VotingDesktop extends StatefulWidget {
-  const VotingDesktop({super.key, required this.drawer});
+  const VotingDesktop(
+      {super.key, required this.drawer, required this.deviceScreenType});
 
   final Function drawer;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<VotingDesktop> createState() => _VotingDesktopState();
@@ -71,19 +74,25 @@ class _VotingDesktopState extends State<VotingDesktop> {
     return isLoading
         ? const LoadingScreen()
         : Container(
-            padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+            padding: EdgeInsets.symmetric(
+                vertical: widget.deviceScreenType == DeviceScreenType.desktop
+                    ? 30.h
+                    : 15.h,
+                horizontal: 15.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TabHeader(
-                  title: "Voting Analytics",
-                  callback: () {
-                    widget.drawer();
-                  },
-                ),
-                SizedBox(
-                  height: 10.h,
-                ),
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  TabHeader(
+                    title: "Voting Analytics",
+                    callback: () {
+                      widget.drawer();
+                    },
+                  ),
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  SizedBox(
+                    height: 10.h,
+                  ),
                 Align(
                   alignment: Alignment.topRight,
                   child: DropdownButton(

@@ -152,25 +152,27 @@ class _StoresMobileState extends State<StoresMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Stores"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              _openChat();
-            },
-            icon: const Icon(Icons.chat_outlined),
-            tooltip: "Global Chat",
-          ),
-          NavBarCircularImageDropDownButton(
-            callback: Routes().navigate,
-            isAdmin: false,
-          ),
-          SizedBox(
-            width: 2.5.w,
-          )
-        ],
-      ),
+      appBar: widget.isAdmin
+          ? null
+          : AppBar(
+              title: const Text("Stores"),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    _openChat();
+                  },
+                  icon: const Icon(Icons.chat_outlined),
+                  tooltip: "Global Chat",
+                ),
+                NavBarCircularImageDropDownButton(
+                  callback: Routes().navigate,
+                  isAdmin: false,
+                ),
+                SizedBox(
+                  width: 2.5.w,
+                )
+              ],
+            ),
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
@@ -192,7 +194,7 @@ class _StoresMobileState extends State<StoresMobile> {
   Container newStore(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: 15.w, vertical: widget.isAdmin ? 30.h : 15.h),
+          horizontal: 15.w, vertical: widget.isAdmin ? 15.h : 15.h),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onInverseSurface,
       ),
@@ -206,37 +208,38 @@ class _StoresMobileState extends State<StoresMobile> {
             },
           ),
           SizedBox(
-            height: 20.h,
+            height: 5.h,
           ),
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Container(
-                      decoration: image != null || imageByte != null
-                          ? BoxDecoration(
-                              image: DecorationImage(
-                                image: kIsWeb
-                                    ? MemoryImage(imageByte!.bytes!)
-                                    : FileImage(image!) as ImageProvider,
-                                fit: BoxFit.cover,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Container(
+                        decoration: image != null || imageByte != null
+                            ? BoxDecoration(
+                                image: DecorationImage(
+                                  image: kIsWeb
+                                      ? MemoryImage(imageByte!.bytes!)
+                                      : FileImage(image!) as ImageProvider,
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.circular(15),
+                              )
+                            : BoxDecoration(
+                                image: const DecorationImage(
+                                  image: AssetImage(noImage),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              borderRadius: BorderRadius.circular(15),
-                            )
-                          : BoxDecoration(
-                              image: const DecorationImage(
-                                image: AssetImage(noImage),
-                                fit: BoxFit.cover,
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Form(
+                  Form(
                     key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -258,6 +261,9 @@ class _StoresMobileState extends State<StoresMobile> {
                             return null;
                           },
                         ),
+                        const SizedBox(
+                          height: 5,
+                        ),
                         TextFormField(
                           controller: _ctrlHouseNo,
                           onSaved: (newValue) => _houseNo = newValue!,
@@ -275,6 +281,9 @@ class _StoresMobileState extends State<StoresMobile> {
                             return null;
                           },
                         ),
+                        const SizedBox(
+                          height: 5,
+                        ),
                         TextFormField(
                           controller: _ctrlStreet,
                           onSaved: (newValue) => _street = newValue!,
@@ -291,6 +300,9 @@ class _StoresMobileState extends State<StoresMobile> {
                             }
                             return null;
                           },
+                        ),
+                        const SizedBox(
+                          height: 5,
                         ),
                         TextFormField(
                           controller: _ctrlContactInfo,
@@ -343,9 +355,9 @@ class _StoresMobileState extends State<StoresMobile> {
                         )
                       ],
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           )
         ],
@@ -356,7 +368,7 @@ class _StoresMobileState extends State<StoresMobile> {
   Container allStores(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-          horizontal: 15.w, vertical: widget.isAdmin ? 30.h : 15.h),
+          horizontal: 15.w, vertical: widget.isAdmin ? 15.h : 15.h),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: widget.isAdmin
@@ -368,15 +380,6 @@ class _StoresMobileState extends State<StoresMobile> {
               : const SizedBox(
                   height: 15,
                 ),
-          widget.isAdmin
-              ? TabHeader(
-                  title: "Stores",
-                  callback: () {
-                    //widget.drawer!();
-                    //TODO:Admin layout
-                  },
-                )
-              : Container(),
           widget.isAdmin
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.end,

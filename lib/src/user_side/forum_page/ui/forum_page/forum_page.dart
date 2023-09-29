@@ -17,6 +17,7 @@ class ForumPage extends StatelessWidget {
         return const Placeholder();
       } else {
         return ForumPageMobile(
+          isAdmin: false,
           screenType: sizingInformation.deviceScreenType,
         );
       }

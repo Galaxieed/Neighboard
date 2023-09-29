@@ -13,14 +13,16 @@ class AdminHOACandidates extends StatelessWidget {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
         return CandidatesDesktop(
+          deviceScreenType: DeviceScreenType.desktop,
           drawer: drawer,
         );
       } else if (sizingInformation.deviceScreenType ==
           DeviceScreenType.tablet) {
         return const Placeholder();
       } else {
-        return const CandidatesMobile(
+        return CandidatesDesktop(
           deviceScreenType: DeviceScreenType.mobile,
+          drawer: drawer,
         );
       }
     });

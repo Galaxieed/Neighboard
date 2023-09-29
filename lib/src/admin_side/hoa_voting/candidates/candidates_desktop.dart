@@ -10,12 +10,15 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_builder/src/device_screen_type.dart';
 import 'package:universal_io/io.dart';
 
 class CandidatesDesktop extends StatefulWidget {
-  const CandidatesDesktop({super.key, required this.drawer});
+  const CandidatesDesktop(
+      {super.key, required this.drawer, required this.deviceScreenType});
 
   final Function drawer;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<CandidatesDesktop> createState() => _CandidatesDesktopState();
@@ -204,19 +207,25 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
             child: CircularProgressIndicator(),
           )
         : Container(
-            padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+            padding: EdgeInsets.symmetric(
+                vertical: widget.deviceScreenType == DeviceScreenType.mobile
+                    ? 15.h
+                    : 30.h,
+                horizontal: 15.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TabHeader(
-                  title: "Candidates List",
-                  callback: () {
-                    widget.drawer();
-                  },
-                ),
-                SizedBox(
-                  height: 20.h,
-                ),
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  TabHeader(
+                    title: "Candidates List",
+                    callback: () {
+                      widget.drawer();
+                    },
+                  ),
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  SizedBox(
+                    height: 20.h,
+                  ),
                 Expanded(
                   child: isElectionOngoing
                       ? const Center(
@@ -344,120 +353,123 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                           Container(
                         padding: const EdgeInsets.all(8.0),
                         width: 700,
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "New Candidate",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleLarge!
-                                    .copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 80,
-                                    backgroundImage: profileImage != null ||
-                                            profileImageByte != null
-                                        ? kIsWeb
-                                            ? MemoryImage(
-                                                profileImageByte!.bytes!)
-                                            : FileImage(profileImage!)
-                                                as ImageProvider
-                                        : const AssetImage(guestIcon),
-                                  ),
-                                  Positioned(
-                                    bottom: 5,
-                                    right: 8,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.grey,
-                                      child: IconButton(
-                                        onPressed: () {
-                                          //update picture
-                                          pickImage(mySetState);
-                                        },
-                                        icon: const Icon(Icons.camera_alt),
-                                        color: Colors.white,
-                                      ),
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "New Candidate",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 80,
+                                      backgroundImage: profileImage != null ||
+                                              profileImageByte != null
+                                          ? kIsWeb
+                                              ? MemoryImage(
+                                                  profileImageByte!.bytes!)
+                                              : FileImage(profileImage!)
+                                                  as ImageProvider
+                                          : const AssetImage(guestIcon),
                                     ),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              myTextFormField(tcFName, "First Name"),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              myTextFormField(tcLName, "Last Name"),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              myTextFormField(tcAddress, "Address", 5),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              Row(
-                                children: [
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      mySetState(() {
-                                        onClearForm();
-                                      });
-                                    },
-                                    icon: const Icon(Icons.delete_outline),
-                                    label: const Text("Discard"),
-                                  ),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        var candidateId =
-                                            DateTime.now().toIso8601String();
-                                        candidateModel = CandidateModel(
-                                          candidateId: candidateId,
-                                          firstName: tcFName.text.trim(),
-                                          lastName: tcLName.text.trim(),
-                                          profilePicture: '',
-                                          address: tcAddress.text.trim(),
-                                          position: title == "PRESIDENT"
-                                              ? "PRESIDENT"
-                                              : title == "VICE PRESIDENT"
-                                                  ? "VICE PRESIDENT"
-                                                  : "BOARD OF DIRECTORS",
-                                          noOfVotes: 0,
-                                        );
-                                        if (candidateModel != null) {
-                                          candidateModels.add(candidateModel!);
-                                          profileImages.add([
-                                            candidateId,
-                                            profileImage,
-                                            profileImageByte,
-                                          ]);
-                                          setState(() {
-                                            if (title == "PRESIDENT") {
-                                              isTherePres = true;
-                                            } else if (title ==
-                                                "VICE PRESIDENT") {
-                                              isThereVP = true;
-                                            } else {
-                                              isThereBD = true;
-                                            }
-                                          });
+                                    Positioned(
+                                      bottom: 5,
+                                      right: 8,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.grey,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            //update picture
+                                            pickImage(mySetState);
+                                          },
+                                          icon: const Icon(Icons.camera_alt),
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                myTextFormField(tcFName, "First Name"),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                myTextFormField(tcLName, "Last Name"),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                myTextFormField(tcAddress, "Address", 5),
+                                const SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  children: [
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        mySetState(() {
                                           onClearForm();
-                                          Navigator.pop(context);
+                                        });
+                                      },
+                                      icon: const Icon(Icons.delete_outline),
+                                      label: const Text("Discard"),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          var candidateId =
+                                              DateTime.now().toIso8601String();
+                                          candidateModel = CandidateModel(
+                                            candidateId: candidateId,
+                                            firstName: tcFName.text.trim(),
+                                            lastName: tcLName.text.trim(),
+                                            profilePicture: '',
+                                            address: tcAddress.text.trim(),
+                                            position: title == "PRESIDENT"
+                                                ? "PRESIDENT"
+                                                : title == "VICE PRESIDENT"
+                                                    ? "VICE PRESIDENT"
+                                                    : "BOARD OF DIRECTORS",
+                                            noOfVotes: 0,
+                                          );
+                                          if (candidateModel != null) {
+                                            candidateModels
+                                                .add(candidateModel!);
+                                            profileImages.add([
+                                              candidateId,
+                                              profileImage,
+                                              profileImageByte,
+                                            ]);
+                                            setState(() {
+                                              if (title == "PRESIDENT") {
+                                                isTherePres = true;
+                                              } else if (title ==
+                                                  "VICE PRESIDENT") {
+                                                isThereVP = true;
+                                              } else {
+                                                isThereBD = true;
+                                              }
+                                            });
+                                            onClearForm();
+                                            Navigator.pop(context);
+                                          }
                                         }
-                                      }
-                                    },
-                                    icon: const Icon(Icons.add),
-                                    label: const Text("Add"),
-                                  ),
-                                ],
-                              )
-                            ],
+                                      },
+                                      icon: const Icon(Icons.add),
+                                      label: const Text("Add"),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -556,7 +568,8 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                         const SizedBox(
                           width: 10,
                         ),
-                        if (startingDate != '' || endingDate != '')
+                        if ((startingDate != '' || endingDate != '') &&
+                            widget.deviceScreenType != DeviceScreenType.mobile)
                           Text(
                               '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}'),
                       ],
@@ -564,6 +577,10 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                     const SizedBox(
                       height: 20,
                     ),
+                    if ((startingDate != '' || endingDate != '') &&
+                        widget.deviceScreenType == DeviceScreenType.mobile)
+                      Text(
+                          '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}'),
                     Expanded(
                       child: TextField(
                         controller: tcNote,

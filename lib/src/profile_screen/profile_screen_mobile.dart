@@ -153,19 +153,21 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
     return userModel == null || isLoading
         ? const LoadingScreen()
         : Scaffold(
-            appBar: AppBar(
-              title: const Text("My Profile"),
-              centerTitle: true,
-              actions: [
-                NavBarCircularImageDropDownButton(
-                  callback: Routes().navigate,
-                  isAdmin: widget.isAdmin,
-                ),
-                SizedBox(
-                  width: 2.5.w,
-                )
-              ],
-            ),
+            appBar: widget.isAdmin
+                ? null
+                : AppBar(
+                    title: const Text("My Profile"),
+                    centerTitle: true,
+                    actions: [
+                      NavBarCircularImageDropDownButton(
+                        callback: Routes().navigate,
+                        isAdmin: widget.isAdmin,
+                      ),
+                      SizedBox(
+                        width: 2.5.w,
+                      )
+                    ],
+                  ),
             drawer: widget.deviceScreenType == DeviceScreenType.mobile
                 ? const NavDrawer()
                 : null,
@@ -271,6 +273,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                   child: Form(
                     key: _formKey,
                     child: GridView(
+                      physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -444,6 +447,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
               children: [
                 Expanded(
                   child: GridView(
+                    physics: const NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(

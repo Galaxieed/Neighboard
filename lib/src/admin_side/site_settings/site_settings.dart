@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_desktop.dart';
-import 'package:neighboard/src/admin_side/site_settings/site_settings_mobile.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminSiteSettings extends StatelessWidget {
@@ -11,14 +10,13 @@ class AdminSiteSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return SiteSettingsDesktop(drawer: drawer);
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
+        return SiteSettingsDesktop(
+            drawer: drawer, deviceScreenType: DeviceScreenType.mobile);
       } else {
-        return const SiteSettingsMobile(
-          deviceScreenType: DeviceScreenType.mobile,
+        return SiteSettingsDesktop(
+          drawer: drawer,
+          deviceScreenType: DeviceScreenType.desktop,
         );
       }
     });

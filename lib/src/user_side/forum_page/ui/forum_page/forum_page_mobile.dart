@@ -15,13 +15,14 @@ import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
-import 'package:hidable/hidable.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ForumPageMobile extends StatefulWidget {
-  const ForumPageMobile({super.key, required this.screenType});
+  const ForumPageMobile(
+      {super.key, required this.screenType, required this.isAdmin});
 
   final DeviceScreenType screenType;
+  final bool isAdmin;
 
   @override
   State<ForumPageMobile> createState() => _ForumPageMobileState();
@@ -73,51 +74,58 @@ class _ForumPageMobileState extends State<ForumPageMobile>
     return Scaffold(
       resizeToAvoidBottomInset: false,
       key: _scaffoldKey,
-      appBar: AppBar(
-        title: const Text("NEIGHBOARD"),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await showSearch(
-                context: context,
-                delegate: SearchScreenUI(widget.screenType),
-              );
-            },
-            icon: const Icon(Icons.search),
-            tooltip: "Search Post Title",
-          ),
-          IconButton(
-            onPressed: () {
-              _openChat();
-            },
-            icon: const Icon(Icons.chat_outlined),
-            tooltip: "Global Chat",
-          ),
-          NavBarCircularImageDropDownButton(
-            callback: Routes().navigate,
-            isAdmin: false,
-          ),
-          SizedBox(
-            width: 2.5.w,
-          )
-        ],
-      ),
+      appBar: widget.isAdmin
+          ? null
+          : AppBar(
+              title: const Text("NEIGHBOARD"),
+              actions: [
+                IconButton(
+                  onPressed: () async {
+                    await showSearch(
+                      context: context,
+                      delegate: SearchScreenUI(widget.screenType),
+                    );
+                  },
+                  icon: const Icon(Icons.search),
+                  tooltip: "Search Post Title",
+                ),
+                IconButton(
+                  onPressed: () {
+                    _openChat();
+                  },
+                  icon: const Icon(Icons.chat_outlined),
+                  tooltip: "Global Chat",
+                ),
+                NavBarCircularImageDropDownButton(
+                  callback: Routes().navigate,
+                  isAdmin: false,
+                ),
+                SizedBox(
+                  width: 2.5.w,
+                )
+              ],
+            ),
       bottomNavigationBar: Material(
         child: TabBar(
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.category),
-              text: "Category",
-            ),
-            Tab(
+          tabs: [
+            widget.isAdmin
+                ? const Tab(
+                    icon: Icon(Icons.pending_actions_outlined),
+                    text: "Pending",
+                  )
+                : const Tab(
+                    icon: Icon(Icons.category),
+                    text: "Category",
+                  ),
+            const Tab(
               icon: Icon(Icons.forum_rounded),
               text: "Posts",
             ),
-            Tab(
+            const Tab(
               icon: Icon(Icons.my_library_books_rounded),
               text: "My Posts",
             ),
-            Tab(
+            const Tab(
               icon: Icon(Icons.add),
               text: "New Post",
             ),
@@ -140,13 +148,13 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                 children: [
                   Categories(
                     category: searchedText,
-                    isAdmin: false,
+                    isAdmin: widget.isAdmin,
                     scrollController: scrollController,
                     deviceScreenType: widget.screenType,
                   ),
                   AllPosts(
                     category: searchedText,
-                    isAdmin: false,
+                    isAdmin: widget.isAdmin,
                     deviceScreenType: widget.screenType,
                   ),
                   MyPosts(search: searchedText),

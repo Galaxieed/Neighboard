@@ -7,10 +7,13 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_builder/src/device_screen_type.dart';
 
 class VotersDesktop extends StatefulWidget {
-  const VotersDesktop({super.key, required this.drawer});
+  const VotersDesktop(
+      {super.key, required this.drawer, required this.deviceScreenType});
   final Function drawer;
+  final DeviceScreenType deviceScreenType;
   @override
   State<VotersDesktop> createState() => _VotersDesktopState();
 }
@@ -27,6 +30,11 @@ class _VotersDesktopState extends State<VotersDesktop> {
   bool isLoading = true;
 
   getAllElection() async {
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
     electionModels = await CandidatesFunctions.getAllElection() ?? [];
     electionModels.sort((a, b) => b.electionId.compareTo(a.electionId));
     for (ElectionModel election in electionModels) {
@@ -78,28 +86,34 @@ class _VotersDesktopState extends State<VotersDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllUsers();
     getAllElection();
   }
 
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 30.h, horizontal: 15.w),
+      padding: EdgeInsets.symmetric(
+          vertical:
+              widget.deviceScreenType == DeviceScreenType.desktop ? 30.h : 15.h,
+          horizontal: 15.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabHeader(
-            title: "List of Voters",
-            callback: () {
-              widget.drawer();
-            },
-          ),
-          SizedBox(
-            height: 10.h,
-          ),
+          if (widget.deviceScreenType == DeviceScreenType.desktop)
+            TabHeader(
+              title: "List of Voters",
+              callback: () {
+                widget.drawer();
+              },
+            ),
+          if (widget.deviceScreenType == DeviceScreenType.desktop)
+            SizedBox(
+              height: 10.h,
+            ),
           Expanded(child: tableTabs()),
         ],
       ),
@@ -151,7 +165,25 @@ class _VotersDesktopState extends State<VotersDesktop> {
                   child: const Text("Not Voted"),
                 ),
                 const Spacer(),
-                DropdownButton(
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  DropdownButton(
+                    underline: Container(),
+                    hint: const Text("Election History"),
+                    value: selectedVal,
+                    items: dropdownItems,
+                    onChanged: (String? value) {
+                      getAllVoters(value!);
+                      setState(() {
+                        selectedVal = value;
+                      });
+                    },
+                  ),
+              ],
+            ),
+            if (widget.deviceScreenType != DeviceScreenType.desktop)
+              Align(
+                alignment: Alignment.centerRight,
+                child: DropdownButton(
                   underline: Container(),
                   hint: const Text("Election History"),
                   value: selectedVal,
@@ -163,76 +195,133 @@ class _VotersDesktopState extends State<VotersDesktop> {
                     });
                   },
                 ),
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
+              ),
+            if (widget.deviceScreenType == DeviceScreenType.desktop)
+              const SizedBox(
+                height: 20,
+              ),
             Expanded(
               child: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  myTable(voted: true),
-                  myTable(voted: false),
+                  //TODO: Replace with DataTable
+                  theTable(voted: true),
+                  theTable(voted: false),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  Table myTable({required bool voted}) {
-    return Table(
-      border: TableBorder.all(style: BorderStyle.solid),
-      children: [
-        TableRow(
-          decoration: BoxDecoration(color: Colors.grey.withOpacity(.5)),
-          children: [
-            tableHeaderText("Voter ID"),
-            tableHeaderText("Name"),
-            tableHeaderText("Address"),
-            if (voted) tableHeaderText("Date"),
-          ],
-        ),
-        if (voted)
-          for (VoterModel v in voterModels)
-            TableRow(
-              children: [
-                tableContextText(v.voterId),
-                tableContextText(v.name),
-                tableContextText(v.address),
-                tableContextText(v.timeVoted),
-              ],
-            )
-        else
-          for (UserModel u in notVotedUsersModel)
-            TableRow(
-              children: [
-                tableContextText(u.userId),
-                tableContextText("${u.lastName}, ${u.firstName}"),
-                tableContextText(u.address),
-              ],
+  Widget theTable({required bool voted}) {
+    return SingleChildScrollView(
+      child: PaginatedDataTable(
+        rowsPerPage: _rowsPerPage,
+        availableRowsPerPage: const <int>[5, 10, 20],
+        onRowsPerPageChanged: (value) {
+          if (value != null) {
+            setState(() {
+              _rowsPerPage = value;
+            });
+          }
+        },
+        columns: [
+          DataColumn(
+            label: Text(
+              "Voter ID",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
             ),
-      ],
+          ),
+          DataColumn(
+            label: Text(
+              "Name",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          DataColumn(
+            label: Text(
+              "Address",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium!
+                  .copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          if (voted)
+            DataColumn(
+              label: Text(
+                "Date",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+        source: VotersDataSource(voted, voterModels, notVotedUsersModel),
+      ),
     );
   }
+}
 
-  Widget tableContextText(String text) => Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Text(text),
-      );
+class VotersDataSource extends DataTableSource {
+  final int _selectedCount = 0;
+  final bool voted;
+  final List<VoterModel> voterModels;
+  final List<UserModel> notVotedUsersModel;
+  VotersDataSource(this.voted, this.voterModels, this.notVotedUsersModel);
 
-  Widget tableHeaderText(String text) => Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          text,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: Theme.of(context)
-              .textTheme
-              .titleMedium!
-              .copyWith(fontWeight: FontWeight.bold),
-        ),
+  @override
+  DataRow? getRow(int index) {
+    // TODO: implement getRow
+    if (voted) {
+      assert(index >= 0);
+      if (index >= voterModels.length) return null;
+      final VoterModel voterModel = voterModels[index];
+      return DataRow.byIndex(
+        index: index,
+        selected: false,
+        cells: [
+          DataCell(Text(voterModel.voterId)),
+          DataCell(Text(voterModel.name)),
+          DataCell(Text(voterModel.address)),
+          DataCell(Text(voterModel.timeVoted)),
+        ],
       );
+    } else {
+      assert(index >= 0);
+      if (index >= notVotedUsersModel.length) return null;
+      final UserModel notVotedUser = notVotedUsersModel[index];
+      return DataRow.byIndex(
+        index: index,
+        selected: false,
+        cells: [
+          DataCell(Text(notVotedUser.userId)),
+          DataCell(Text("${notVotedUser.lastName}, ${notVotedUser.firstName}")),
+          DataCell(Text(notVotedUser.address)),
+        ],
+      );
+    }
+  }
+
+  @override
+  // TODO: implement isRowCountApproximate
+  bool get isRowCountApproximate => false;
+
+  @override
+  // TODO: implement rowCount
+  int get rowCount => voted ? voterModels.length : notVotedUsersModel.length;
+
+  @override
+  // TODO: implement selectedRowCount
+  int get selectedRowCount => _selectedCount;
 }

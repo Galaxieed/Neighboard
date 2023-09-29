@@ -16,6 +16,7 @@ import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminDesktop extends StatefulWidget {
   const AdminDesktop({super.key});
@@ -125,12 +126,17 @@ class _AdminDesktopState extends State<AdminDesktop> {
                                     isAdmin: true,
                                   )
                                 : const Placeholder(),
-                            Dashboard(callback: (i) {
-                              switchPage(controller, i);
-                            }),
+                            Dashboard(
+                              callback: (i) {
+                                switchPage(controller, i);
+                              },
+                              deviceScreenType: DeviceScreenType.desktop,
+                            ),
                             const AdminForum(),
                             AdminAnnouncement(drawer: onExpandCollapseDrawer),
-                            const AdminCommunityMap(),
+                            const AdminCommunityMap(
+                              deviceScreenType: DeviceScreenType.desktop,
+                            ),
                             AdminStores(drawer: onExpandCollapseDrawer),
                             AdminHOACandidates(
                               drawer: onExpandCollapseDrawer,

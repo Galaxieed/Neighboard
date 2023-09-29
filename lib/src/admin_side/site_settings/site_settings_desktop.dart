@@ -10,11 +10,13 @@ import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class SiteSettingsDesktop extends StatefulWidget {
-  const SiteSettingsDesktop({super.key, required this.drawer});
-
+  const SiteSettingsDesktop(
+      {super.key, required this.drawer, required this.deviceScreenType});
+  final DeviceScreenType deviceScreenType;
   final void Function() drawer;
 
   @override
@@ -177,14 +179,12 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getSiteSettings();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     tcHeader.dispose();
     tcSubHeader.dispose();
     tcAbout.dispose();
@@ -195,21 +195,24 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(
-        vertical: 30.h,
+        vertical:
+            widget.deviceScreenType == DeviceScreenType.desktop ? 30.h : 15.h,
         horizontal: 15.w,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TabHeader(
-            title: "Site Settings",
-            callback: () {
-              widget.drawer();
-            },
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+          if (widget.deviceScreenType == DeviceScreenType.desktop)
+            TabHeader(
+              title: "Site Settings",
+              callback: () {
+                widget.drawer();
+              },
+            ),
+          if (widget.deviceScreenType == DeviceScreenType.desktop)
+            const SizedBox(
+              height: 20,
+            ),
           Expanded(
             child: SingleChildScrollView(
               child: Center(
@@ -221,12 +224,14 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         GridView(
+                          physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           gridDelegate:
                               const SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 500,
                             childAspectRatio: 500 / 400,
                             crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
                           ),
                           children: [
                             Stack(

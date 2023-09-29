@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_desktop.dart';
-import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_mobile.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminHOAVoters extends StatelessWidget {
@@ -13,15 +12,13 @@ class AdminHOAVoters extends StatelessWidget {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
         return VotersDesktop(
-          drawer: drawer,
-        );
+            drawer: drawer, deviceScreenType: DeviceScreenType.desktop);
       } else if (sizingInformation.deviceScreenType ==
           DeviceScreenType.tablet) {
         return const Placeholder();
       } else {
-        return const VotersMobile(
-          deviceScreenType: DeviceScreenType.mobile,
-        );
+        return VotersDesktop(
+            drawer: drawer, deviceScreenType: DeviceScreenType.mobile);
       }
     });
   }

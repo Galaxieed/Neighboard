@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:responsive_builder/src/device_screen_type.dart';
 
 class Dashboard extends StatelessWidget {
-  const Dashboard({super.key, required this.callback});
+  const Dashboard(
+      {super.key, required this.callback, required this.deviceScreenType});
 
   final Function callback;
+  final DeviceScreenType deviceScreenType;
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +18,13 @@ class Dashboard extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: deviceScreenType == DeviceScreenType.mobile
+                  ? Theme.of(context).textTheme.titleLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      )
+                  : Theme.of(context).textTheme.headlineMedium!.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
               children: const <TextSpan>[
                 TextSpan(
                     text: 'Welcome back, ',
@@ -31,12 +38,19 @@ class Dashboard extends StatelessWidget {
           ),
           Expanded(
             child: GridView(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 400,
-                childAspectRatio: 400 / 300,
-                mainAxisSpacing: 30,
-                crossAxisSpacing: 30,
-              ),
+              gridDelegate: deviceScreenType == DeviceScreenType.mobile
+                  ? const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 200,
+                      childAspectRatio: 200 / 150,
+                      mainAxisSpacing: 15,
+                      crossAxisSpacing: 15,
+                    )
+                  : const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 400,
+                      childAspectRatio: 400 / 300,
+                      mainAxisSpacing: 30,
+                      crossAxisSpacing: 30,
+                    ),
               children: [
                 dashboardCards(
                   context,
@@ -115,10 +129,15 @@ class Dashboard extends StatelessWidget {
             ),
             Text(
               text,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge!
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: deviceScreenType == DeviceScreenType.mobile
+                  ? Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(fontWeight: FontWeight.bold)
+                  : Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(fontWeight: FontWeight.bold),
             ),
           ],
         ),

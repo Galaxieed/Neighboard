@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/models/site_model.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
-import 'package:neighboard/src/admin_side/admin_side.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
-import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,8 +44,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              //home: const AdminSide(),
-              home: const LandingPage(),
+              home: ScreenDirect(),
             );
           });
     }));
