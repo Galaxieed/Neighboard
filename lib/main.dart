@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
           builder: (_, currentMode, __) {
             return MaterialApp(
               debugShowCheckedModeBanner: false,
-              title: 'Neighboard | Home',
+              title: 'Neighboard',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: currentThemeColor),
                 useMaterial3: true,
@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: ScreenDirect(),
+              home: const ScreenDirect(),
             );
           });
     }));

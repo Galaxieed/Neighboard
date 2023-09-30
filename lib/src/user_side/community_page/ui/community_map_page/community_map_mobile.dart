@@ -53,7 +53,6 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getMapLoc();
   }

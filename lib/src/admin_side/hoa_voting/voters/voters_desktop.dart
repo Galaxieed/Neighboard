@@ -7,7 +7,7 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class VotersDesktop extends StatefulWidget {
   const VotersDesktop(
@@ -204,7 +204,6 @@ class _VotersDesktopState extends State<VotersDesktop> {
               child: TabBarView(
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
-                  //TODO: Replace with DataTable
                   theTable(voted: true),
                   theTable(voted: false),
                 ],
@@ -282,7 +281,6 @@ class VotersDataSource extends DataTableSource {
 
   @override
   DataRow? getRow(int index) {
-    // TODO: implement getRow
     if (voted) {
       assert(index >= 0);
       if (index >= voterModels.length) return null;
@@ -314,14 +312,11 @@ class VotersDataSource extends DataTableSource {
   }
 
   @override
-  // TODO: implement isRowCountApproximate
   bool get isRowCountApproximate => false;
 
   @override
-  // TODO: implement rowCount
   int get rowCount => voted ? voterModels.length : notVotedUsersModel.length;
 
   @override
-  // TODO: implement selectedRowCount
   int get selectedRowCount => _selectedCount;
 }

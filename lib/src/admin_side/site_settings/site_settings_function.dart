@@ -20,7 +20,6 @@ class SiteSettingsFunction {
 
       return true;
     } catch (e) {
-      print("saveNew : $e");
       return false;
     }
   }

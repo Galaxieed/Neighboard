@@ -12,7 +12,6 @@ import 'package:neighboard/src/admin_side/hoa_voting/voting/voting.dart';
 import 'package:neighboard/src/admin_side/navigation/navigation_bar.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings.dart';
 import 'package:neighboard/src/admin_side/stores/stores.dart';
-import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';

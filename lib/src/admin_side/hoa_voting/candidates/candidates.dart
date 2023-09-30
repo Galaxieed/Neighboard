@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_desktop.dart';
-import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_mobile.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminHOACandidates extends StatelessWidget {

@@ -67,7 +67,6 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
 
   @override
   void didUpdateWidget(covariant AdminNavDrawer oldWidget) {
-    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
     selectedSubButton = widget.selectedPage;
     if (selectedSubButton == "Voting") {

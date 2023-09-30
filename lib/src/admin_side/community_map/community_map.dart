@@ -8,7 +8,7 @@ import 'package:geocode/geocode.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminCommunityMap extends StatefulWidget {
   const AdminCommunityMap({super.key, required this.deviceScreenType});
@@ -143,7 +143,6 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getSiteLocation();
   }

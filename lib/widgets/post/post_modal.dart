@@ -282,7 +282,6 @@ class _PostModalState extends State<PostModal> {
                             .toList();
                         CommentModel comment = commentModels[index];
 
-                        //TODO: Create a callback that will get the input from this to the comment box
                         return PostModalComment(
                           currentUser: currentUser,
                           postModel: widget.postModel,

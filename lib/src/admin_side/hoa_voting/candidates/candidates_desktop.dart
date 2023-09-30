@@ -10,7 +10,7 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class CandidatesDesktop extends StatefulWidget {
@@ -87,7 +87,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     bool isSuccessful = await CandidatesFunctions.startElection(electionModel!);
 
     if (isSuccessful) {
-      //TODO: add candidates in new collection after starting election.
       //save the candidate 1 by 1
       try {
         for (int i = 0; i < candidateModels.length; i++) {
@@ -131,7 +130,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       });
     }
   }
-  //TODO: add new candidate in firebase at the save button
+
   //first collect all data then add all at the end
 
   String startingDate = '';
@@ -195,7 +194,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfElectionOngoing();
   }
@@ -302,8 +300,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                         }
                                         if (!ctrl.indexIsChanging &&
                                             ctrl.index == 3) {
-                                          //TODO: save the voted HOA
-
                                           if (candidateModels != [] &&
                                               startingDate != '' &&
                                               endingDate != '') {
@@ -659,7 +655,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
           ),
           ElevatedButton.icon(
             onPressed: () {
-              //TODO: Edit candidate
               tcFName.text = candidate.firstName;
               tcLName.text = candidate.lastName;
               tcAddress.text = candidate.address;

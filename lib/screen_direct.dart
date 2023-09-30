@@ -40,7 +40,6 @@ class _ScreenDirectState extends State<ScreenDirect> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfUserLoggedIn();
   }

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/voter_model.dart';
 
 class HOAVotingFunction {
@@ -34,7 +33,6 @@ class HOAVotingFunction {
             {"voted_candidate_id": candidateId});
       });
     } catch (e) {
-      print(e);
       return;
     }
   }

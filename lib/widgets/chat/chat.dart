@@ -6,7 +6,6 @@ import 'package:neighboard/models/chatmessage_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat_function.dart';
-import 'package:responsive_builder/responsive_builder.dart';
 
 class MyChat extends StatefulWidget {
   const MyChat({super.key});
@@ -58,14 +57,12 @@ class _MyChatState extends State<MyChat> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUser();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _globalChatController.dispose();
     super.dispose();
   }

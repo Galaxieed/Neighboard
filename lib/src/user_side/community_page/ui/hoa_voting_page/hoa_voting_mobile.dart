@@ -295,7 +295,6 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                         (startCount == 5 &&
                             chosenPresident != null &&
                             chosenVicePresident != null)) {
-                      //TODO: save the voted HOA
                       onSaveVote();
                     }
                   },
@@ -396,9 +395,6 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                       value: optionsBD[candidate.candidateId],
                       onChanged: (bool? value) {
                         setState(() {
-                          // idsOfSelectedDirectors[candidate.candidateId] =
-                          //     value!;
-                          //TODO: FIX selecting multiple BD and saving them in a list
                           if (!optionsBD[candidate.candidateId]! &&
                               startCount >= 5) {
                             ScaffoldMessenger.of(context).showSnackBar(

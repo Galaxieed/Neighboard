@@ -7,7 +7,7 @@ import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_funct
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
-import 'package:responsive_builder/src/device_screen_type.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class VotingDesktop extends StatefulWidget {
   const VotingDesktop(
@@ -64,7 +64,6 @@ class _VotingDesktopState extends State<VotingDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getAllElection();
   }

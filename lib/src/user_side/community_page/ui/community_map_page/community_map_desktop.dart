@@ -50,7 +50,6 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getMapLoc();
   }

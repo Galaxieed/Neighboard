@@ -294,7 +294,6 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                         (startCount == 5 &&
                             chosenPresident != null &&
                             chosenVicePresident != null)) {
-                      //TODO: save the voted HOA
                       onSaveVote();
                     }
                   },
@@ -395,9 +394,6 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                       value: optionsBD[candidate.candidateId],
                       onChanged: (bool? value) {
                         setState(() {
-                          // idsOfSelectedDirectors[candidate.candidateId] =
-                          //     value!;
-                          //TODO: FIX selecting multiple BD and saving them in a list
                           if (!optionsBD[candidate.candidateId]! &&
                               startCount >= 5) {
                             ScaffoldMessenger.of(context).showSnackBar(
