@@ -33,20 +33,16 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
 
     if (isUser) {
       // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ForumPage(),
-        ),
-      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const ForumPage()),
+          (route) => false);
     } else if (isAdmin) {
       // ignore: use_build_context_synchronously
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const AdminSide(),
-        ),
-      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminSide()),
+          (route) => false);
     } else {
       if (loginResult ==
           'There is no user record corresponding to this identifier. The user may have been deleted.') {

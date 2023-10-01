@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
-import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -328,12 +328,13 @@ class _NavBarCircularImageDropDownButtonState
                     backgroundImage: NetworkImage(userModel!.profilePicture),
                   ),
         //child: Icon(Icons.keyboard_arrow_down),
-        onSelected: (String newValue) {
+        onSelected: (String newValue) async {
           if (newValue == "Logout") {
-            LoginFunction.logout();
+            await LoginFunction.logout();
+            // ignore: use_build_context_synchronously
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => const LandingPage()),
+                MaterialPageRoute(builder: (context) => const ScreenDirect()),
                 (route) => false);
           } else if (newValue == "User") {
             Navigator.push(

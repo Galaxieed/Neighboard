@@ -36,12 +36,10 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
 
       if (isAccountSuccessfullyCreated) {
         // ignore: use_build_context_synchronously
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const ForumPage(),
-          ),
-        );
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const ForumPage()),
+            (route) => false);
       } else {
         // ignore: use_build_context_synchronously
         showDialog(

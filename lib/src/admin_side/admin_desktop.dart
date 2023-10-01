@@ -98,65 +98,68 @@ class _AdminDesktopState extends State<AdminDesktop> {
       appBar: const AdminNavBar(),
       body: isLoading
           ? const LoadingScreen()
-          : DefaultTabController(
-              initialIndex: 1,
-              length: 10,
-              child: Builder(
-                builder: (context) {
-                  final TabController controller =
-                      DefaultTabController.of(context);
-                  return Row(
-                    children: [
-                      MyDrawer(
-                        userModel: userModel!,
-                        selectedPage: selectedPage,
-                        isDrawerExpanded: isDrawerExpanded,
-                        callback: (index) {
-                          switchPage(controller, index);
-                        },
-                      ),
-                      Expanded(
-                        child: TabBarView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          children: [
-                            isLoggedIn
-                                ? ProfileScreen(
-                                    userId: _auth.currentUser!.uid,
-                                    isAdmin: true,
-                                  )
-                                : const Placeholder(),
-                            Dashboard(
-                              callback: (i) {
-                                switchPage(controller, i);
-                              },
-                              deviceScreenType: DeviceScreenType.desktop,
+          : !isLoggedIn
+              ? Container()
+              : DefaultTabController(
+                  initialIndex: 1,
+                  length: 10,
+                  child: Builder(
+                    builder: (context) {
+                      final TabController controller =
+                          DefaultTabController.of(context);
+                      return Row(
+                        children: [
+                          MyDrawer(
+                            userModel: userModel!,
+                            selectedPage: selectedPage,
+                            isDrawerExpanded: isDrawerExpanded,
+                            callback: (index) {
+                              switchPage(controller, index);
+                            },
+                          ),
+                          Expanded(
+                            child: TabBarView(
+                              physics: const NeverScrollableScrollPhysics(),
+                              children: [
+                                isLoggedIn
+                                    ? ProfileScreen(
+                                        userId: _auth.currentUser!.uid,
+                                        isAdmin: true,
+                                      )
+                                    : const Placeholder(),
+                                Dashboard(
+                                  callback: (i) {
+                                    switchPage(controller, i);
+                                  },
+                                  deviceScreenType: DeviceScreenType.desktop,
+                                ),
+                                const AdminForum(),
+                                AdminAnnouncement(
+                                    drawer: onExpandCollapseDrawer),
+                                const AdminCommunityMap(
+                                  deviceScreenType: DeviceScreenType.desktop,
+                                ),
+                                AdminStores(drawer: onExpandCollapseDrawer),
+                                AdminHOACandidates(
+                                  drawer: onExpandCollapseDrawer,
+                                ),
+                                AdminHOAVoting(
+                                  drawer: onExpandCollapseDrawer,
+                                ),
+                                AdminHOAVoters(
+                                  drawer: onExpandCollapseDrawer,
+                                ),
+                                AdminSiteSettings(
+                                  drawer: onExpandCollapseDrawer,
+                                ),
+                              ],
                             ),
-                            const AdminForum(),
-                            AdminAnnouncement(drawer: onExpandCollapseDrawer),
-                            const AdminCommunityMap(
-                              deviceScreenType: DeviceScreenType.desktop,
-                            ),
-                            AdminStores(drawer: onExpandCollapseDrawer),
-                            AdminHOACandidates(
-                              drawer: onExpandCollapseDrawer,
-                            ),
-                            AdminHOAVoting(
-                              drawer: onExpandCollapseDrawer,
-                            ),
-                            AdminHOAVoters(
-                              drawer: onExpandCollapseDrawer,
-                            ),
-                            AdminSiteSettings(
-                              drawer: onExpandCollapseDrawer,
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  );
-                },
-              ),
-            ),
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                ),
     );
   }
 }
