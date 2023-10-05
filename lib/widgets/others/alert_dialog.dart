@@ -8,13 +8,11 @@ void showAlertDialog(BuildContext context, String title, String content) {
         title: Text(title),
         content: Text(content),
         actions: [
-          BackButton(
-            onPressed: () {
-              // Perform an action when the user taps on the 'OK' button.
-              Navigator.of(context).pop();
-            },
-
-          ),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Back'))
         ],
       );
     },

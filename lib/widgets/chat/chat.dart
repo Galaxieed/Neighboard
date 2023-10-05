@@ -52,6 +52,7 @@ class _MyChatState extends State<MyChat> {
       );
       await ChatFunction.sendChat(chatModel);
       _globalChatController.clear();
+      setState(() {});
     }
   }
 
@@ -89,7 +90,7 @@ class _MyChatState extends State<MyChat> {
                       "Global Chat",
                       style: Theme.of(context)
                           .textTheme
-                          .titleMedium!
+                          .titleLarge!
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
                     Expanded(
@@ -112,37 +113,63 @@ class _MyChatState extends State<MyChat> {
                                 chatModels.sort(
                                     (a, b) => b.chatId.compareTo(a.chatId));
                                 ChatModel chat = chatModels[index];
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                return Column(
                                   children: [
-                                    Expanded(
-                                      flex: 3,
-                                      child:
-                                          Text(chat.timestamp.split('| ')[1]),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Text(
-                                        chat.senderName,
-                                        textAlign: TextAlign.end,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: chat.senderId ==
-                                                  currentUser!.userId
-                                              ? Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                              : null,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    if (chat.timestamp.split('| ')[0] !=
+                                        chatModels[index > 0 &&
+                                                    index <
+                                                        chatModels.length - 1
+                                                ? index + 1
+                                                : index]
+                                            .timestamp
+                                            .split('| ')[0])
+                                      Row(
+                                        children: [
+                                          const Expanded(child: Divider()),
+                                          Text(
+                                            chat.timestamp.split('| ')[0],
+                                          ),
+                                          const Expanded(child: Divider()),
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      flex: 8,
-                                      child: Text(chat.message),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            chat.senderName,
+                                            textAlign: TextAlign.end,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: chat.senderId ==
+                                                      currentUser!.userId
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .primary
+                                                  : null,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(chat.message),
+                                        ),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        Expanded(
+                                          flex: 2,
+                                          child: Text(
+                                            chat.timestamp.split('| ')[1],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 );
@@ -153,15 +180,23 @@ class _MyChatState extends State<MyChat> {
                       ),
                     ),
                     TextField(
+                      onChanged: (a) {
+                        setState(() {});
+                      },
                       autofocus: true,
                       controller: _globalChatController,
                       decoration: InputDecoration(
                           border: const OutlineInputBorder(),
                           icon: const Icon(Icons.messenger_outline_sharp),
                           suffixIcon: IconButton(
-                              onPressed: () {
-                                sendChat();
-                              },
+                              mouseCursor: _globalChatController.text.isEmpty
+                                  ? SystemMouseCursors.forbidden
+                                  : null,
+                              onPressed: _globalChatController.text.isEmpty
+                                  ? null
+                                  : () {
+                                      sendChat();
+                                    },
                               icon: const Icon(Icons.send_rounded)),
                           hintText: "Message everyone..."),
                     ),

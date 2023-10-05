@@ -306,7 +306,7 @@ class _PostModalCommentState extends State<PostModalComment> {
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const LinearProgressIndicator();
+                return const LinearProgressIndicator(); //TODO: Replace with Shimmer
               } else if (snapshot.connectionState == ConnectionState.active ||
                   snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
@@ -449,7 +449,7 @@ class _ReplyItselfState extends State<ReplyItself> {
   }
 }
 
-class ReplyTextBox extends StatelessWidget {
+class ReplyTextBox extends StatefulWidget {
   const ReplyTextBox({
     super.key,
     required this.currentUser,
@@ -462,19 +462,33 @@ class ReplyTextBox extends StatelessWidget {
   final Function({required ReplyModel reply}) addReply;
 
   @override
+  State<ReplyTextBox> createState() => _ReplyTextBoxState();
+}
+
+class _ReplyTextBoxState extends State<ReplyTextBox> {
+  final TextEditingController controller = TextEditingController();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.text = "${widget.recipientName} ";
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextEditingController controller = TextEditingController();
-    controller.text = "$recipientName ";
     return Row(
       children: [
         CircleAvatar(
           backgroundImage: NetworkImage(
-            currentUser.profilePicture,
+            widget.currentUser.profilePicture,
           ),
         ),
         Expanded(
           child: Card(
             child: TextField(
+              onChanged: (value) {
+                setState(() {});
+              },
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
@@ -486,18 +500,22 @@ class ReplyTextBox extends StatelessWidget {
           ),
         ),
         IconButton(
-          onPressed: () {
-            ReplyModel newReply = ReplyModel(
-              replyId: DateTime.now().toIso8601String(),
-              senderId: currentUser.userId,
-              senderName: currentUser.username,
-              recipientId: recipientId,
-              recipientName: recipientName,
-              replyMessage: controller.text,
-            );
-            addReply(reply: newReply);
-            controller.clear();
-          },
+          mouseCursor:
+              controller.text.isEmpty ? SystemMouseCursors.forbidden : null,
+          onPressed: controller.text.isEmpty
+              ? null
+              : () {
+                  ReplyModel newReply = ReplyModel(
+                    replyId: DateTime.now().toIso8601String(),
+                    senderId: widget.currentUser.userId,
+                    senderName: widget.currentUser.username,
+                    recipientId: widget.recipientId,
+                    recipientName: widget.recipientName,
+                    replyMessage: controller.text,
+                  );
+                  widget.addReply(reply: newReply);
+                  controller.clear();
+                },
           icon: const Icon(Icons.send),
         ),
       ],

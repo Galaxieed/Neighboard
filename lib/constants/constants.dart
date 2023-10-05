@@ -7,6 +7,8 @@ const String bigScoopImage = 'assets/bigscoop.jpg';
 const String walterMartImage = 'assets/waltermart.jpg';
 const String guestIcon = 'assets/guest_icon.png';
 const String noImage = 'assets/no_image.jpg';
+const String robotInfo = 'assets/robot.png';
+const String robotThanks = 'assets/robot_thanks.png';
 
 //LandPage Styles
 double ccLandPageBGOpacity = 1;

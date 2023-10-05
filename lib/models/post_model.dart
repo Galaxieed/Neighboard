@@ -10,6 +10,7 @@ class PostModel {
   late int noOfViews;
   late int noOfUpVotes;
   late List<String> tags;
+  late List<String> images;
 
   PostModel({
     required this.postId,
@@ -23,6 +24,7 @@ class PostModel {
     required this.noOfViews,
     required this.noOfUpVotes,
     required this.tags,
+    required this.images,
   });
 
   PostModel.fromJson(Map<String, dynamic> json) {
@@ -37,6 +39,7 @@ class PostModel {
     noOfViews = json['no_of_views'];
     noOfUpVotes = json['no_of_upVotes'];
     tags = json['tags'].cast<String>();
+    images = json['images'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -52,6 +55,7 @@ class PostModel {
     data['no_of_views'] = noOfViews;
     data['no_of_upVotes'] = noOfUpVotes;
     data['tags'] = tags;
+    data['images'] = images;
     return data;
   }
 }

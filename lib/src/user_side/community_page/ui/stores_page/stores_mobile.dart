@@ -428,6 +428,75 @@ class StoresCards extends StatelessWidget {
 
   final StoreModel storeModel;
 
+  theModal(context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      showDragHandle: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: Container(
+                    width: 500,
+                    height: 300,
+                    decoration: storeModel.storeImage == ""
+                        ? BoxDecoration(
+                            image: const DecorationImage(
+                              image: AssetImage(noImage),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(5))
+                        : BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(storeModel.storeImage),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(5)),
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Flexible(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        storeModel.storeName,
+                        style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -448,87 +517,16 @@ class StoresCards extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                   borderRadius: BorderRadius.circular(5)),
-          child: Column(
-            children: [
-              const Expanded(child: SizedBox()),
-              InkWell(
-                onTap: () {
-                  // The Modal
-                  showModalBottomSheet(
-                    isScrollControlled: true,
-                    showDragHandle: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return SingleChildScrollView(
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                child: Container(
-                                  width: 500,
-                                  height: 300,
-                                  decoration: storeModel.storeImage == ""
-                                      ? BoxDecoration(
-                                          image: const DecorationImage(
-                                            image: AssetImage(noImage),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5))
-                                      : BoxDecoration(
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                storeModel.storeImage),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5)),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Flexible(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      storeModel.storeName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: Container(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () {
+              // The Modal
+              theModal(context);
+            },
+            child: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                Container(
                   decoration: BoxDecoration(
                       color: ccStoresBannerColor(context),
                       borderRadius: BorderRadius.circular(5)),
@@ -539,19 +537,32 @@ class StoresCards extends StatelessWidget {
                       Expanded(
                         child: Text(
                           storeModel.storeName,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(
-                        'View Details..',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      ElevatedButton(
+                        onPressed: () {
+                          theModal(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8))),
+                        ),
+                        child: Text(
+                          'View Details',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       )
                     ],
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),

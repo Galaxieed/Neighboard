@@ -584,109 +584,158 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                       StateSetter stateSetter) {
                                 return Dialog(
                                   child: Container(
+                                    width: 700,
                                     padding: const EdgeInsets.all(32),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        CircleAvatar(
-                                          radius: 120,
-                                          backgroundImage: profileImage !=
-                                                      null ||
-                                                  profileImageByte != null
-                                              ? kIsWeb
-                                                  ? MemoryImage(
-                                                      profileImageByte!.bytes!)
-                                                  : FileImage(profileImage!)
-                                                      as ImageProvider
-                                              : NetworkImage(
-                                                  userModel!.profilePicture),
+                                        Text(
+                                          "Change Profile Picture",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium!
+                                              .copyWith(
+                                                  fontWeight: FontWeight.bold),
                                         ),
-                                        const SizedBox(
-                                          height: 32,
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                            profileImage = null;
-                                            profileImageByte = null;
-                                            profileImageUrl = "";
-                                            checker = false;
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.cancel),
-                                          label: const Text("Cancel"),
-                                        ),
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            try {
-                                              pickImage(stateSetter);
-                                            } catch (e) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(e.toString()),
+                                        const Divider(),
+                                        Stack(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 120,
+                                              backgroundImage: profileImage !=
+                                                          null ||
+                                                      profileImageByte != null
+                                                  ? kIsWeb
+                                                      ? MemoryImage(
+                                                          profileImageByte!
+                                                              .bytes!)
+                                                      : FileImage(profileImage!)
+                                                          as ImageProvider
+                                                  : NetworkImage(userModel!
+                                                      .profilePicture),
+                                            ),
+                                            Positioned(
+                                              bottom: 15,
+                                              right: 15,
+                                              child: CircleAvatar(
+                                                backgroundColor: Colors.grey,
+                                                child: IconButton(
+                                                  onPressed: () {
+                                                    try {
+                                                      pickImage(stateSetter);
+                                                    } catch (e) {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                              e.toString()),
+                                                        ),
+                                                      );
+                                                    }
+                                                  },
+                                                  icon: const Icon(
+                                                      Icons.camera_alt),
+                                                  color: Colors.white,
                                                 ),
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.camera_alt),
-                                          label: const Text("Camera"),
+                                              ),
+                                            )
+                                          ],
                                         ),
+                                        const Divider(),
                                         const SizedBox(
-                                          height: 8,
+                                          height: 16,
                                         ),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            try {
-                                              if ((profileImage != null ||
-                                                      profileImageByte !=
-                                                          null) &&
-                                                  checker) {
-                                                onSavingPic();
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            ElevatedButton.icon(
+                                              onPressed: () {
                                                 Navigator.pop(context);
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                        "Profile Picture Updated"),
-                                                  ),
-                                                );
-                                                //This will now allow user to upload picture
+                                                profileImage = null;
+                                                profileImageByte = null;
+                                                profileImageUrl = "";
                                                 checker = false;
-                                                setState(() {});
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text("No changes"),
-                                                  ),
-                                                );
-                                              }
-                                            } catch (e) {
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(e.toString()),
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                fixedSize:
+                                                    const Size.fromWidth(150),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
                                                 ),
-                                              );
-                                            }
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            fixedSize:
-                                                const Size.fromWidth(240),
-                                          ),
-                                          icon: const Icon(Icons.save),
-                                          label: const Text("Save"),
+                                                backgroundColor:
+                                                    Colors.red[800],
+                                                foregroundColor: Colors.white,
+                                              ),
+                                              icon: const Icon(Icons.cancel),
+                                              label: const Text("Cancel"),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            ElevatedButton.icon(
+                                              onPressed: () {
+                                                try {
+                                                  if ((profileImage != null ||
+                                                          profileImageByte !=
+                                                              null) &&
+                                                      checker) {
+                                                    onSavingPic();
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            "Profile Picture Updated"),
+                                                      ),
+                                                    );
+                                                    //This will now allow user to upload picture
+                                                    checker = false;
+                                                    setState(() {});
+                                                  } else {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content:
+                                                            Text("No changes"),
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content:
+                                                          Text(e.toString()),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                fixedSize:
+                                                    const Size.fromWidth(150),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                backgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                foregroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .onPrimary,
+                                              ),
+                                              icon: const Icon(Icons.save),
+                                              label: const Text("Save"),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),

@@ -6,6 +6,7 @@ import 'package:neighboard/main.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CommunityMapDesktop extends StatefulWidget {
@@ -31,11 +32,11 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
     );
   }
 
-  double lat = 14.827335497500572;
-  double long = 120.87190527693967;
+  double lat = 0;
+  double long = 0;
   late LatLng centerLoc;
   void getMapLoc() {
-    if (siteModel != null) {
+    if (siteModel != null && siteModel!.siteLocation != '') {
       lat = double.parse(siteModel!.siteLocation.split('|')[0]);
       long = double.parse(siteModel!.siteLocation.split('|')[1]);
     }
@@ -62,11 +63,7 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const Drawer(
-        child: Column(
-          children: [Text("Notifications")],
-        ),
-      ),
+      endDrawer: const NotificationDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: _moveMap,
         tooltip: 'Move Map',

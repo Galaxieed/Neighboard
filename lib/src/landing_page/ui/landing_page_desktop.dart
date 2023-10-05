@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 
 import 'package:neighboard/routes/routes.dart';
 
@@ -135,54 +138,57 @@ class HomePage extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 30.w),
-            scrollDirection: Axis.vertical,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                LandPageHeader(header: header),
-                LandPageHeaderSmall(
-                  header: subHeader,
-                  size: 5,
-                  color: Colors.white,
-                ),
-                SizedBox(
-                  height: 15.h,
-                ),
-                LandPageButton(label: 'Explore', callback: Routes().navigate),
-                // Expanded(
-                //   flex: 2,
-                //   child: Container(
-                //     padding:
-                //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
-                //     child: Column(
-                //       mainAxisSize: MainAxisSize.max,
-                //       mainAxisAlignment: MainAxisAlignment.center,
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       children: [],
-                //     ),
-                //   ),
-                // ),
-                // Expanded(
-                //   flex: 1,
-                //   child: Padding(
-                //     padding:
-                //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
-                //     child: Column(
-                //       mainAxisSize: MainAxisSize.max,
-                //       mainAxisAlignment: MainAxisAlignment.end,
-                //       children: [
-                //         SizedBox(height: MediaQuery.sizeOf(context).height / 2),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-              ],
+        child: ClipRRect(
+          //TODO: Add backdropFilter to blur
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 30.w),
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  LandPageHeader(header: header),
+                  LandPageHeaderSmall(
+                    header: subHeader,
+                    size: 5,
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    height: 15.h,
+                  ),
+                  LandPageButton(label: 'Explore', callback: Routes().navigate),
+                  // Expanded(
+                  //   flex: 2,
+                  //   child: Container(
+                  //     padding:
+                  //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
+                  //     child: Column(
+                  //       mainAxisSize: MainAxisSize.max,
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [],
+                  //     ),
+                  //   ),
+                  // ),
+                  // Expanded(
+                  //   flex: 1,
+                  //   child: Padding(
+                  //     padding:
+                  //         EdgeInsets.symmetric(vertical: 5.h, horizontal: 30.w),
+                  //     child: Column(
+                  //       mainAxisSize: MainAxisSize.max,
+                  //       mainAxisAlignment: MainAxisAlignment.end,
+                  //       children: [
+                  //         SizedBox(height: MediaQuery.sizeOf(context).height / 2),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
             ),
           ),
         ),
@@ -203,29 +209,31 @@ class LandPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: (Rect bounds) {
-        return LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
           colors: [
-            ccExploreButtonBGColor(context),
-            ccExploreButtonBGColor(context).withOpacity(0.2),
+            Theme.of(context).colorScheme.inversePrimary,
+            Colors.white24
           ],
-        ).createShader(bounds);
-      },
+        ),
+        borderRadius: BorderRadius.circular(45),
+      ),
       child: ElevatedButton(
         onPressed: () {
           callback('Forum', context);
         },
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-          foregroundColor: ccExploreButtonFGColor(context),
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 6.sp,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : null,
           ),
         ),
       ),
@@ -270,12 +278,29 @@ class LandPageHeader extends StatelessWidget {
     return Text(
       header,
       style: TextStyle(
-        fontSize: 18.sp,
-        color: ccHeaderFGColor(context),
-        letterSpacing: 10,
-        wordSpacing: 10,
-        fontWeight: FontWeight.w800,
-      ),
+          fontSize: 18.sp,
+          color: ccHeaderFGColor(context),
+          letterSpacing: 10,
+          wordSpacing: 10,
+          fontWeight: FontWeight.w800,
+          shadows: const [
+            Shadow(
+                // bottomLeft
+                offset: Offset(-1.5, -1.5),
+                color: Colors.white),
+            Shadow(
+                // bottomRight
+                offset: Offset(1.5, -1.5),
+                color: Colors.white),
+            Shadow(
+                // topRight
+                offset: Offset(1.5, 1.5),
+                color: Colors.white),
+            Shadow(
+                // topLeft
+                offset: Offset(-1.5, 1.5),
+                color: Colors.white),
+          ]),
       softWrap: true,
     );
   }

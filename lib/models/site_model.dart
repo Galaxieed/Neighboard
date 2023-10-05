@@ -7,6 +7,7 @@ class SiteModel {
   late String siteAbout;
   late int siteThemeColor;
   late String siteLogo;
+  late String siteLogoDark;
   late String siteHomepageImage;
   late String siteAboutImage;
 
@@ -19,6 +20,7 @@ class SiteModel {
     required this.siteAbout,
     required this.siteThemeColor,
     required this.siteLogo,
+    required this.siteLogoDark,
     required this.siteHomepageImage,
     required this.siteAboutImage,
   });
@@ -32,6 +34,7 @@ class SiteModel {
     siteAbout = json['site_about'];
     siteThemeColor = json['site_theme_color'];
     siteLogo = json['site_logo'];
+    siteLogoDark = json['site_logo_dark'];
     siteHomepageImage = json['site_homepage_image'];
     siteAboutImage = json['site_about_image'];
   }
@@ -46,6 +49,7 @@ class SiteModel {
     data['site_about'] = siteAbout;
     data['site_theme_color'] = siteThemeColor;
     data['site_logo'] = siteLogo;
+    data['site_logo_dark'] = siteLogoDark;
     data['site_homepage_image'] = siteHomepageImage;
     data['site_about_image'] = siteAboutImage;
     return data;

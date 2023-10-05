@@ -11,6 +11,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -70,11 +71,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const Drawer(
-        child: Column(
-          children: [Text("Notifications")],
-        ),
-      ),
+      endDrawer: const NotificationDrawer(),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Row(
@@ -82,7 +79,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
                 child: Column(
@@ -135,26 +132,30 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                 height: 10.h,
                               ),
                               Expanded(
-                                child: TabBarView(
-                                  children: [
-                                    Categories(
-                                      category: searchedText,
-                                      isAdmin: false,
-                                      deviceScreenType:
-                                          DeviceScreenType.desktop,
-                                    ),
-                                    AllPosts(
-                                      category: searchedText,
-                                      isAdmin: false,
-                                      deviceScreenType:
-                                          DeviceScreenType.desktop,
-                                    ),
-                                    MyPosts(search: searchedText),
-                                    const NewPost(
-                                      deviceScreenType:
-                                          DeviceScreenType.desktop,
-                                    ),
-                                  ],
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 15.w, vertical: 0),
+                                  child: TabBarView(
+                                    children: [
+                                      Categories(
+                                        category: searchedText,
+                                        isAdmin: false,
+                                        deviceScreenType:
+                                            DeviceScreenType.desktop,
+                                      ),
+                                      AllPosts(
+                                        category: searchedText,
+                                        isAdmin: false,
+                                        deviceScreenType:
+                                            DeviceScreenType.desktop,
+                                      ),
+                                      MyPosts(search: searchedText),
+                                      const NewPost(
+                                        deviceScreenType:
+                                            DeviceScreenType.desktop,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ],
@@ -305,9 +306,6 @@ Widget miniProfile(UserModel userModel) {
       CircleAvatar(
         radius: 40.sp,
         backgroundImage: NetworkImage(userModel.profilePicture.toString()),
-      ),
-      SizedBox(
-        height: 10.h,
       ),
       Text(
         "@${userModel.username}",

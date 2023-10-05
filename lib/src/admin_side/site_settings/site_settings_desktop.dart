@@ -32,9 +32,12 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
 
   SiteModel? siteModel;
 
-  File? homeImg, aboutImg, logoImg;
-  PlatformFile? homeImgByte, aboutImgByte, logoImgByte;
-  String homeImgUrl = "", aboutImgUrl = "", logoImgUrl = "";
+  File? homeImg, aboutImg, logoImg, logoImgDark;
+  PlatformFile? homeImgByte, aboutImgByte, logoImgByte, logoImgByteDark;
+  String homeImgUrl = "",
+      aboutImgUrl = "",
+      logoImgUrl = "",
+      logoImgUrlDark = "";
 
   bool isLoading = true;
 
@@ -81,6 +84,20 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
           logoImg = File(pickedImage.path);
         }
       }
+    } else if (img == 'logoDark') {
+      if (kIsWeb) {
+        FilePickerResult? result = await FilePicker.platform
+            .pickFiles(allowMultiple: false, type: FileType.image);
+        if (result != null) {
+          logoImgByteDark = result.files.single;
+        }
+      } else if (!kIsWeb) {
+        final pickedImage =
+            await ImagePicker().pickImage(source: ImageSource.gallery);
+        if (pickedImage != null) {
+          logoImgDark = File(pickedImage.path);
+        }
+      }
     }
     setState(() {});
   }
@@ -107,6 +124,13 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
               ""
           : await SiteSettingsFunction.uploadImage(logoImg!) ?? "";
     }
+    if (logoImgDark != null || logoImgByteDark != null) {
+      logoImgUrlDark = kIsWeb
+          ? await SiteSettingsFunction.uploadImageWeb(logoImgByteDark!.bytes!,
+                  logoImgByteDark!.name, logoImgByteDark!.extension!) ??
+              ""
+          : await SiteSettingsFunction.uploadImage(logoImgDark!) ?? "";
+    }
   }
 
   void onSavingSettings(context) async {
@@ -124,6 +148,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         siteAbout: tcAbout.text,
         siteThemeColor: currentThemeColor.value,
         siteLogo: logoImgUrl,
+        siteLogoDark: logoImgUrlDark,
         siteHomepageImage: homeImgUrl,
         siteAboutImage: aboutImgUrl,
       );
@@ -173,6 +198,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     homeImgUrl = siteModel?.siteHomepageImage ?? "";
     aboutImgUrl = siteModel?.siteAboutImage ?? "";
     logoImgUrl = siteModel?.siteLogo ?? "";
+    logoImgUrlDark = siteModel?.siteLogoDark ?? "";
 
     setState(() {});
   }
@@ -305,6 +331,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                             pickImage('logo');
                           },
                           leading: CircleAvatar(
+                            backgroundColor: Colors.white54,
                             backgroundImage: logoImg != null ||
                                     logoImgByte != null
                                 ? kIsWeb
@@ -316,6 +343,24 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                         siteModel?.siteLogo ?? logoImgUrl),
                           ),
                           title: const Text("Change Logo"),
+                        ),
+                        ListTile(
+                          onTap: () {
+                            pickImage('logoDark');
+                          },
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.black54,
+                            backgroundImage: logoImgDark != null ||
+                                    logoImgByteDark != null
+                                ? kIsWeb
+                                    ? MemoryImage(logoImgByteDark!.bytes!)
+                                    : FileImage(logoImgDark!) as ImageProvider
+                                : siteModel?.siteLogoDark == null
+                                    ? const AssetImage(noImage) as ImageProvider
+                                    : NetworkImage(siteModel?.siteLogoDark ??
+                                        logoImgUrlDark),
+                          ),
+                          title: const Text("Change Logo (Darkmode)"),
                         ),
                         const Divider(),
                         const LightDarkMode(),

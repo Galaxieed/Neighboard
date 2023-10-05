@@ -210,29 +210,11 @@ class _PostModalState extends State<PostModal> {
         centerTitle: true,
       ),
       bottomNavigationBar: isLoggedIn
-          ? ListTile(
-              leading: CircleAvatar(
-                backgroundImage: currentUser!.profilePicture != ""
-                    ? NetworkImage(currentUser!.profilePicture)
-                    : null,
-              ),
-              title: Card(
-                child: TextField(
-                  controller: _ctrlComment,
-                  focusNode: focusComment,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Write a public comment...",
-                  ),
-                ),
-              ),
-              trailing: IconButton(
-                onPressed: () {
-                  addComment();
-                },
-                icon: const Icon(Icons.send_outlined),
-              ),
-            )
+          ? ReplyCommentBox(
+              currentUser: currentUser,
+              focusComment: focusComment,
+              ctrlComment: _ctrlComment,
+              addComment: addComment)
           : null,
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -378,6 +360,61 @@ class _PostModalState extends State<PostModal> {
           icon: const Icon(Icons.more_horiz),
         ),
       ],
+    );
+  }
+}
+
+class ReplyCommentBox extends StatefulWidget {
+  const ReplyCommentBox(
+      {super.key,
+      this.currentUser,
+      required this.focusComment,
+      required this.ctrlComment,
+      required this.addComment});
+
+  final UserModel? currentUser;
+  final FocusNode focusComment;
+  final TextEditingController ctrlComment;
+  final void Function() addComment;
+
+  @override
+  State<ReplyCommentBox> createState() => _ReplyCommentBoxState();
+}
+
+class _ReplyCommentBoxState extends State<ReplyCommentBox> {
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: widget.currentUser!.profilePicture != ""
+            ? NetworkImage(widget.currentUser!.profilePicture)
+            : null,
+      ),
+      title: Card(
+        child: TextField(
+          onChanged: (a) {
+            setState(() {});
+          },
+          controller: widget.ctrlComment,
+          focusNode: widget.focusComment,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            hintText: "Write a public comment...",
+          ),
+        ),
+      ),
+      trailing: IconButton(
+        mouseCursor: widget.ctrlComment.text.isNotEmpty
+            ? null
+            : SystemMouseCursors.forbidden,
+        onPressed: widget.ctrlComment.text.isNotEmpty
+            ? () {
+                widget.addComment();
+                widget.ctrlComment.clear();
+              }
+            : null,
+        icon: const Icon(Icons.send_outlined),
+      ),
     );
   }
 }

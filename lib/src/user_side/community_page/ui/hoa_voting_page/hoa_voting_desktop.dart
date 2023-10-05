@@ -13,6 +13,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 
 class HOAVotingDesktop extends StatefulWidget {
   const HOAVotingDesktop({super.key});
@@ -191,11 +192,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const Drawer(
-        child: Column(
-          children: [Text("Notifications")],
-        ),
-      ),
+      endDrawer: const NotificationDrawer(),
       body: isLoading
           ? const LoadingScreen()
           : Container(
@@ -214,25 +211,54 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                   const SizedBox(
                     height: 30,
                   ),
-                  Expanded(
-                    child: !isLoggedIn
-                        ? const Center(
+                  !isLoggedIn
+                      ? const Expanded(
+                          child: Center(
                             child: Text("Login First"),
-                          )
-                        : !isElectionOngoing
-                            ? const Center(
-                                child: Text("There is no election right now"),
-                              )
-                            : isAlreadyVoted
-                                ? const Center(
-                                    child: Text(
-                                        "You already voted. Thank you for participation"),
-                                  )
-                                : gridOfCandidates(),
-                  ),
+                          ),
+                        )
+                      : !isElectionOngoing
+                          ? infoBannerMessage(
+                              context,
+                              "There is no election right now",
+                              robotInfo,
+                            )
+                          : isAlreadyVoted
+                              ? infoBannerMessage(
+                                  context,
+                                  "You already voted. Thank you for participation",
+                                  robotThanks,
+                                )
+                              : Expanded(
+                                  child: gridOfCandidates(),
+                                ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget infoBannerMessage(BuildContext context, text, imageString) {
+    return Center(
+      child: Container(
+        //color: Theme.of(context).colorScheme.inversePrimary,
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imageString, scale: 5),
+            Text(
+              text,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

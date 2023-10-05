@@ -215,25 +215,54 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: !isLoggedIn
-                        ? const Center(
+                  !isLoggedIn
+                      ? const Expanded(
+                          child: Center(
                             child: Text("Login First"),
-                          )
-                        : !isElectionOngoing
-                            ? const Center(
-                                child: Text("There is no election right now"),
-                              )
-                            : isAlreadyVoted
-                                ? const Center(
-                                    child: Text(
-                                        "You already voted. Thank you for participation"),
-                                  )
-                                : gridOfCandidates(),
-                  ),
+                          ),
+                        )
+                      : !isElectionOngoing
+                          ? infoBannerMessage(
+                              context,
+                              "There is no election right now",
+                              robotInfo,
+                            )
+                          : isAlreadyVoted
+                              ? infoBannerMessage(
+                                  context,
+                                  "You already voted. Thank you for participation",
+                                  robotThanks,
+                                )
+                              : Expanded(
+                                  child: gridOfCandidates(),
+                                ),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget infoBannerMessage(BuildContext context, text, imageString) {
+    return Center(
+      child: Container(
+        //color: Theme.of(context).colorScheme.inversePrimary,
+        width: double.infinity,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imageString, scale: 5),
+            Text(
+              text,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

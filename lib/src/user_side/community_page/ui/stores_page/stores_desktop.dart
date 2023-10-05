@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:universal_io/io.dart';
 
@@ -164,13 +167,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
                     openNotification: _openNotification,
                     openChat: _openChat,
                   ),
-            endDrawer: widget.isAdmin
-                ? null
-                : const Drawer(
-                    child: Column(
-                      children: [Text("Notifications")],
-                    ),
-                  ),
+            endDrawer: widget.isAdmin ? null : const NotificationDrawer(),
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               transitionBuilder: (Widget child, Animation<double> animation) {
@@ -429,6 +426,87 @@ class StoresCards extends StatelessWidget {
 
   final StoreModel storeModel;
 
+  theModal(context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              image: DecorationImage(
+                image: NetworkImage(storeModel.storeImage),
+                fit: BoxFit.cover,
+                opacity: 0.25,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            storeModel.storeName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Text(
+                            "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 32,
+                    ),
+                    Flexible(
+                      flex: 3,
+                      child: Container(
+                        width: 600,
+                        height: 600,
+                        decoration: storeModel.storeImage == ""
+                            ? BoxDecoration(
+                                image: const DecorationImage(
+                                  image: AssetImage(noImage),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.circular(30))
+                            : BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(storeModel.storeImage),
+                                  fit: BoxFit.cover,
+                                ),
+                                borderRadius: BorderRadius.circular(30)),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -449,80 +527,15 @@ class StoresCards extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                   borderRadius: BorderRadius.circular(5)),
-          child: Column(
-            children: [
-              const Expanded(child: SizedBox()),
-              InkWell(
-                onTap: () {
-                  showDialog(
-                    // The Modal
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Dialog(
-                        child: Container(
-                          padding: const EdgeInsets.all(32),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      storeModel.storeName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium,
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    Text(
-                                      "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 32,
-                              ),
-                              Flexible(
-                                flex: 3,
-                                child: Container(
-                                  width: 600,
-                                  height: 600,
-                                  decoration: storeModel.storeImage == ""
-                                      ? BoxDecoration(
-                                          image: const DecorationImage(
-                                            image: AssetImage(noImage),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5))
-                                      : BoxDecoration(
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                storeModel.storeImage),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5)),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: Container(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () {
+              theModal(context);
+            },
+            child: Column(
+              children: [
+                const Expanded(child: SizedBox()),
+                Container(
                   decoration: BoxDecoration(
                       color: ccStoresBannerColor(context),
                       borderRadius: BorderRadius.circular(5)),
@@ -533,19 +546,32 @@ class StoresCards extends StatelessWidget {
                       Expanded(
                         child: Text(
                           storeModel.storeName,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style:
+                              Theme.of(context).textTheme.titleMedium!.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Text(
-                        'View Details..',
-                        style: Theme.of(context).textTheme.titleMedium,
+                      ElevatedButton(
+                        onPressed: () {
+                          theModal(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8))),
+                        ),
+                        child: Text(
+                          'View Details',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                       )
                     ],
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -6,6 +8,7 @@ import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 
 class AnnouncementDesktop extends StatefulWidget {
   const AnnouncementDesktop({super.key});
@@ -94,11 +97,7 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const Drawer(
-        child: Column(
-          children: [Text("Notifications")],
-        ),
-      ),
+      endDrawer: const NotificationDrawer(),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         child: announcementModels == []
@@ -204,98 +203,133 @@ class MainAnnouncement extends StatelessWidget {
                   ),
                 ),
         ),
-        GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  child: Container(
-                    padding: const EdgeInsets.all(32),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                announcementModel.title,
-                                style:
-                                    Theme.of(context).textTheme.headlineMedium,
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "${announcementModel.datePosted}\n${announcementModel.details}",
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 32,
-                        ),
-                        Flexible(
-                          flex: 3,
-                          child: Container(
-                            width: 600,
-                            height: 600,
-                            decoration: announcementModel.image == ""
-                                ? BoxDecoration(
-                                    image: const DecorationImage(
-                                      image: AssetImage(noImage),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5))
-                                : BoxDecoration(
-                                    image: DecorationImage(
-                                      image:
-                                          NetworkImage(announcementModel.image),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5)),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: ccMainAnnouncementBannerColor(context),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(3.7.sp),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
+        Container(
+          decoration: BoxDecoration(
+            color: ccMainAnnouncementBannerColor(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(3.7.sp),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         announcementModel.title.toUpperCase(),
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         announcementModel.timeStamp,
                         style: Theme.of(context).textTheme.titleMedium,
+                        overflow: TextOverflow.ellipsis,
                       )
                     ],
                   ),
-                  Text(
-                    'View Details..',
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          child: Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              image: DecorationImage(
+                                image: NetworkImage(announcementModel.image),
+                                fit: BoxFit.cover,
+                                opacity: 0.25,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(30),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Flexible(
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            announcementModel.title,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headlineMedium!
+                                                .copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          Text(
+                                            "${announcementModel.datePosted}\n${announcementModel.details}",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 32,
+                                    ),
+                                    Flexible(
+                                      flex: 3,
+                                      child: Container(
+                                        width: 600,
+                                        height: 600,
+                                        decoration: announcementModel.image ==
+                                                ""
+                                            ? BoxDecoration(
+                                                image: const DecorationImage(
+                                                  image: AssetImage(noImage),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(30))
+                                            : BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      announcementModel.image),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(30)),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8))),
+                  ),
+                  child: Text(
+                    'View Details',
                     style: Theme.of(context).textTheme.titleMedium,
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
           ),
         )
@@ -331,103 +365,148 @@ class OtherAnnouncement extends StatelessWidget {
               SizedBox(
                 height: 100.h,
               ),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Dialog(
-                        child: Container(
-                          padding: const EdgeInsets.all(32),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      announcementModel.title,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineMedium,
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    Text(
-                                      "${announcementModel.datePosted}\n${announcementModel.details}",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 32,
-                              ),
-                              Flexible(
-                                flex: 3,
-                                child: Container(
-                                  width: 600,
-                                  height: 600,
-                                  decoration: announcementModel.image == ""
-                                      ? BoxDecoration(
-                                          image: const DecorationImage(
-                                            image: AssetImage(noImage),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5))
-                                      : BoxDecoration(
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                announcementModel.image),
-                                            fit: BoxFit.cover,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(5)),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ccOtherAnnouncementBannerColor(context),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  padding: EdgeInsets.all(3.5.sp),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
+              Container(
+                decoration: BoxDecoration(
+                  color: ccOtherAnnouncementBannerColor(context),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                padding: EdgeInsets.all(3.5.sp),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             announcementModel.title,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             announcementModel.timeStamp,
                             style: Theme.of(context).textTheme.titleMedium,
+                            overflow: TextOverflow.ellipsis,
                           )
                         ],
                       ),
-                      Text(
-                        'View Details..',
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              child: Container(
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  image: DecorationImage(
+                                    image:
+                                        NetworkImage(announcementModel.image),
+                                    fit: BoxFit.cover,
+                                    opacity: 0.25,
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(30),
+                                  child: BackdropFilter(
+                                    filter:
+                                        ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Flexible(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                announcementModel.title,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .headlineMedium!
+                                                    .copyWith(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                              const SizedBox(
+                                                height: 20,
+                                              ),
+                                              Text(
+                                                "${announcementModel.datePosted}\n${announcementModel.details}",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          width: 32,
+                                        ),
+                                        Flexible(
+                                          flex: 3,
+                                          child: Container(
+                                            width: 600,
+                                            height: 600,
+                                            decoration: announcementModel
+                                                        .image ==
+                                                    ""
+                                                ? BoxDecoration(
+                                                    image:
+                                                        const DecorationImage(
+                                                      image:
+                                                          AssetImage(noImage),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  )
+                                                : BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(
+                                                          announcementModel
+                                                              .image),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(8))),
+                      ),
+                      child: Text(
+                        'View Details',
                         style: Theme.of(context).textTheme.titleMedium,
-                      )
-                    ],
-                  ),
+                      ),
+                    )
+                  ],
                 ),
               )
             ],

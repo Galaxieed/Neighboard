@@ -90,6 +90,8 @@ flutter:
     - assets/bigscoop.jpg
     - assets/guest_icon.png
     - assets/no_image.jpg
+    - assets/robot.png
+    - assets/robot_thanks.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

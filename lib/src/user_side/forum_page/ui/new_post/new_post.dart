@@ -1,7 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -11,6 +13,7 @@ import 'package:neighboard/src/user_side/login_register_page/login_page/login_pa
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/others/alert_dialog.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:universal_io/io.dart';
 
 class NewPost extends StatefulWidget {
   const NewPost({Key? key, required this.deviceScreenType}) : super(key: key);
@@ -22,7 +25,6 @@ class NewPost extends StatefulWidget {
 
 class _NewPostState extends State<NewPost> {
   final _formKey = GlobalKey<FormState>();
-  //final _picker = ImagePicker();
   String? _category;
   String _postTitle = '';
   String _postContent = '';
@@ -33,6 +35,10 @@ class _NewPostState extends State<NewPost> {
 
   bool isLoading = false;
   bool isLoggedIn = false;
+
+  List<File> images = [];
+  List<PlatformFile> imageBytes = [];
+  List<String> imageUrls = [];
 
   UserModel? userModel;
   @override
@@ -59,6 +65,7 @@ class _NewPostState extends State<NewPost> {
         isLoading = true;
       });
       _formKey.currentState!.save();
+      await onSavingPic();
       PostModel postModel = PostModel(
         postId: DateTime.now().toIso8601String(),
         authorId: userModel!.userId,
@@ -73,6 +80,7 @@ class _NewPostState extends State<NewPost> {
         tags: [
           _category!,
         ],
+        images: imageUrls,
       );
       bool isPostPublished = await NewPostFunction.createNewPost(postModel);
 
@@ -84,13 +92,13 @@ class _NewPostState extends State<NewPost> {
               builder: (context) => const ForumPage(),
             ),
             (route) => false);
-      }
-      setState(() {
-        _cTitlePost.clear();
-        _cContentPost.clear();
-        _category = null;
+
+        _discardPost();
+        // ignore: use_build_context_synchronously
         showAlertDialog(context, 'Success!',
             'Post have been published!\nJust wait for the admin to approve your post.');
+      }
+      setState(() {
         isLoading = false;
       });
     }
@@ -101,21 +109,38 @@ class _NewPostState extends State<NewPost> {
       _cTitlePost.clear();
       _cContentPost.clear();
       _category = null;
+      imageBytes.clear();
+      imageUrls.clear();
+      images.clear();
     });
   }
 
-  Future<void> _getImage() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
-    if (result != null) {
-      setState(() {});
+  Future _getImage() async {
+    if (kIsWeb) {
+      final pickedImages = await FilePicker.platform
+          .pickFiles(allowMultiple: true, type: FileType.image);
+
+      if (pickedImages != null) {
+        imageBytes = pickedImages.files;
+      }
     } else {
-      //No image selected
+      final pickedImages = await ImagePicker().pickMultiImage();
+
+      if (pickedImages.isNotEmpty) {
+        images = pickedImages.map((e) => File(e.path)).toList();
+      }
+    }
+
+    setState(() {});
+  }
+
+  onSavingPic() async {
+    if (images.isNotEmpty || imageBytes.isNotEmpty) {
+      imageUrls = kIsWeb
+          ? await NewPostFunction.uploadMultipleImageWeb(imageBytes) ?? []
+          : await NewPostFunction.uploadMultipleImage(images) ?? [];
     }
   }
-  // if (_imageBytes != null) // Display the image if it has been uploaded
-  // Image.memory(_imageBytes!), //Place it inside the widget tree
 
   bool isMobilePlatform() {
     return widget.deviceScreenType == DeviceScreenType.mobile;
@@ -149,6 +174,7 @@ class _NewPostState extends State<NewPost> {
               alignment: Alignment.topCenter,
               child: SingleChildScrollView(
                 child: Card(
+                  color: Colors.white,
                   child: Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 15.h),
@@ -216,7 +242,7 @@ class _NewPostState extends State<NewPost> {
                             ),
                             keyboardType: TextInputType.multiline,
                             expands: false,
-                            maxLines: 15,
+                            maxLines: 10,
                             textAlignVertical: TextAlignVertical.top,
                             validator: (value) {
                               if (value?.trim() == '') {
@@ -258,15 +284,32 @@ class _NewPostState extends State<NewPost> {
                                       onPressed: _getImage,
                                       style: ElevatedButton.styleFrom(
                                         shape: const BeveledRectangleBorder(),
+                                        backgroundColor: Colors.indigo[800],
+                                        foregroundColor: Colors.white,
                                       ),
                                       icon: const Icon(Icons.image),
                                       label: const Text('Add Image'),
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        images.isNotEmpty ||
+                                                imageBytes.isNotEmpty
+                                            ? kIsWeb
+                                                ? "${imageBytes.map((e) => e.name)}"
+                                                : "${images.map((e) => e.path)}"
+                                            : "",
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                     ElevatedButton.icon(
                                       onPressed: _discardPost,
                                       style: ElevatedButton.styleFrom(
                                         shape: const BeveledRectangleBorder(),
+                                        backgroundColor: Colors.red[900],
+                                        foregroundColor: Colors.white,
                                       ),
                                       icon: const Icon(Icons.delete_outline),
                                       label: const Text('Discard'),
@@ -278,6 +321,12 @@ class _NewPostState extends State<NewPost> {
                                       onPressed: _publishPost,
                                       style: ElevatedButton.styleFrom(
                                         shape: const BeveledRectangleBorder(),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        foregroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
                                       ),
                                       icon: const Icon(Icons.send),
                                       label: const Text('Publish'),

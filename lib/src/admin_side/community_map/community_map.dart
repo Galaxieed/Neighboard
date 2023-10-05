@@ -100,6 +100,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
         siteAbout: '',
         siteThemeColor: currentThemeColor.value,
         siteLogo: '',
+        siteLogoDark: '',
         siteHomepageImage: '',
         siteAboutImage: '',
       );

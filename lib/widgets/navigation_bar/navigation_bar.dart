@@ -45,7 +45,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
           width: 10,
         ),
         NavBarBadges(
-          count: "1",
+          count: null,
           icon: const Icon(Icons.chat_outlined),
           callback: () {
             openChat != null ? openChat!() : null;
@@ -55,7 +55,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
           width: 10,
         ),
         NavBarBadges(
-          count: "2",
+          count: null,
           icon: const Icon(Icons.notifications_outlined),
           callback: () {
             openNotification != null ? openNotification!() : null;
@@ -83,18 +83,27 @@ class NavBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        siteModel == null
-            ? const Icon(Icons.api_sharp)
-            : siteModel!.siteLogo == ''
-                ? const Icon(Icons.api_sharp)
-                : Image.network(siteModel!.siteLogo),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-      ],
+    return InkWell(
+      onTap: () {
+        Routes().navigate("Home", context);
+      },
+      child: Row(
+        children: [
+          siteModel == null
+              ? const Icon(Icons.api_sharp)
+              : siteModel!.siteLogo == ''
+                  ? const Icon(Icons.api_sharp)
+                  : Image.network(isDarkMode
+                      ? siteModel!.siteLogoDark != ''
+                          ? siteModel!.siteLogoDark
+                          : siteModel!.siteLogo
+                      : siteModel!.siteLogo),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -213,12 +222,12 @@ class _LightDarkModeState extends State<LightDarkMode> {
 class NavBarBadges extends StatefulWidget {
   const NavBarBadges({
     Key? key,
-    required this.count,
+    this.count,
     required this.icon,
     required this.callback,
   }) : super(key: key);
 
-  final String count;
+  final String? count;
   final Icon icon;
   final Function callback;
 
@@ -237,7 +246,7 @@ class _NavBarBadgesState extends State<NavBarBadges> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Badge(
-          label: Text(widget.count),
+          label: widget.count != null ? Text(widget.count!) : null,
           backgroundColor: Colors.blue,
           child: widget.icon,
         ),

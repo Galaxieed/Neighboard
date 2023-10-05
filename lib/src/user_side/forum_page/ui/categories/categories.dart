@@ -170,7 +170,7 @@ class _SinglePostState extends State<SinglePost> {
   }
 
   void onOpenPost() async {
-    if (!isAlreadyViewed && _auth.currentUser != null) {
+    if (!isAlreadyViewed && _auth.currentUser != null && !widget.isAdmin) {
       setState(() {
         isAlreadyViewed = true;
         widget.post.noOfViews += 1;
@@ -189,53 +189,79 @@ class _SinglePostState extends State<SinglePost> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SmallProfilePic(profilePic: widget.post.profilePicture),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    AuthorNameText(authorName: widget.post.authorName),
-                    PostTimeText(time: widget.post.timeStamp)
-                  ],
-                )),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            PostTitleText(title: widget.post.title),
-            const SizedBox(
-              height: 5,
-            ),
-            PostContentText(
-              content: widget.post.content,
-              maxLine: 1,
-              textOverflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            ActionBarPosts(
-              post: widget.post,
-              isAdmin: widget.isAdmin,
-              denyPost: widget.denyPost,
-              approvePost: widget.approvePost,
-              onOpenPost: onOpenPost,
-              deviceScreenType: widget.deviceScreenType,
-            )
-          ],
+      child: InkWell(
+        borderRadius: BorderRadius.circular(4),
+        onTap: () {
+          onOpenPost();
+          widget.deviceScreenType != DeviceScreenType.mobile
+              ? showDialog(
+                  context: context,
+                  builder: (BuildContext context) => Dialog(
+                      child: PostModal(
+                    postModel: widget.post,
+                    deviceScreenType: widget.deviceScreenType,
+                  )),
+                )
+              : showModalBottomSheet(
+                  useSafeArea: true,
+                  useRootNavigator: true,
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (context) => PostModal(
+                    postModel: widget.post,
+                    deviceScreenType: widget.deviceScreenType,
+                  ),
+                );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  SmallProfilePic(profilePic: widget.post.profilePicture),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      AuthorNameText(authorName: widget.post.authorName),
+                      PostTimeText(time: widget.post.timeStamp)
+                    ],
+                  )),
+                  IconButton(
+                      onPressed: () {}, icon: const Icon(Icons.more_vert)),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              PostTitleText(title: widget.post.title),
+              const SizedBox(
+                height: 5,
+              ),
+              PostContentText(
+                content: widget.post.content,
+                maxLine: 1,
+                textOverflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ActionBarPosts(
+                post: widget.post,
+                isAdmin: widget.isAdmin,
+                denyPost: widget.denyPost,
+                approvePost: widget.approvePost,
+                onOpenPost: onOpenPost,
+                deviceScreenType: widget.deviceScreenType,
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -322,30 +348,11 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
               const SizedBox(
                 width: 20,
               ),
-              IconButton(
-                onPressed: () {
-                  widget.onOpenPost();
-                  widget.deviceScreenType != DeviceScreenType.mobile
-                      ? showDialog(
-                          context: context,
-                          builder: (BuildContext context) => Dialog(
-                              child: PostModal(
-                            postModel: widget.post,
-                            deviceScreenType: widget.deviceScreenType,
-                          )),
-                        )
-                      : showModalBottomSheet(
-                          useSafeArea: true,
-                          useRootNavigator: true,
-                          isScrollControlled: true,
-                          context: context,
-                          builder: (context) => PostModal(
-                            postModel: widget.post,
-                            deviceScreenType: widget.deviceScreenType,
-                          ),
-                        );
-                },
-                icon: const Icon(Icons.mode_comment_outlined),
+              AbsorbPointer(
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.mode_comment_outlined),
+                ),
               ),
               Text('${widget.post.noOfComments}'),
               const SizedBox(
