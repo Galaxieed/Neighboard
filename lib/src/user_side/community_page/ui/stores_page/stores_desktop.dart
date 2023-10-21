@@ -6,14 +6,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/store_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class StoresDesktop extends StatefulWidget {
@@ -29,10 +36,12 @@ class StoresDesktop extends StatefulWidget {
 class _StoresDesktopState extends State<StoresDesktop> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _ctrlName = TextEditingController();
+  final TextEditingController _ctrlOffers = TextEditingController();
   final TextEditingController _ctrlHouseNo = TextEditingController();
   final TextEditingController _ctrlStreet = TextEditingController();
   final TextEditingController _ctrlContactInfo = TextEditingController();
   String _name = '';
+  String _offers = '';
   String _houseNo = '';
   String _street = '';
   String _contactInfo = '';
@@ -50,6 +59,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
     setState(() {
       _ctrlContactInfo.text = '';
       _ctrlName.text = '';
+      _ctrlOffers.text = '';
       _ctrlHouseNo.text = '';
       _ctrlStreet.text = '';
       isOnNewPost = !isOnNewPost;
@@ -84,6 +94,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
       StoreModel storeModel = StoreModel(
           storeId: DateTime.now().toIso8601String(),
           storeName: _name,
+          storeOffers: _offers,
           storeHouseNumber: _houseNo,
           storeStreetName: _street,
           storeContactNo: _contactInfo,
@@ -94,11 +105,12 @@ class _StoresDesktopState extends State<StoresDesktop> {
       if (isSuccessful) {
         storeModels.add(storeModel);
         storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
+        await sendNotifToAll();
         onNewStore();
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Announcement successfully posted"),
+            content: Text("Store successfully added"),
           ),
         );
       }
@@ -125,9 +137,44 @@ class _StoresDesktopState extends State<StoresDesktop> {
     setState(() {});
   }
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "New Store Added: ",
+      _ctrlName.text,
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "New Store Added: ",
+      notifBody: _ctrlName.text,
+      notifTime: formattedDate(),
+      notifLocation: "STORE",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     getAllStores();
   }
 
@@ -136,6 +183,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
     _ctrlContactInfo.dispose();
     _ctrlHouseNo.dispose();
     _ctrlName.dispose();
+    _ctrlOffers.dispose();
     _ctrlStreet.dispose();
     super.dispose();
   }
@@ -167,7 +215,11 @@ class _StoresDesktopState extends State<StoresDesktop> {
                     openNotification: _openNotification,
                     openChat: _openChat,
                   ),
-            endDrawer: widget.isAdmin ? null : const NotificationDrawer(),
+            endDrawer: widget.isAdmin
+                ? null
+                : const NotificationDrawer(
+                    deviceScreenType: DeviceScreenType.desktop,
+                  ),
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
               transitionBuilder: (Widget child, Animation<double> animation) {
@@ -248,6 +300,23 @@ class _StoresDesktopState extends State<StoresDesktop> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Name is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        TextFormField(
+                          controller: _ctrlOffers,
+                          onSaved: (newValue) => _offers = newValue!,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 4.0),
+                            ),
+                            labelText: "Products and Services",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Products and Services is required';
                             }
                             return null;
                           },
@@ -436,7 +505,9 @@ class StoresCards extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
               image: DecorationImage(
-                image: NetworkImage(storeModel.storeImage),
+                image: storeModel.storeImage == ""
+                    ? const AssetImage(noImage) as ImageProvider
+                    : NetworkImage(storeModel.storeImage),
                 fit: BoxFit.cover,
                 opacity: 0.25,
               ),
@@ -459,7 +530,7 @@ class StoresCards extends StatelessWidget {
                             storeModel.storeName,
                             style: Theme.of(context)
                                 .textTheme
-                                .headlineMedium!
+                                .titleLarge!
                                 .copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -468,8 +539,15 @@ class StoresCards extends StatelessWidget {
                             height: 20,
                           ),
                           Text(
+                            storeModel.storeOffers,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Text(
                             "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],
                       ),
@@ -478,10 +556,10 @@ class StoresCards extends StatelessWidget {
                       width: 32,
                     ),
                     Flexible(
-                      flex: 3,
+                      flex: 2,
                       child: Container(
-                        width: 600,
-                        height: 600,
+                        width: 500,
+                        height: 500,
                         decoration: storeModel.storeImage == ""
                             ? BoxDecoration(
                                 image: const DecorationImage(

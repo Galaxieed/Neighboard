@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
-import 'package:neighboard/src/admin_side/admin_side.dart';
-import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
 
@@ -32,16 +31,35 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
     bool isAdmin = loginResult == "ADMIN";
 
     if (isUser) {
+      //Update deviceToken
+      // try {
+      //   Map<String, dynamic> deviceToken = {
+      //     'device_token': myToken,
+      //   };
+      //   await ProfileFunction.updateUserProfile(deviceToken);
+      // } catch (e) {
+      //   print(e);
+      // }
+
       // ignore: use_build_context_synchronously
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const ForumPage()),
+          MaterialPageRoute(builder: (_) => const ScreenDirect()),
           (route) => false);
     } else if (isAdmin) {
+      //Update deviceToken
+      // try {
+      //   Map<String, dynamic> deviceToken = {
+      //     'device_token': myToken,
+      //   };
+      //   await ProfileFunction.updateUserProfile(deviceToken);
+      // } catch (e) {
+      //   print(e);
+      // }
       // ignore: use_build_context_synchronously
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const AdminSide()),
+          MaterialPageRoute(builder: (context) => const ScreenDirect()),
           (route) => false);
     } else {
       if (loginResult ==

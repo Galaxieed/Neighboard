@@ -4,13 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/store_model.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
@@ -29,10 +35,12 @@ class StoresMobile extends StatefulWidget {
 class _StoresMobileState extends State<StoresMobile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _ctrlName = TextEditingController();
+  final TextEditingController _ctrlOffers = TextEditingController();
   final TextEditingController _ctrlHouseNo = TextEditingController();
   final TextEditingController _ctrlStreet = TextEditingController();
   final TextEditingController _ctrlContactInfo = TextEditingController();
   String _name = '';
+  String _offers = '';
   String _houseNo = '';
   String _street = '';
   String _contactInfo = '';
@@ -50,6 +58,7 @@ class _StoresMobileState extends State<StoresMobile> {
     setState(() {
       _ctrlContactInfo.text = '';
       _ctrlName.text = '';
+      _ctrlOffers.text = '';
       _ctrlHouseNo.text = '';
       _ctrlStreet.text = '';
       isOnNewPost = !isOnNewPost;
@@ -84,6 +93,7 @@ class _StoresMobileState extends State<StoresMobile> {
       StoreModel storeModel = StoreModel(
           storeId: DateTime.now().toIso8601String(),
           storeName: _name,
+          storeOffers: _offers,
           storeHouseNumber: _houseNo,
           storeStreetName: _street,
           storeContactNo: _contactInfo,
@@ -94,11 +104,12 @@ class _StoresMobileState extends State<StoresMobile> {
       if (isSuccessful) {
         storeModels.add(storeModel);
         storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
+        await sendNotifToAll();
         onNewStore();
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Announcement successfully posted"),
+            content: Text("Store successfully Added"),
           ),
         );
       }
@@ -134,9 +145,44 @@ class _StoresMobileState extends State<StoresMobile> {
     );
   }
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "New Store Added: ",
+      _ctrlName.text,
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "New Store Added: ",
+      notifBody: _ctrlName.text,
+      notifTime: formattedDate(),
+      notifLocation: "STORE",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     getAllStores();
   }
 
@@ -145,6 +191,7 @@ class _StoresMobileState extends State<StoresMobile> {
     _ctrlContactInfo.dispose();
     _ctrlHouseNo.dispose();
     _ctrlName.dispose();
+    _ctrlOffers.dispose();
     _ctrlStreet.dispose();
     super.dispose();
   }
@@ -257,6 +304,26 @@ class _StoresMobileState extends State<StoresMobile> {
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Name is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        TextFormField(
+                          controller: _ctrlOffers,
+                          onSaved: (newValue) => _offers = newValue!,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.black, width: 4.0),
+                            ),
+                            labelText: "Products and Services",
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Products and Services is required';
                             }
                             return null;
                           },
@@ -473,6 +540,14 @@ class StoresCards extends StatelessWidget {
                       Text(
                         storeModel.storeName,
                         style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        storeModel.storeOffers,
+                        style: Theme.of(context).textTheme.bodyMedium,
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(

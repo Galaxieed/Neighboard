@@ -21,14 +21,12 @@ class CommunityMapMobile extends StatefulWidget {
 }
 
 class _CommunityMapMobileState extends State<CommunityMapMobile> {
-  double lat = 14.827335497500572;
-
-  double long = 120.87190527693967;
-
+  double lat = 0;
+  double long = 0;
   late LatLng centerLoc;
 
   void getMapLoc() {
-    if (siteModel != null) {
+    if (siteModel != null && siteModel!.siteLocation != '') {
       lat = double.parse(siteModel!.siteLocation.split('|')[0]);
       long = double.parse(siteModel!.siteLocation.split('|')[1]);
     }

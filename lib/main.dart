@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/models/site_model.dart';
@@ -7,6 +8,16 @@ import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 
+AndroidNotificationChannel channel = const AndroidNotificationChannel(
+  'high_importance_channel', // id
+  'High Importance Notifications', // title
+  description:
+      'This channel is used for important notifications.', // description
+  importance: Importance.high,
+);
+
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

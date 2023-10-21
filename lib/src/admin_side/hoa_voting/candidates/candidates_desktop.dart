@@ -4,10 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
+import 'package:neighboard/models/notification_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -109,6 +115,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
           );
         }
         isElectionOngoing = true;
+        await sendNotifToAll();
         // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -192,9 +199,45 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     });
   }
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "New Election has added: ",
+      '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}',
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "New Election has added: ",
+      notifBody:
+          '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}',
+      notifTime: formattedDate(),
+      notifLocation: "ELECTION",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     checkIfElectionOngoing();
   }
 

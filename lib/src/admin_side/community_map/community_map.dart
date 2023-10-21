@@ -5,9 +5,15 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocode/geocode.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/site_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AdminCommunityMap extends StatefulWidget {
@@ -108,6 +114,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
+        await sendNotifToAll();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Site successfully updated"),
@@ -120,7 +127,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
         'site_location': '$newLatitude|$newLongitude',
       };
       await SiteSettingsFunction.updateSiteSettings(siteDetails);
-
+      await sendNotifToAll();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Map location successfully updated"),
@@ -142,9 +149,44 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
     // Do something with the latitude and longitude
   }
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "New map location has been set: ",
+      "",
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "New map location has been set: ",
+      notifBody: "",
+      notifTime: formattedDate(),
+      notifLocation: "MAP",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     getSiteLocation();
   }
 

@@ -7,6 +7,7 @@ import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CommunityMapDesktop extends StatefulWidget {
@@ -63,7 +64,9 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const NotificationDrawer(),
+      endDrawer: const NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _moveMap,
         tooltip: 'Move Map',

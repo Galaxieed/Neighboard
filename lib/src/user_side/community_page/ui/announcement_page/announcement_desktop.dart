@@ -9,6 +9,7 @@ import 'package:neighboard/src/admin_side/announcements/announcement_function.da
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class AnnouncementDesktop extends StatefulWidget {
   const AnnouncementDesktop({super.key});
@@ -23,7 +24,8 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
 
   void getAllAnnouncements() async {
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
-    announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+    announcementModels
+        .sort((a, b) => b.announcementId.compareTo(a.announcementId));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -43,10 +45,12 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
             (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "date" && isDateAsc) {
-        announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+        announcementModels
+            .sort((a, b) => b.announcementId.compareTo(a.announcementId));
         isDateAsc = !isDateAsc;
       } else if (type == "date" && !isDateAsc) {
-        announcementModels.sort((a, b) => a.datePosted.compareTo(b.datePosted));
+        announcementModels
+            .sort((a, b) => a.announcementId.compareTo(b.announcementId));
         isDateAsc = !isDateAsc;
       }
     });
@@ -97,7 +101,9 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const NotificationDrawer(),
+      endDrawer: const NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         child: announcementModels == []
@@ -187,21 +193,16 @@ class MainAnnouncement extends StatelessWidget {
     return Column(
       children: [
         Flexible(
-          child: announcementModel.image == ""
-              ? Container(
-                  color: Colors.grey[350],
-                  child: const Center(
-                    child: Text("No Image"),
-                  ),
-                )
-              : Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(announcementModel.image),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: announcementModel.image == ""
+                    ? const AssetImage(noImage) as ImageProvider
+                    : NetworkImage(announcementModel.image),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
         Container(
           decoration: BoxDecoration(
@@ -242,13 +243,14 @@ class MainAnnouncement extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
                               image: DecorationImage(
-                                image: NetworkImage(announcementModel.image),
+                                image: announcementModel.image == ""
+                                    ? const AssetImage(noImage) as ImageProvider
+                                    : NetworkImage(announcementModel.image),
                                 fit: BoxFit.cover,
                                 opacity: 0.25,
                               ),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(30),
                               child: BackdropFilter(
                                 filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                                 child: Row(
@@ -256,42 +258,44 @@ class MainAnnouncement extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Flexible(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            announcementModel.title,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headlineMedium!
-                                                .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          Text(
-                                            "${announcementModel.datePosted}\n${announcementModel.details}",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge,
-                                          ),
-                                        ],
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              announcementModel.title,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge!
+                                                  .copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                            const SizedBox(
+                                              height: 20,
+                                            ),
+                                            Text(
+                                              "${announcementModel.datePosted}\n${announcementModel.details}",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyLarge,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(
                                       width: 32,
                                     ),
                                     Flexible(
-                                      flex: 3,
+                                      flex: 2,
                                       child: Container(
-                                        width: 600,
-                                        height: 600,
+                                        width: 500,
+                                        height: 500,
                                         decoration: announcementModel.image ==
                                                 ""
                                             ? BoxDecoration(
@@ -407,14 +411,15 @@ class OtherAnnouncement extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(30),
                                   image: DecorationImage(
-                                    image:
-                                        NetworkImage(announcementModel.image),
+                                    image: announcementModel.image == ""
+                                        ? const AssetImage(noImage)
+                                            as ImageProvider
+                                        : NetworkImage(announcementModel.image),
                                     fit: BoxFit.cover,
                                     opacity: 0.25,
                                   ),
                                 ),
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(30),
                                   child: BackdropFilter(
                                     filter:
                                         ImageFilter.blur(sigmaX: 5, sigmaY: 5),
@@ -424,43 +429,45 @@ class OtherAnnouncement extends StatelessWidget {
                                           MainAxisAlignment.center,
                                       children: [
                                         Flexible(
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                announcementModel.title,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .headlineMedium!
-                                                    .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                              ),
-                                              const SizedBox(
-                                                height: 20,
-                                              ),
-                                              Text(
-                                                "${announcementModel.datePosted}\n${announcementModel.details}",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .titleLarge,
-                                              ),
-                                            ],
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  announcementModel.title,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleLarge!
+                                                      .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 20,
+                                                ),
+                                                Text(
+                                                  "${announcementModel.datePosted}\n${announcementModel.details}",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(
                                           width: 32,
                                         ),
                                         Flexible(
-                                          flex: 3,
+                                          flex: 2,
                                           child: Container(
-                                            width: 600,
-                                            height: 600,
+                                            width: 500,
+                                            height: 500,
                                             decoration: announcementModel
                                                         .image ==
                                                     ""

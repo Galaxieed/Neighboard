@@ -113,13 +113,16 @@ class _MyChatState extends State<MyChat> {
                                 chatModels.sort(
                                     (a, b) => b.chatId.compareTo(a.chatId));
                                 ChatModel chat = chatModels[index];
+                                String currentDate =
+                                    chat.timestamp.split('| ')[0];
                                 return Column(
                                   children: [
-                                    if (chat.timestamp.split('| ')[0] !=
-                                        chatModels[index > 0 &&
-                                                    index <
-                                                        chatModels.length - 1
-                                                ? index + 1
+                                    //DATE DIVIDER
+                                    if (currentDate !=
+                                        chatModels[index > 0
+                                                ? index < chatModels.length - 1
+                                                    ? index + 1
+                                                    : index
                                                 : index]
                                             .timestamp
                                             .split('| ')[0])
@@ -127,11 +130,33 @@ class _MyChatState extends State<MyChat> {
                                         children: [
                                           const Expanded(child: Divider()),
                                           Text(
-                                            chat.timestamp.split('| ')[0],
+                                            currentDate,
+                                          ),
+                                          const Expanded(child: Divider()),
+                                        ],
+                                      )
+                                    else if (index == chatModels.length - 1)
+                                      Row(
+                                        children: [
+                                          const Expanded(child: Divider()),
+                                          Text(
+                                            currentDate,
+                                          ),
+                                          const Expanded(child: Divider()),
+                                        ],
+                                      )
+                                    else if (currentDate ==
+                                        chatModels[0].timestamp)
+                                      Row(
+                                        children: [
+                                          const Expanded(child: Divider()),
+                                          Text(
+                                            index.toString(),
                                           ),
                                           const Expanded(child: Divider()),
                                         ],
                                       ),
+                                    //THE CHAT
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,

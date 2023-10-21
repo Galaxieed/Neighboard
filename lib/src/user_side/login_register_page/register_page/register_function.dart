@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/screen_direct.dart';
 
 class RegisterFunction {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -49,18 +50,20 @@ class RegisterFunction {
     try {
       String userId = _auth.currentUser!.uid;
       UserModel userModel = UserModel(
-          userId: userId,
-          firstName: firstName,
-          lastName: lastName,
-          username: username,
-          email: email,
-          address: "",
-          contactNo: "",
-          socialMediaLinks: [],
-          rank: 0,
-          posts: 0,
-          profilePicture: "",
-          role: "USER");
+        userId: userId,
+        firstName: firstName,
+        lastName: lastName,
+        username: username,
+        email: email,
+        address: "",
+        contactNo: "",
+        socialMediaLinks: [],
+        rank: 0,
+        posts: 0,
+        profilePicture: "",
+        role: "USER",
+        deviceToken: myToken,
+      );
       await _firestore.collection("users").doc(userId).set(userModel.toJson());
     } catch (e) {
       return;

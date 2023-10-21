@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/admin_side/admin_side.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
@@ -36,12 +38,22 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
     bool isAdmin = loginResult == "ADMIN";
 
     if (isUser) {
+      //Update deviceToken
+      Map<String, dynamic> deviceToken = {
+        'device_token': myToken,
+      };
+      await ProfileFunction.updateUserProfile(deviceToken);
       // ignore: use_build_context_synchronously
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const ForumPage()),
           (route) => false);
     } else if (isAdmin) {
+      //Update deviceToken
+      Map<String, dynamic> deviceToken = {
+        'device_token': myToken,
+      };
+      await ProfileFunction.updateUserProfile(deviceToken);
       // ignore: use_build_context_synchronously
       Navigator.pushAndRemoveUntil(
           context,

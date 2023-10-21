@@ -11,6 +11,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
@@ -170,7 +171,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     openNotification: _openNotification,
                     openChat: _openChat,
                   ),
-            endDrawer: const NotificationDrawer(),
+            endDrawer: const NotificationDrawer(
+              deviceScreenType: DeviceScreenType.desktop,
+            ),
             body: Padding(
               padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
               child: ListView(

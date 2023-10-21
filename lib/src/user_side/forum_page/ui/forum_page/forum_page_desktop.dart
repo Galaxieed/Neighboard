@@ -71,7 +71,9 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const NotificationDrawer(),
+      endDrawer: const NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Row(

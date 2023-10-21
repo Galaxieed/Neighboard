@@ -224,16 +224,16 @@ class MainAnnouncement extends StatelessWidget {
     return Column(
       children: [
         Flexible(
-          child: announcementModel.image == ""
-              ? const Center(child: Text("No Image"))
-              : Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(announcementModel.image),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: announcementModel.image == ""
+                    ? const AssetImage(noImage) as ImageProvider
+                    : NetworkImage(announcementModel.image),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
         Container(
           decoration: BoxDecoration(

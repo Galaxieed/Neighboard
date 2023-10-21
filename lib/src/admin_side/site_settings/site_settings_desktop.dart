@@ -5,10 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/site_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
@@ -156,6 +162,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
+        await sendNotifToAll();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Site settings successfully added"),
@@ -176,6 +183,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       };
       await SiteSettingsFunction.updateSiteSettings(siteDetails);
       await getSiteSettings();
+      await sendNotifToAll();
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -203,9 +211,44 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     setState(() {});
   }
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "Site Settings had changed: ",
+      "Refresh to see changes.",
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "Site Settings had changed: ",
+      notifBody: "Refresh to see changes.",
+      notifTime: formattedDate(),
+      notifLocation: "SITE",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     getSiteSettings();
   }
 

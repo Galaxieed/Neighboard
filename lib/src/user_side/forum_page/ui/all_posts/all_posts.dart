@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -6,7 +5,6 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';
-import 'package:neighboard/widgets/post/post_interactors_function.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
@@ -118,29 +116,10 @@ class SinglePost extends StatefulWidget {
 }
 
 class _SinglePostState extends State<SinglePost> {
-  bool isAlreadyViewed = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  void checkIfAlreadyViewed() async {
-    isAlreadyViewed = await PostInteractorsFunctions.isAlreadyViewed(
-        postId: widget.post.postId);
-    setState(() {});
-  }
-
-  void onOpenPost() async {
-    if (!isAlreadyViewed && _auth.currentUser != null) {
-      setState(() {
-        isAlreadyViewed = true;
-        widget.post.noOfViews += 1;
-      });
-      await PostInteractorsFunctions.onViewPost(widget.post.postId, true);
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    checkIfAlreadyViewed();
+    //checkIfAlreadyViewed();
   }
 
   @override
@@ -149,7 +128,6 @@ class _SinglePostState extends State<SinglePost> {
       child: InkWell(
         borderRadius: BorderRadius.circular(4),
         onTap: () {
-          onOpenPost();
           widget.deviceScreenType != DeviceScreenType.mobile
               ? showDialog(
                   context: context,
@@ -215,7 +193,6 @@ class _SinglePostState extends State<SinglePost> {
               ActionBarPosts(
                 post: widget.post,
                 isAdmin: widget.isAdmin,
-                onOpenPost: onOpenPost,
                 deviceScreenType: widget.deviceScreenType,
               )
             ],
@@ -232,12 +209,10 @@ class ActionBarPosts extends StatefulWidget {
     required this.post,
     required this.isAdmin,
     required this.deviceScreenType,
-    required this.onOpenPost,
   });
 
   final PostModel post;
   final bool isAdmin;
-  final Function onOpenPost;
   final DeviceScreenType deviceScreenType;
 
   @override

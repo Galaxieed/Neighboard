@@ -14,6 +14,7 @@ import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_v
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:responsive_builder/responsive_builder.dart';
 
 class HOAVotingDesktop extends StatefulWidget {
   const HOAVotingDesktop({super.key});
@@ -192,7 +193,9 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
         openNotification: _openNotification,
         openChat: _openChat,
       ),
-      endDrawer: const NotificationDrawer(),
+      endDrawer: const NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+      ),
       body: isLoading
           ? const LoadingScreen()
           : Container(

@@ -5,10 +5,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/announcement_model.dart';
+import 'package:neighboard/models/notification_model.dart';
+import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
+import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_desktop.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:universal_io/io.dart';
 
@@ -39,7 +44,8 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
 
   void getAllAnnouncements() async {
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
-    announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+    announcementModels
+        .sort((a, b) => b.announcementId.compareTo(a.announcementId));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -72,7 +78,9 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
 
     if (isSuccessful) {
       announcementModels.add(announcementModel);
-      announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+      announcementModels
+          .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+      await sendNotifToAll();
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -115,10 +123,12 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
             (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "date" && isDateAsc) {
-        announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+        announcementModels
+            .sort((a, b) => b.announcementId.compareTo(a.announcementId));
         isDateAsc = !isDateAsc;
       } else if (type == "date" && !isDateAsc) {
-        announcementModels.sort((a, b) => a.datePosted.compareTo(b.datePosted));
+        announcementModels
+            .sort((a, b) => a.announcementId.compareTo(b.announcementId));
         isDateAsc = !isDateAsc;
       }
     });
@@ -141,9 +151,44 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
     ),
   ];
 
+  List<UserModel> allUsers = [];
+  getAllUsers() async {
+    allUsers = await VotersFunction.getAllUsers() ?? [];
+    //remove the admin from the list of users
+    allUsers = allUsers.where((element) => element.role != "ADMIN").toList();
+  }
+
+  //send notif to one
+  Future<void> sendNotificaton(UserModel user) async {
+    await MyNotification().sendPushMessage(
+      user.deviceToken,
+      "New Announcement: ",
+      _ctrlTitle.text,
+    );
+
+    //ADD sa notification TAB
+    NotificationModel notificationModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "New Announcement: ",
+      notifBody: _ctrlTitle.text,
+      notifTime: formattedDate(),
+      notifLocation: "ANNOUNCEMENT",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
+    await Future.forEach(allUsers, sendNotificaton);
+  }
+
   @override
   void initState() {
     super.initState();
+    getAllUsers();
     getAllAnnouncements();
   }
 

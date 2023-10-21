@@ -4,6 +4,7 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/post/post_interactors_function.dart';
 
+//FOR SHOWING NO OF VIEWS AND UPVOTES (People)
 class PostInteractors extends StatefulWidget {
   const PostInteractors({
     super.key,

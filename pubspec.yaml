@@ -58,6 +58,9 @@ dependencies:
   geocode: ^1.0.3
   latlong2: 
   hidable: ^1.0.5
+  firebase_messaging: ^14.6.9
+  flutter_local_notifications: ^16.0.0+1
+  elegant_notification: ^1.11.2
 
 dev_dependencies:
   flutter_test:

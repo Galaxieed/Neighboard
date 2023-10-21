@@ -5,13 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
 import 'package:neighboard/widgets/post/post_modal_comment.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -31,7 +35,7 @@ class _PostModalState extends State<PostModal> {
   FocusNode focusComment = FocusNode();
   final TextEditingController _ctrlComment = TextEditingController();
   List<CommentModel> commentModels = [];
-  UserModel? currentUser;
+  UserModel? currentUser, otherUser;
   bool isUpvoted = false;
   bool isLoading = true;
   bool isLoggedIn = false;
@@ -41,12 +45,40 @@ class _PostModalState extends State<PostModal> {
     currentUser = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
   }
 
+  sendNotification(userId, title, body) async {
+    otherUser = await ProfileFunction.getUserDetails(userId);
+    await MyNotification().sendPushMessage(
+      otherUser!.deviceToken,
+      title,
+      body,
+    );
+
+    //ADD sa notification TAB
+
+    if (otherUser!.userId != currentUser!.userId) {
+      NotificationModel notificationModel = NotificationModel(
+        notifId: DateTime.now().toIso8601String(),
+        notifTitle: title,
+        notifBody: body,
+        notifTime: formattedDate(),
+        notifLocation: "FORUM|${widget.postModel.postId}",
+        isRead: false,
+        isArchived: false,
+      );
+
+      await NotificationFunction.addNotification(
+          notificationModel, otherUser!.userId);
+    } else {
+      print("SI CURRENT USER TO");
+    }
+  }
+
   void addComment() async {
     if (_ctrlComment.text.isNotEmpty) {
       //for reply in mobile layout
       if (respondType != null && respondType == "REPLY") {
         addReplyMobile();
-        _ctrlComment.clear();
+
         respondType = '';
         FocusManager.instance.primaryFocus?.unfocus();
         return;
@@ -76,6 +108,13 @@ class _PostModalState extends State<PostModal> {
           isLoading = false;
         });
       }
+
+      //send notification to the author of this post
+      sendNotification(
+        widget.postModel.authorId,
+        '${currentUser!.username} commented on this post: ',
+        widget.postModel.title,
+      );
     } else {
       return;
     }
@@ -114,6 +153,12 @@ class _PostModalState extends State<PostModal> {
       });
       await MyPostFunction.onUpvoteAndUnUpvote(
           postId: widget.postModel.postId, isUpvoted: true);
+
+      //send Notification to the author when upvoted
+      sendNotification(
+          widget.postModel.authorId,
+          '${currentUser!.username} upvoted this post: ',
+          widget.postModel.title);
     }
   }
 
@@ -142,11 +187,17 @@ class _PostModalState extends State<PostModal> {
       recipientName: recipientName!,
       replyMessage: _ctrlComment.text,
     );
+    //send notification to the recipient of this reply (from mobile)
+    sendNotification(
+      recipientId,
+      '${currentUser!.username} replied: ',
+      _ctrlComment.text,
+    );
     await CommentFunction.postReply(
       postId: widget.postModel.postId,
       commentId: cmntId!,
       replyModel: newReply,
-    );
+    ).then((value) => _ctrlComment.clear());
   }
 
   addReplyCallback(
@@ -158,6 +209,26 @@ class _PostModalState extends State<PostModal> {
     );
   }
 
+  bool isAlreadyViewed = false;
+
+  void checkIfAlreadyViewed() async {
+    isAlreadyViewed = await PostInteractorsFunctions.isAlreadyViewed(
+        postId: widget.postModel.postId);
+
+    onOpenPost();
+    setState(() {});
+  }
+
+  void onOpenPost() async {
+    if (!isAlreadyViewed) {
+      setState(() {
+        isAlreadyViewed = true;
+        widget.postModel.noOfViews += 1;
+      });
+      await PostInteractorsFunctions.onViewPost(widget.postModel.postId, true);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -165,6 +236,7 @@ class _PostModalState extends State<PostModal> {
       getCurrentUser();
       isLoggedIn = true;
       checkIfUpVoted();
+      checkIfAlreadyViewed();
       setState(() {});
     } else {
       isLoggedIn = false;

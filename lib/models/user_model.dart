@@ -11,6 +11,7 @@ class UserModel {
   late int posts;
   late String profilePicture;
   late String role;
+  late String deviceToken;
 
   UserModel({
     required this.userId,
@@ -25,6 +26,7 @@ class UserModel {
     required this.posts,
     required this.profilePicture,
     required this.role,
+    required this.deviceToken,
   });
 
   UserModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class UserModel {
     posts = json['posts'];
     profilePicture = json['profile_picture'];
     role = json['role'];
+    deviceToken = json['device_token'];
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +59,7 @@ class UserModel {
     data['posts'] = posts;
     data['profile_picture'] = profilePicture;
     data['role'] = role;
+    data['device_token'] = deviceToken;
     return data;
   }
 }

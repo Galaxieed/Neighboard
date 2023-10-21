@@ -75,7 +75,9 @@ class LandingPage extends StatelessWidget {
             openNotification: openNotification,
             openChat: openChat,
           ),
-          endDrawer: const NotificationDrawer(),
+          endDrawer: NotificationDrawer(
+            deviceScreenType: sizingInformation.deviceScreenType,
+          ),
           body: LandingPageDesktop(
             header: header,
             subHeader: subHeader,

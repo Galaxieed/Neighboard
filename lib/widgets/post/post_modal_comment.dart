@@ -1,11 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
+import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -45,6 +50,33 @@ class _PostModalCommentState extends State<PostModalComment> {
   bool isRepliesShown = false;
   bool isLiked = false;
   bool isDisliked = false;
+  UserModel? otherUser;
+
+  sendNotification(userId, title, body) async {
+    otherUser = await ProfileFunction.getUserDetails(userId);
+    await MyNotification().sendPushMessage(
+      otherUser!.deviceToken,
+      title,
+      body,
+    );
+
+    //TODO:add sa notification TAB
+    //Send and add notification sa receiver
+    if (otherUser!.userId != widget.currentUser!.userId) {
+      NotificationModel notificationModel = NotificationModel(
+        notifId: DateTime.now().toIso8601String(),
+        notifTitle: title,
+        notifBody: body,
+        notifTime: formattedDate(),
+        notifLocation: "FORUM|${widget.postModel.postId}",
+        isRead: false,
+        isArchived: false,
+      );
+
+      await NotificationFunction.addNotification(
+          notificationModel, otherUser!.userId);
+    }
+  }
 
   void checkIfLikedOrDisliked() async {
     isLiked = await CommentFunction.isAlreadyLiked(
@@ -83,9 +115,16 @@ class _PostModalCommentState extends State<PostModalComment> {
           isLiked = true;
         });
         await CommentFunction.onLikeAndUnlike(
-            postId: widget.postModel.postId,
-            commentId: widget.commentModel.commentId,
-            isLiked: true);
+          postId: widget.postModel.postId,
+          commentId: widget.commentModel.commentId,
+          isLiked: true,
+        );
+        //send notification to the author of this comment
+        sendNotification(
+          widget.commentModel.senderId,
+          '${widget.currentUser!.username} liked on this comment:',
+          widget.commentModel.commentMessage,
+        );
       }
     }
     if (type == 'dislike') {
@@ -93,9 +132,10 @@ class _PostModalCommentState extends State<PostModalComment> {
         widget.commentModel.noOfLikes -= 1;
         isLiked = false;
         await CommentFunction.onLikeAndUnlike(
-            postId: widget.postModel.postId,
-            commentId: widget.commentModel.commentId,
-            isLiked: false);
+          postId: widget.postModel.postId,
+          commentId: widget.commentModel.commentId,
+          isLiked: false,
+        );
       }
       if (isDisliked) {
         setState(() {
@@ -103,9 +143,10 @@ class _PostModalCommentState extends State<PostModalComment> {
           isDisliked = false;
         });
         await CommentFunction.onDislikeAndUnDislike(
-            postId: widget.postModel.postId,
-            commentId: widget.commentModel.commentId,
-            isDisliked: false);
+          postId: widget.postModel.postId,
+          commentId: widget.commentModel.commentId,
+          isDisliked: false,
+        );
       } else {
         setState(() {
           widget.commentModel.noOfDislikes += 1;
@@ -115,6 +156,12 @@ class _PostModalCommentState extends State<PostModalComment> {
           postId: widget.postModel.postId,
           commentId: widget.commentModel.commentId,
           isDisliked: true,
+        );
+        //send notification to the author of this comment
+        sendNotification(
+          widget.commentModel.senderId,
+          '${widget.currentUser!.username} disliked on this comment:',
+          widget.commentModel.commentMessage,
         );
       }
     }
@@ -272,6 +319,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                             recipientName: widget.commentModel.senderName,
                             recipientId: widget.commentModel.senderId,
                             addReply: addReplyCallback,
+                            postModel: widget.postModel,
                           ),
                         commentReplies(),
                       ],
@@ -324,6 +372,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                     addReply: addReplyCallback,
                     onTypeReply: onTypeReply,
                     deviceScreenType: widget.deviceScreenType,
+                    postModel: widget.postModel,
                   );
                 } else {
                   return const Text('Empty data');
@@ -348,7 +397,9 @@ class ReplyItself extends StatefulWidget {
     required this.addReply,
     required this.onTypeReply,
     required this.deviceScreenType,
+    required this.postModel,
   });
+  final PostModel postModel;
   final DeviceScreenType deviceScreenType;
   final ReplyModel replyModel;
   final UserModel currentUser;
@@ -441,6 +492,7 @@ class _ReplyItselfState extends State<ReplyItself> {
                       recipientName: widget.replyModel.senderName,
                       recipientId: widget.replyModel.senderId,
                       addReply: widget.addReply,
+                      postModel: widget.postModel,
                     )
                   : Container()
               : Container(),
@@ -456,7 +508,9 @@ class ReplyTextBox extends StatefulWidget {
     required this.recipientName,
     required this.recipientId,
     required this.addReply,
+    required this.postModel,
   });
+  final PostModel postModel;
   final String recipientName, recipientId;
   final UserModel currentUser;
   final Function({required ReplyModel reply}) addReply;
@@ -467,6 +521,34 @@ class ReplyTextBox extends StatefulWidget {
 
 class _ReplyTextBoxState extends State<ReplyTextBox> {
   final TextEditingController controller = TextEditingController();
+  UserModel? otherUser;
+
+  sendNotification(userId) async {
+    otherUser = await ProfileFunction.getUserDetails(userId);
+    await MyNotification().sendPushMessage(
+      otherUser!.deviceToken,
+      '${widget.currentUser.username} replied: ',
+      controller.text,
+    );
+
+    //TODO:add sa notification TAB
+    if (otherUser!.userId != widget.currentUser.userId) {
+      NotificationModel notificationModel = NotificationModel(
+        notifId: DateTime.now().toIso8601String(),
+        notifTitle: '${widget.currentUser.username} replied: ',
+        notifBody: controller.text,
+        notifTime: formattedDate(),
+        notifLocation: "FORUM|${widget.postModel.postId}",
+        isRead: false,
+        isArchived: false,
+      );
+
+      await NotificationFunction.addNotification(
+              notificationModel, otherUser!.userId)
+          .then((value) => controller.clear());
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -514,7 +596,9 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
                     replyMessage: controller.text,
                   );
                   widget.addReply(reply: newReply);
-                  controller.clear();
+
+                  //send notification to the recipient of this reply (from desktop)
+                  sendNotification(widget.recipientId);
                 },
           icon: const Icon(Icons.send),
         ),
