@@ -63,9 +63,11 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
       appBar: NavBar(
         openNotification: _openNotification,
         openChat: _openChat,
+        currentPage: "Community",
       ),
-      endDrawer: const NotificationDrawer(
+      endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _moveMap,

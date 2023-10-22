@@ -448,15 +448,32 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                 onPressed: () {
                                   getSiteSettings();
                                 },
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  foregroundColor: Colors.red,
+                                ),
                                 icon: const Icon(Icons.delete_outline),
                                 label: const Text("Discard")),
                             const SizedBox(
-                              width: 20,
+                              width: 10,
                             ),
                             ElevatedButton.icon(
                                 onPressed: () {
                                   onSavingSettings(context);
                                 },
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  backgroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
+                                  foregroundColor: Theme.of(context)
+                                      .colorScheme
+                                      .onBackground,
+                                ),
                                 icon: const Icon(Icons.save_outlined),
                                 label: const Text("Save")),
                           ],

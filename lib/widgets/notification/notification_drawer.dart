@@ -14,9 +14,11 @@ import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class NotificationDrawer extends StatefulWidget {
-  const NotificationDrawer({super.key, required this.deviceScreenType});
+  const NotificationDrawer(
+      {super.key, required this.deviceScreenType, required this.stateSetter});
 
   final DeviceScreenType deviceScreenType;
+  final StateSetter stateSetter;
 
   @override
   State<NotificationDrawer> createState() => _NotificationDrawerState();
@@ -61,8 +63,6 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
   String selectedVal = "All";
   bool isLoading = true;
 
-  List<NotificationModel> notificationModels = [];
-
   List<NotificationModel> unReadNotifications = [];
   void getAllUnreadNotifications() {
     unReadNotifications =
@@ -72,6 +72,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
 
   void readAllNotification() async {
     await NotificationFunction.readAllNotification();
+    widget.stateSetter(() {});
   }
 
   void archiveAllNotification() async {
@@ -80,6 +81,7 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
 
   void readNotification(notificationId) async {
     await NotificationFunction.readNotification(notificationId);
+    widget.stateSetter(() {});
   }
 
   void archiveNotification(notificationId) async {

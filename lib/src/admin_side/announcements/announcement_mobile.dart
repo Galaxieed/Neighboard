@@ -478,22 +478,34 @@ class MainAnnouncement extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        announcementModel.title.toUpperCase(),
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      Text(
-                        announcementModel.timeStamp,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      )
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          announcementModel.title.toUpperCase(),
+                          style: Theme.of(context).textTheme.titleLarge,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          announcementModel.timeStamp,
+                          style: Theme.of(context).textTheme.titleSmall,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      ],
+                    ),
                   ),
-                  Text(
-                    'View Details..',
-                    style: Theme.of(context).textTheme.titleSmall,
+                  AbsorbPointer(
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4))),
+                      child: Text(
+                        'View Details..',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                    ),
                   )
                 ],
               ),

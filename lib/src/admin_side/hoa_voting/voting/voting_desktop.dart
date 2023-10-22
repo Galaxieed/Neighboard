@@ -151,17 +151,17 @@ class _VotingDesktopState extends State<VotingDesktop> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: ccHOANextButtonBGColor(context),
                       foregroundColor: ccHOANextButtonFGColor(context),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
+                      elevation: 1,
                     ),
                     child: const Text("Back"),
                   ),
                 ),
-                SizedBox(
-                  width: 2.w,
+                const SizedBox(
+                  width: 10,
                 ),
                 mycontroller(context).index >= 2
                     ? Container()

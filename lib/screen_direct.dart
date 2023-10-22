@@ -18,6 +18,8 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 
 String myToken = '';
+List<NotificationModel> notificationModels = [];
+StreamSubscription<QuerySnapshot>? subscription;
 
 class ScreenDirect extends StatefulWidget {
   const ScreenDirect({super.key});
@@ -32,8 +34,6 @@ class _ScreenDirectState extends State<ScreenDirect> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  StreamSubscription<QuerySnapshot>? subscription;
 
   UserModel? userModel;
 
@@ -64,7 +64,7 @@ class _ScreenDirectState extends State<ScreenDirect> {
   }
 
   //for Web
-  List<NotificationModel> notificationModels = [];
+
   void listenForNotification() {
     if (isLoggedIn) {
       subscription = _firestore

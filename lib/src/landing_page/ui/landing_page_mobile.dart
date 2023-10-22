@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -60,24 +62,33 @@ class HomePage extends StatelessWidget {
           opacity: ccLandPageBGOpacity,
         ),
       ),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(20.sp),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                LandPageHeader(header: header),
-                SizedBox(
-                  height: 30.h,
+      child: ClipRRect(
+        child: Center(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(20.sp),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    LandPageHeader(header: header),
+                    SizedBox(
+                      height: 30.h,
+                    ),
+                    LandPageHeaderSmall(
+                      header: subHeader,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      height: 60.h,
+                    ),
+                    LandPageButton(
+                        label: 'Explore', callback: Routes().navigate),
+                  ],
                 ),
-                LandPageHeaderSmall(header: subHeader),
-                SizedBox(
-                  height: 60.h,
-                ),
-                LandPageButton(label: 'Explore', callback: Routes().navigate),
-              ],
+              ),
             ),
           ),
         ),
@@ -121,9 +132,11 @@ class LandPageHeaderSmall extends StatelessWidget {
   const LandPageHeaderSmall({
     super.key,
     required this.header,
+    required this.color,
   });
 
   final String header;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +144,7 @@ class LandPageHeaderSmall extends StatelessWidget {
       header,
       style: TextStyle(
         fontSize: 20.sp,
-        color: ccSubHeaderFGColor(context),
+        color: color,
       ),
       textAlign: TextAlign.center,
       softWrap: true,
@@ -152,9 +165,29 @@ class LandPageHeader extends StatelessWidget {
     return Text(
       header,
       style: TextStyle(
-        fontSize: 37.sp,
-        color: ccHeaderFGColor(context),
-      ),
+          fontSize: 37.sp,
+          color: ccHeaderFGColor(context),
+          letterSpacing: 5,
+          wordSpacing: 2,
+          fontWeight: FontWeight.w800,
+          shadows: const [
+            Shadow(
+                // bottomLeft
+                offset: Offset(-1.5, -1.5),
+                color: Colors.white),
+            Shadow(
+                // bottomRight
+                offset: Offset(1.5, -1.5),
+                color: Colors.white),
+            Shadow(
+                // topRight
+                offset: Offset(1.5, 1.5),
+                color: Colors.white),
+            Shadow(
+                // topLeft
+                offset: Offset(-1.5, 1.5),
+                color: Colors.white),
+          ]),
       textAlign: TextAlign.center,
       softWrap: true,
     );
@@ -196,7 +229,10 @@ class AboutPage extends StatelessWidget {
                 const SizedBox(
                   height: 20,
                 ),
-                LandPageHeaderSmall(header: subHeader),
+                LandPageHeaderSmall(
+                  header: subHeader,
+                  color: Colors.white,
+                ),
                 const SizedBox(
                   height: 20,
                 ),

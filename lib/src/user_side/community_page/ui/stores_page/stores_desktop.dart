@@ -214,11 +214,13 @@ class _StoresDesktopState extends State<StoresDesktop> {
                 : NavBar(
                     openNotification: _openNotification,
                     openChat: _openChat,
+                    currentPage: "Community",
                   ),
             endDrawer: widget.isAdmin
                 ? null
-                : const NotificationDrawer(
+                : NotificationDrawer(
                     deviceScreenType: DeviceScreenType.desktop,
+                    stateSetter: setState,
                   ),
             body: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),

@@ -8,9 +8,14 @@ import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
 
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     // String header = 'LA ALDEA \nCOMMUNITY \nFORUM';
@@ -74,9 +79,11 @@ class LandingPage extends StatelessWidget {
           appBar: NavBar(
             openNotification: openNotification,
             openChat: openChat,
+            currentPage: "Home",
           ),
           endDrawer: NotificationDrawer(
             deviceScreenType: sizingInformation.deviceScreenType,
+            stateSetter: setState,
           ),
           body: LandingPageDesktop(
             header: header,

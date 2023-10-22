@@ -100,9 +100,11 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
       appBar: NavBar(
         openNotification: _openNotification,
         openChat: _openChat,
+        currentPage: "Community",
       ),
-      endDrawer: const NotificationDrawer(
+      endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),

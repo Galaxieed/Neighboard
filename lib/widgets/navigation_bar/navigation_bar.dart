@@ -10,12 +10,17 @@ import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
-  const NavBar({Key? key, this.openNotification, this.openChat})
+  const NavBar(
+      {Key? key,
+      this.openNotification,
+      this.openChat,
+      required this.currentPage})
       : preferredSize = const Size.fromHeight(kToolbarHeight),
         super(key: key);
   final Function? openNotification, openChat;
   @override
   final Size preferredSize;
+  final String currentPage;
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +33,26 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         const NavBarTitle(title: 'NEIGHBOARD'),
         const Spacer(),
-        NavBarTextButton(text: 'Home', callback: Routes().navigate),
+        NavBarTextButton(
+          text: 'Home',
+          callback: Routes().navigate,
+          currentPage: currentPage,
+        ),
         const SizedBox(
           width: 10,
         ),
-        NavBarTextButton(text: 'Forum', callback: Routes().navigate),
-        const SizedBox(
-          width: 10,
+        NavBarTextButton(
+          text: 'Forum',
+          callback: Routes().navigate,
+          currentPage: currentPage,
         ),
-        NavBarDropDownButton(callback: Routes().navigate),
+        const SizedBox(
+          width: 5,
+        ),
+        NavBarDropDownButton(
+          callback: Routes().navigate,
+          currentPage: currentPage,
+        ),
         const SizedBox(
           width: 10,
         ),
@@ -55,7 +71,11 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
           width: 10,
         ),
         NavBarBadges(
-          count: null,
+          count: notificationModels
+              .where((element) => !element.isRead)
+              .toList()
+              .length
+              .toString(),
           icon: const Icon(Icons.notifications_outlined),
           callback: () {
             openNotification != null ? openNotification!() : null;
@@ -108,41 +128,86 @@ class NavBarTitle extends StatelessWidget {
   }
 }
 
-class NavBarTextButton extends StatelessWidget {
+class NavBarTextButton extends StatefulWidget {
   const NavBarTextButton({
     super.key,
     required this.text,
     required this.callback,
+    required this.currentPage,
   });
 
   final String text;
   final Function callback;
+  final String currentPage;
 
   @override
+  State<NavBarTextButton> createState() => _NavBarTextButtonState();
+}
+
+class _NavBarTextButtonState extends State<NavBarTextButton> {
+  bool _isHovering = false;
+  @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        callback(text, context);
-      },
-      child: Text(
-        text,
-        overflow: TextOverflow.ellipsis,
+    return MouseRegion(
+      onHover: (event) => setState(() => _isHovering = true),
+      onExit: (event) => setState(() => _isHovering = false),
+      child: Container(
+        decoration: BoxDecoration(
+          border: _isHovering || widget.currentPage == widget.text
+              ? Border(
+                  bottom: BorderSide(
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    width: 2.0,
+                  ),
+                )
+              : null,
+        ),
+        child: TextButton(
+          onPressed: () {
+            widget.callback(widget.text, context);
+          },
+          style: ButtonStyle(
+            overlayColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                if (states.contains(MaterialState.hovered)) {
+                  return Colors.transparent;
+                }
+                return Colors.transparent;
+                // Use the component's default.
+              },
+            ),
+          ),
+          child: Text(
+            widget.text,
+            style: TextStyle(
+              letterSpacing: 1,
+              fontWeight: FontWeight.w500,
+              color: _isHovering || widget.currentPage == widget.text
+                  ? Theme.of(context).colorScheme.inversePrimary
+                  : Theme.of(context).colorScheme.onBackground,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ),
     );
   }
 }
 
 class NavBarDropDownButton extends StatefulWidget {
-  const NavBarDropDownButton({Key? key, required this.callback})
+  const NavBarDropDownButton(
+      {Key? key, required this.callback, required this.currentPage})
       : super(key: key);
 
   final Function callback;
+  final String currentPage;
 
   @override
   State<NavBarDropDownButton> createState() => _NavBarDropDownButtonState();
 }
 
 class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
+  bool _isHovering = false;
   static const menuItems = <String>[
     'Announcements',
     'Community Map',
@@ -150,7 +215,7 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
     'HOA Voting',
   ];
 
-  final List<PopupMenuItem<String>> _popUpMenuItems = menuItems
+  List<PopupMenuItem<String>> _popUpMenuItems(context) => menuItems
       .map(
         (String value) => PopupMenuItem<String>(
           value: value,
@@ -168,7 +233,11 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
               const SizedBox(
                 width: 10,
               ),
-              Text(value)
+              Text(
+                value,
+                style: const TextStyle(letterSpacing: 1.5),
+                overflow: TextOverflow.ellipsis,
+              )
             ],
           ),
         ),
@@ -178,18 +247,53 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
   late String selectedValue;
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton<String>(
-      position: PopupMenuPosition.under,
-      tooltip: 'Show Community Options',
-      child: IgnorePointer(
-        ignoring: true,
-        child: TextButton(onPressed: () {}, child: const Text('Community')),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        highlightColor: Colors.transparent, // Change this to the color you want
+        hoverColor: Colors.transparent,
+        splashColor: Colors.transparent,
       ),
-      onSelected: (String newValue) {
-        selectedValue = newValue;
-        widget.callback(newValue, context);
-      },
-      itemBuilder: (BuildContext context) => _popUpMenuItems,
+      child: MouseRegion(
+        onHover: (event) => setState(() => _isHovering = true),
+        onExit: (event) => setState(() => _isHovering = false),
+        child: Container(
+          decoration: BoxDecoration(
+            border: _isHovering || widget.currentPage == "Community"
+                ? Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      width: 2.0,
+                    ),
+                  )
+                : null,
+          ),
+          child: PopupMenuButton<String>(
+            position: PopupMenuPosition.under,
+            tooltip: 'Show Community Options',
+            onSelected: (String newValue) {
+              selectedValue = newValue;
+              widget.callback(newValue, context);
+            },
+            itemBuilder: (BuildContext context) => _popUpMenuItems(context),
+            child: IgnorePointer(
+              ignoring: true,
+              child: TextButton(
+                onPressed: () {},
+                child: Text(
+                  'Community',
+                  style: TextStyle(
+                    letterSpacing: 1,
+                    fontWeight: FontWeight.w500,
+                    color: _isHovering || widget.currentPage == "Community"
+                        ? Theme.of(context).colorScheme.inversePrimary
+                        : Theme.of(context).colorScheme.onBackground,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -248,6 +352,8 @@ class _NavBarBadgesState extends State<NavBarBadges> {
         child: Badge(
           label: widget.count != null ? Text(widget.count!) : null,
           backgroundColor: Colors.blue,
+          isLabelVisible:
+              widget.count == null || widget.count == "0" ? false : true,
           child: widget.icon,
         ),
       ),
@@ -340,6 +446,8 @@ class _NavBarCircularImageDropDownButtonState
         onSelected: (String newValue) async {
           if (newValue == "Logout") {
             await LoginFunction.logout();
+            subscription!.cancel();
+            notificationModels.clear();
             // ignore: use_build_context_synchronously
             Navigator.pushAndRemoveUntil(
                 context,

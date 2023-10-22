@@ -434,8 +434,7 @@ class _StoresMobileState extends State<StoresMobile> {
 
   Container allStores(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-          horizontal: 15.w, vertical: widget.isAdmin ? 15.h : 15.h),
+      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: widget.isAdmin
@@ -468,9 +467,6 @@ class _StoresMobileState extends State<StoresMobile> {
               : Container(),
           Expanded(
             child: GridView(
-              padding: widget.isAdmin
-                  ? EdgeInsets.symmetric(horizontal: 15.w)
-                  : null,
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 400,
                 childAspectRatio: 400 / 300,

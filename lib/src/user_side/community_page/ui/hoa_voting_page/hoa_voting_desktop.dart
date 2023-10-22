@@ -192,9 +192,11 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
       appBar: NavBar(
         openNotification: _openNotification,
         openChat: _openChat,
+        currentPage: "Community",
       ),
-      endDrawer: const NotificationDrawer(
+      endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
       ),
       body: isLoading
           ? const LoadingScreen()

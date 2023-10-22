@@ -170,9 +170,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                 : NavBar(
                     openNotification: _openNotification,
                     openChat: _openChat,
+                    currentPage: "Profile",
                   ),
-            endDrawer: const NotificationDrawer(
+            endDrawer: NotificationDrawer(
               deviceScreenType: DeviceScreenType.desktop,
+              stateSetter: setState,
             ),
             body: Padding(
               padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),

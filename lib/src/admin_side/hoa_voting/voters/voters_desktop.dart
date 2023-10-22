@@ -36,7 +36,7 @@ class _VotersDesktopState extends State<VotersDesktop> {
       });
     }
     electionModels = await CandidatesFunctions.getAllElection() ?? [];
-    electionModels.sort((a, b) => b.electionId.compareTo(a.electionId));
+    electionModels.sort((a, b) => a.electionId.compareTo(b.electionId));
     for (ElectionModel election in electionModels) {
       String dateText =
           '${DateFormat.yMMMd().format(DateTime.parse(election.electionStartDate))} - ${DateFormat.yMMMd().format(DateTime.parse(election.electionEndDate))}';
@@ -69,7 +69,7 @@ class _VotersDesktopState extends State<VotersDesktop> {
     } else {
       notVotedUsersModel = userModels
           .where(
-              (element) => voterModels.any((v) => v.voterId != element.userId))
+              (element) => !voterModels.any((v) => v.voterId == element.userId))
           .toList();
     }
 
@@ -137,12 +137,15 @@ class _VotersDesktopState extends State<VotersDesktop> {
                       setState(() {});
                     }
                   },
-                  style: mycontroller(context).index == 0
-                      ? ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.inversePrimary,
-                        )
-                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mycontroller(context).index == 0
+                        ? Theme.of(context).colorScheme.inversePrimary
+                        : null,
+                    foregroundColor: Theme.of(context).colorScheme.onBackground,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   child: const Text("Voted"),
                 ),
                 const SizedBox(
@@ -156,12 +159,15 @@ class _VotersDesktopState extends State<VotersDesktop> {
                       setState(() {});
                     }
                   },
-                  style: mycontroller(context).index == 1
-                      ? ElevatedButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.inversePrimary,
-                        )
-                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: mycontroller(context).index == 1
+                        ? Theme.of(context).colorScheme.inversePrimary
+                        : null,
+                    foregroundColor: Theme.of(context).colorScheme.onBackground,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   child: const Text("Not Voted"),
                 ),
                 const Spacer(),

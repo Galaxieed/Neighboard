@@ -63,6 +63,7 @@ dependencies:
   elegant_notification: ^1.11.2
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -78,6 +79,29 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 19 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icon.png"
+# flutter_icons:
+#   android: true
+#   ios: true
+#   image_path: "assets/icon.png"
+
+
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -95,6 +119,7 @@ flutter:
     - assets/no_image.jpg
     - assets/robot.png
     - assets/robot_thanks.png
+    - assets/icon.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
