@@ -10,7 +10,6 @@ import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
-import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';

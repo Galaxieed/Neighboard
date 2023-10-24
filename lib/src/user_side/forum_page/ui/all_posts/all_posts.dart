@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
-import 'package:neighboard/src/loading_screen/loading_screen.dart';
-import 'package:neighboard/src/loading_screen/post_shimmer.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';

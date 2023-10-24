@@ -64,7 +64,6 @@ class _ScreenDirectState extends State<ScreenDirect> {
     userModel = await ProfileFunction.getUserDetails(userId);
   }
 
-  //Notif for Web
   void listenForNotification() {
     if (isLoggedIn) {
       notifSubscription = _firestore
