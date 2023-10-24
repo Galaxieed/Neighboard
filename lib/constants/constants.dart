@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/main.dart';
 
-const String homepageImage = 'assets/homepage.jpg';
-const String homeImage = 'assets/home.jpeg';
-const String bigScoopImage = 'assets/bigscoop.jpg';
-const String walterMartImage = 'assets/waltermart.jpg';
 const String guestIcon = 'assets/guest_icon.png';
 const String noImage = 'assets/no_image.jpg';
 const String robotInfo = 'assets/robot.png';

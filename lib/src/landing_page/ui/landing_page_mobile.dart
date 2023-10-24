@@ -170,6 +170,7 @@ class LandPageHeader extends StatelessWidget {
           letterSpacing: 5,
           wordSpacing: 2,
           fontWeight: FontWeight.w800,
+          fontFamily: "Lexend Deca",
           shadows: const [
             Shadow(
                 // bottomLeft

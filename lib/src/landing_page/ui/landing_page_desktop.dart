@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -282,6 +281,7 @@ class LandPageHeader extends StatelessWidget {
           letterSpacing: 10,
           wordSpacing: 10,
           fontWeight: FontWeight.w800,
+          fontFamily: "Lexend Deca",
           shadows: const [
             Shadow(
                 // bottomLeft

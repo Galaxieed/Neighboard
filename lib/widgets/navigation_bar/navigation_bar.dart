@@ -113,14 +113,20 @@ class NavBarTitle extends StatelessWidget {
               ? const Icon(Icons.api_sharp)
               : siteModel!.siteLogo == ''
                   ? const Icon(Icons.api_sharp)
-                  : Image.network(isDarkMode
-                      ? siteModel!.siteLogoDark != ''
-                          ? siteModel!.siteLogoDark
-                          : siteModel!.siteLogo
-                      : siteModel!.siteLogo),
+                  : Image.network(
+                      isDarkMode
+                          ? siteModel!.siteLogoDark != ''
+                              ? siteModel!.siteLogoDark
+                              : siteModel!.siteLogo
+                          : siteModel!.siteLogo,
+                      isAntiAlias: true,
+                    ),
           Text(
             title,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  fontFamily: "Montserrat",
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ],
       ),
