@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:neighboard/screen_direct.dart';
 
@@ -18,12 +19,12 @@ class MyNotification {
 
   Future<void> sendPushMessage(token, title, body) async {
     if (token == null) {
-      print('Unable to send FCM message, no token exists.');
+      if (kDebugMode) print('Unable to send FCM message, no token exists.');
       return;
     }
 
     if (token == myToken) {
-      print("self");
+      if (kDebugMode) print("self");
       return;
     }
 
@@ -38,9 +39,9 @@ class MyNotification {
         },
         body: constructFCMPayload(token, title, body),
       );
-      print('FCM request for device sent!');
+      if (kDebugMode) print('FCM request for device sent!');
     } catch (e) {
-      print(e);
+      if (kDebugMode) print(e);
     }
   }
 }

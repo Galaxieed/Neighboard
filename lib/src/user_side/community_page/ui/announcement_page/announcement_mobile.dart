@@ -3,10 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class AnnouncementMobile extends StatefulWidget {
@@ -86,11 +88,19 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
   ];
   void _openChat() {
     showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
       },
     );
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   @override
@@ -102,24 +112,23 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("Announcements"),
         actions: [
-          PopupMenuButton(
-            position: PopupMenuPosition.under,
-            tooltip: "Filter announcements",
-            icon: const Icon(Icons.filter_alt_outlined),
-            onSelected: (value) {
-              sortAnnouncement(value);
-            },
-            itemBuilder: (BuildContext context) => _popUpMenuItem,
-          ),
-          IconButton(
-            onPressed: () {
-              _openChat();
-            },
+          //TODO: Chat count
+          NavBarBadges(
+            count: null,
             icon: const Icon(Icons.chat_outlined),
-            tooltip: "Global Chat",
+            callback: _openChat,
+          ),
+          NavBarBadges(
+            count: notificationModels
+                .where((element) => !element.isRead)
+                .toList()
+                .length
+                .toString(),
+            icon: const Icon(Icons.notifications_outlined),
+            callback: _openNotification,
           ),
           NavBarCircularImageDropDownButton(
             callback: Routes().navigate,
@@ -133,35 +142,51 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
-      body: announcementModels == []
-          ? const Center(
-              child: Text("No Announcements"),
-            )
-          : Container(
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // const SizedBox(
-                  //   height: 15,
-                  // ),
-                  // Text(
-                  //   'Announcements',
-                  //   style: Theme.of(context).textTheme.headlineLarge,
-                  // ),
-                  // Row(
-                  //   mainAxisSize: MainAxisSize.max,
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     ElevatedButton.icon(
-                  //       onPressed: () {},
-                  //       icon: const Icon(Icons.filter_alt),
-                  //       label: const Text('Filter'),
-                  //     )
-                  //   ],
-                  // ),
-                  Expanded(
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
+      ),
+      body: Container(
+        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: Alignment.centerRight,
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: Text(
+                    'ANNOUNCEMENTS',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+                Positioned(
+                  right: 1,
+                  child: PopupMenuButton(
+                    position: PopupMenuPosition.under,
+                    tooltip: "Filter announcements",
+                    icon: const Icon(Icons.filter_alt_outlined),
+                    onSelected: (value) {
+                      sortAnnouncement(value);
+                    },
+                    itemBuilder: (BuildContext context) => _popUpMenuItem,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            announcementModels.isEmpty
+                ? const Center(
+                    child: Text("No Announcements"),
+                  )
+                : Expanded(
                     child: Column(
                       children: [
                         Expanded(
@@ -183,8 +208,11 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
                                     SizedBox(
                                       height:
                                           MediaQuery.of(context).size.height /
-                                              2,
+                                              2.5,
                                       child: mainAnnouncementWidget,
+                                    ),
+                                    const SizedBox(
+                                      height: 20,
                                     ),
                                     const Divider(),
                                     Text(
@@ -194,12 +222,18 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
                                           .titleMedium,
                                     ),
                                     const Divider(),
+                                    const SizedBox(
+                                      height: 20,
+                                    ),
                                   ],
                                 );
                               }
                               if (model != announcementModels[0]) {
-                                return OtherAnnouncement(
-                                    announcementModel: model);
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: OtherAnnouncement(
+                                      announcementModel: model),
+                                );
                               } else {
                                 return Container();
                               }
@@ -209,9 +243,9 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -240,7 +274,7 @@ class MainAnnouncement extends StatelessWidget {
             color: ccMainAnnouncementBannerColor(context),
           ),
           child: Padding(
-            padding: EdgeInsets.all(3.7.sp),
+            padding: const EdgeInsets.all(10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -250,14 +284,15 @@ class MainAnnouncement extends StatelessWidget {
                     children: [
                       Text(
                         announcementModel.title.toUpperCase(),
-                        style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         announcementModel.timeStamp,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleSmall,
                         overflow: TextOverflow.ellipsis,
                       )
                     ],
@@ -348,7 +383,7 @@ class MainAnnouncement extends StatelessWidget {
                   ),
                   child: Text(
                     'View Details',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 )
               ],
@@ -392,7 +427,7 @@ class OtherAnnouncement extends StatelessWidget {
                   color: ccOtherAnnouncementBannerColor(context),
                   borderRadius: BorderRadius.circular(5),
                 ),
-                padding: EdgeInsets.all(3.5.sp),
+                padding: const EdgeInsets.all(10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -412,7 +447,7 @@ class OtherAnnouncement extends StatelessWidget {
                           ),
                           Text(
                             announcementModel.timeStamp,
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: Theme.of(context).textTheme.titleSmall,
                             overflow: TextOverflow.ellipsis,
                           )
                         ],
@@ -505,7 +540,7 @@ class OtherAnnouncement extends StatelessWidget {
                       ),
                       child: Text(
                         'View Details',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     )
                   ],

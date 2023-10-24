@@ -138,225 +138,227 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
               ? const Center(
                   child: Text("Login First"),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Text(
-                              "Notifications",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.start,
-                              overflow: TextOverflow.ellipsis,
+              : SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            const SizedBox(
+                              width: 10,
                             ),
-                          ),
-                          PopupMenuButton<String>(
-                            position: PopupMenuPosition.under,
-                            onSelected: (String value) {
-                              if (value == "Mark all as read") {
-                                //all notification of this specific user go to read
-                                readAllNotification();
-                              } else if (value == "Archive all") {
-                                //all notification of this specific user go to archive
-                                archiveAllNotification();
-                              }
-                            },
-                            itemBuilder: (context) => _popUpMenuItemsALL,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedVal = "All";
-                              });
-                            },
-                            style: selectedVal != "All"
-                                ? null
-                                : ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .inversePrimary,
-                                    foregroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
-                                  ),
-                            child: const Text("All"),
-                          ),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                selectedVal = "Unread";
-                              });
-                            },
-                            style: selectedVal != "Unread"
-                                ? null
-                                : ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .inversePrimary,
-                                    foregroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .onBackground,
-                                  ),
-                            child: const Text("Unread"),
-                          ),
-                        ],
-                      ),
-                      Expanded(
-                        child: StreamBuilder(
-                          stream: _firestore
-                              .collection("notifications")
-                              .doc(_auth.currentUser!.uid)
-                              .collection("all")
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                  child: CircularProgressIndicator());
-                            } else {
-                              //initialization ng notifications
-                              notificationModels = snapshot.data!.docs
-                                  .map((e) =>
-                                      NotificationModel.fromJson(e.data()))
-                                  .toList();
-                              notificationModels.sort(
-                                  (a, b) => b.notifId.compareTo(a.notifId));
-                              getAllUnreadNotifications();
+                            Expanded(
+                              child: Text(
+                                "Notifications",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              position: PopupMenuPosition.under,
+                              onSelected: (String value) {
+                                if (value == "Mark all as read") {
+                                  //all notification of this specific user go to read
+                                  readAllNotification();
+                                } else if (value == "Archive all") {
+                                  //all notification of this specific user go to archive
+                                  archiveAllNotification();
+                                }
+                              },
+                              itemBuilder: (context) => _popUpMenuItemsALL,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedVal = "All";
+                                });
+                              },
+                              style: selectedVal != "All"
+                                  ? null
+                                  : ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary,
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onBackground,
+                                    ),
+                              child: const Text("All"),
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  selectedVal = "Unread";
+                                });
+                              },
+                              style: selectedVal != "Unread"
+                                  ? null
+                                  : ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary,
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onBackground,
+                                    ),
+                              child: const Text("Unread"),
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                          child: StreamBuilder(
+                            stream: _firestore
+                                .collection("notifications")
+                                .doc(_auth.currentUser!.uid)
+                                .collection("all")
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else {
+                                //initialization ng notifications
+                                notificationModels = snapshot.data!.docs
+                                    .map((e) =>
+                                        NotificationModel.fromJson(e.data()))
+                                    .toList();
+                                notificationModels.sort(
+                                    (a, b) => b.notifId.compareTo(a.notifId));
+                                getAllUnreadNotifications();
 
-                              return ListView.separated(
-                                shrinkWrap: true,
-                                itemCount: selectedVal == "All"
-                                    ? notificationModels.length
-                                    : unReadNotifications.length,
-                                itemBuilder: (context, index) {
-                                  NotificationModel notification;
-                                  if (selectedVal == "All") {
-                                    notification = notificationModels[index];
-                                  } else {
-                                    notification = unReadNotifications[index];
-                                  }
-                                  return ListTile(
-                                    onTap: () {
-                                      //TODO: read notif and open related page
-                                      readNotification(notification.notifId);
-                                      if (notification.notifLocation
-                                              .split("|")[0] ==
-                                          "FORUM") {
-                                        Navigator.pop(context);
-                                        if (postModels.isNotEmpty) {
-                                          PostModel post =
-                                              postModels.firstWhere(
-                                            (element) =>
-                                                element.postId ==
-                                                notification.notifLocation
-                                                    .split("|")[1],
-                                          );
-                                          openPostModal(post);
+                                return ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: selectedVal == "All"
+                                      ? notificationModels.length
+                                      : unReadNotifications.length,
+                                  itemBuilder: (context, index) {
+                                    NotificationModel notification;
+                                    if (selectedVal == "All") {
+                                      notification = notificationModels[index];
+                                    } else {
+                                      notification = unReadNotifications[index];
+                                    }
+                                    return ListTile(
+                                      onTap: () {
+                                        readNotification(notification.notifId);
+                                        if (notification.notifLocation
+                                                .split("|")[0] ==
+                                            "FORUM") {
+                                          Navigator.pop(context);
+                                          if (postModels.isNotEmpty) {
+                                            PostModel post =
+                                                postModels.firstWhere(
+                                              (element) =>
+                                                  element.postId ==
+                                                  notification.notifLocation
+                                                      .split("|")[1],
+                                            );
+                                            openPostModal(post);
+                                          }
                                         }
-                                      }
-                                      if (notification.notifLocation ==
-                                          "ANNOUNCEMENT") {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const AnnouncementPage(),
-                                          ),
-                                        );
-                                      }
-                                      if (notification.notifLocation == "MAP") {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const CommunityMap(),
-                                          ),
-                                        );
-                                      }
-                                      if (notification.notifLocation ==
-                                          "ELECTION") {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const HOAVoting(),
-                                          ),
-                                        );
-                                      }
-                                      if (notification.notifLocation ==
-                                          "SITE") {
-                                        Navigator.pop(context);
-                                        Navigator.pushAndRemoveUntil(
+                                        if (notification.notifLocation ==
+                                            "ANNOUNCEMENT") {
+                                          Navigator.pop(context);
+                                          Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const ScreenDirect()),
-                                            (route) => false);
-                                      }
-                                      if (notification.notifLocation ==
-                                          "STORE") {
-                                        Navigator.pop(context);
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const StoresPage(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    isThreeLine: true,
-                                    title: Text(
-                                      "${notification.notifTitle}${notification.notifBody}",
-                                      style: notification.isRead
+                                              builder: (context) =>
+                                                  const AnnouncementPage(),
+                                            ),
+                                          );
+                                        }
+                                        if (notification.notifLocation ==
+                                            "MAP") {
+                                          Navigator.pop(context);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const CommunityMap(),
+                                            ),
+                                          );
+                                        }
+                                        if (notification.notifLocation ==
+                                            "ELECTION") {
+                                          Navigator.pop(context);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const HOAVoting(),
+                                            ),
+                                          );
+                                        }
+                                        if (notification.notifLocation ==
+                                            "SITE") {
+                                          Navigator.pop(context);
+                                          Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const ScreenDirect()),
+                                              (route) => false);
+                                        }
+                                        if (notification.notifLocation ==
+                                            "STORE") {
+                                          Navigator.pop(context);
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const StoresPage(),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      isThreeLine: true,
+                                      title: Text(
+                                        "${notification.notifTitle}${notification.notifBody}",
+                                        style: notification.isRead
+                                            ? null
+                                            : const TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                      ),
+                                      subtitle: Text(
+                                        notification.notifTime,
+                                        style: notification.isRead
+                                            ? null
+                                            : const TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold),
+                                      ),
+                                      trailing: notification.isRead
                                           ? null
-                                          : const TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                      notification.notifTime,
-                                      style: notification.isRead
-                                          ? null
-                                          : const TextStyle(
+                                          : const Icon(
+                                              Icons.circle,
                                               color: Colors.blue,
-                                              fontWeight: FontWeight.bold),
-                                    ),
-                                    trailing: notification.isRead
-                                        ? null
-                                        : const Icon(
-                                            Icons.circle,
-                                            color: Colors.blue,
-                                            size: 15,
-                                          ),
-                                  );
-                                },
-                                separatorBuilder: (context, index) {
-                                  return const Divider();
-                                },
-                              );
-                            }
-                          },
+                                              size: 15,
+                                            ),
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) {
+                                    return const Divider();
+                                  },
+                                );
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
     );

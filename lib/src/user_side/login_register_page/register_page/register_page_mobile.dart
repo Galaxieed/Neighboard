@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -94,6 +95,10 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         backgroundColor: ccRegisterButtonBGColor(context),
                         foregroundColor: ccRegisterButtonFGColor(context),
                       ),
@@ -111,6 +116,10 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         foregroundColor: ccRegisterLoginButtonFGColor(context),
                       ),
                       child: const Text('Login'),
@@ -125,11 +134,6 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                   children: [
                     Expanded(
                       child: Container(
-                        decoration: const BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(homeImage),
-                                fit: BoxFit.cover,
-                                opacity: 100)),
                         padding:
                             EdgeInsets.symmetric(horizontal: 30.w, vertical: 0),
                         child: Center(
@@ -162,7 +166,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   controller: firstName,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'First Name',
+                                    hintText: 'First Name',
                                   ),
                                 ),
                                 const SizedBox(
@@ -172,7 +176,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   controller: lastName,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Last Name',
+                                    hintText: 'Last Name',
                                   ),
                                 ),
                                 const SizedBox(
@@ -182,7 +186,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   controller: email,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Email',
+                                    hintText: 'Email',
                                   ),
                                 ),
                                 const SizedBox(
@@ -192,7 +196,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   controller: username,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Username',
+                                    hintText: 'Username',
                                   ),
                                 ),
                                 const SizedBox(
@@ -203,7 +207,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   obscureText: true,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
-                                    labelText: 'Password',
+                                    hintText: 'Password',
                                   ),
                                 ),
                                 const SizedBox(

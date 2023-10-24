@@ -103,7 +103,7 @@ class NavBarTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         Routes().navigate("Home", context);
       },
@@ -446,7 +446,8 @@ class _NavBarCircularImageDropDownButtonState
         onSelected: (String newValue) async {
           if (newValue == "Logout") {
             await LoginFunction.logout();
-            subscription!.cancel();
+            notifSubscription?.cancel();
+            chatSubscription?.cancel();
             notificationModels.clear();
             // ignore: use_build_context_synchronously
             Navigator.pushAndRemoveUntil(

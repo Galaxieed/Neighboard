@@ -13,6 +13,7 @@ import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
@@ -117,18 +118,14 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
         isElectionOngoing = true;
         await sendNotifToAll();
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Election successfully started"),
-          ),
-        );
+        successMessage(
+            title: "Success!",
+            desc: "Election successfully started",
+            context: context);
       } catch (e) {
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Something went wrong.."),
-          ),
-        );
+        errorMessage(
+            title: "Error!", desc: "Something went wrong..", context: context);
       }
     }
     if (mounted) {

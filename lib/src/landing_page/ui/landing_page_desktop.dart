@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -93,7 +94,7 @@ class AboutPage extends StatelessWidget {
                   topLeft: Radius.circular(90),
                   bottomLeft: Radius.circular(90)),
               child: Transform.flip(
-                flipX: true,
+                flipX: false,
                 child: Container(
                   decoration: BoxDecoration(
                     image: DecorationImage(

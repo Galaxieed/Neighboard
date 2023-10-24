@@ -14,14 +14,18 @@ import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class SiteSettingsDesktop extends StatefulWidget {
-  const SiteSettingsDesktop(
-      {super.key, required this.drawer, required this.deviceScreenType});
+  const SiteSettingsDesktop({
+    super.key,
+    required this.drawer,
+    required this.deviceScreenType,
+  });
   final DeviceScreenType deviceScreenType;
   final void Function() drawer;
 
@@ -163,11 +167,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
 
       if (isSuccessful) {
         await sendNotifToAll();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Site settings successfully added"),
-          ),
-        );
+        successMessage(
+            title: "Success!",
+            desc: "Site settings successfully added",
+            context: context);
       }
       return;
     } else {
@@ -185,11 +188,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       await getSiteSettings();
       await sendNotifToAll();
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Site settings successfully updated"),
-        ),
-      );
+      successMessage(
+          title: "Success!",
+          desc: "Site settings successfully updated",
+          context: context);
     }
 
     setState(() {

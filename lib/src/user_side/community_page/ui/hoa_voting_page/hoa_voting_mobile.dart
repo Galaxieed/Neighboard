@@ -8,6 +8,7 @@ import 'package:neighboard/models/election_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/models/voter_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -15,6 +16,8 @@ import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_v
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class HOAVotingMobile extends StatefulWidget {
@@ -32,7 +35,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
   String? chosenVicePresident;
   Map<String, bool> optionsBD = {};
   List selectedBD = [];
-  int maxDirectors = 5, startCount = 0;
+  int maxDirectors = 10, startCount = 0;
 
   TabController controller(context) => DefaultTabController.of(context);
   bool isLoading = true, isElectionOngoing = true, isAlreadyVoted = false;
@@ -150,11 +153,9 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
           electionModel!.electionId, id, voter);
     }
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Your vote is successful.'),
-      ),
-    );
+    successMessage(
+        title: "Success!", desc: "Your vote is successful", context: context);
+
     setState(() {
       isLoading = false;
       isAlreadyVoted = true;
@@ -163,11 +164,19 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
 
   void _openChat() {
     showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
       },
     );
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   @override
@@ -185,15 +194,23 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("HOA Voting"),
         actions: [
-          IconButton(
-            onPressed: () {
-              _openChat();
-            },
+          //TODO: Chat count
+          NavBarBadges(
+            count: null,
             icon: const Icon(Icons.chat_outlined),
-            tooltip: "Global Chat",
+            callback: _openChat,
+          ),
+          NavBarBadges(
+            count: notificationModels
+                .where((element) => !element.isRead)
+                .toList()
+                .length
+                .toString(),
+            icon: const Icon(Icons.notifications_outlined),
+            callback: _openNotification,
           ),
           NavBarCircularImageDropDownButton(
             callback: Routes().navigate,
@@ -207,6 +224,10 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
+      ),
       body: isLoading
           ? const LoadingScreen()
           : Container(
@@ -215,6 +236,16 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      'HOA VOTING',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                   !isLoggedIn
                       ? const Expanded(
                           child: Center(
@@ -321,7 +352,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                     }
                     if (!ctrl.indexIsChanging &&
                         ctrl.index == 2 &&
-                        (startCount == 5 &&
+                        (startCount == 10 &&
                             chosenPresident != null &&
                             chosenVicePresident != null)) {
                       onSaveVote();
@@ -329,7 +360,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: controller(context).index == 2 &&
-                            (startCount != 5 ||
+                            (startCount != 10 ||
                                 chosenPresident == null ||
                                 chosenVicePresident == null)
                         ? Theme.of(context).disabledColor
@@ -394,12 +425,12 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
             chosenVicePresident = candidate.candidateId;
           }
           if (position == "BOARD OF DIRECTORS") {
-            if (!optionsBD[candidate.candidateId]! && startCount >= 5) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('You can only select up to 5 Candidates.'),
-                ),
-              );
+            if (!optionsBD[candidate.candidateId]! && startCount >= 10) {
+              errorMessage(
+                  title: "Warning!",
+                  desc: "You can only select up to 10 Candidates.",
+                  context: context);
+
               return;
             } else {
               optionsBD[candidate.candidateId] =
@@ -425,13 +456,12 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                       onChanged: (bool? value) {
                         setState(() {
                           if (!optionsBD[candidate.candidateId]! &&
-                              startCount >= 5) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'You can only select up to 5 options.'),
-                              ),
-                            );
+                              startCount >= 10) {
+                            errorMessage(
+                                title: "Warning!",
+                                desc: 'You can only select up to 10 options.',
+                                context: context);
+
                             return;
                           } else {
                             optionsBD[candidate.candidateId] =

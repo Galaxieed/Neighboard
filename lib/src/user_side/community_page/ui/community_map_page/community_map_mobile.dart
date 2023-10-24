@@ -4,9 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -42,11 +44,19 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
 
   void _openChat() {
     showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
       },
     );
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   @override
@@ -58,15 +68,23 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text("Community Map"),
         actions: [
-          IconButton(
-            onPressed: () {
-              _openChat();
-            },
+          //TODO: Chat count
+          NavBarBadges(
+            count: null,
             icon: const Icon(Icons.chat_outlined),
-            tooltip: "Global Chat",
+            callback: _openChat,
+          ),
+          NavBarBadges(
+            count: notificationModels
+                .where((element) => !element.isRead)
+                .toList()
+                .length
+                .toString(),
+            icon: const Icon(Icons.notifications_outlined),
+            callback: _openNotification,
           ),
           NavBarCircularImageDropDownButton(
             callback: Routes().navigate,
@@ -85,12 +103,29 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                'COMMUNITY MAP',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             Expanded(
               child: FlutterMap(
                 mapController: mapController,

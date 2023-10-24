@@ -103,6 +103,10 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         foregroundColor: ccLoginRegisterButtonFGColor(context),
                       ),
                       child: const Text('Register'),
@@ -116,6 +120,10 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         backgroundColor: ccLoginButtonBGColor(context),
                         foregroundColor: ccLoginButtonFGColor(context),
                       ),
@@ -132,11 +140,6 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                   children: [
                     Expanded(
                       child: Container(
-                        decoration: const BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(homeImage),
-                                fit: BoxFit.cover,
-                                opacity: 100)),
                         padding:
                             EdgeInsets.symmetric(horizontal: 30.w, vertical: 0),
                         child: Center(

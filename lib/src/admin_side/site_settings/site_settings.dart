@@ -12,7 +12,9 @@ class AdminSiteSettings extends StatelessWidget {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
       if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return SiteSettingsDesktop(
-            drawer: drawer, deviceScreenType: DeviceScreenType.mobile);
+          drawer: drawer,
+          deviceScreenType: DeviceScreenType.mobile,
+        );
       } else {
         return SiteSettingsDesktop(
           drawer: drawer,

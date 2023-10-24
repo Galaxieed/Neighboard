@@ -93,15 +93,19 @@ Color ccStoresBannerColor([context]) =>
     Theme.of(context).colorScheme.inversePrimary.withOpacity(0.85);
 
 //login and register styles
-Color ccLoginButtonBGColor(context) => Theme.of(context).primaryColor;
-Color ccLoginButtonFGColor(context) => Colors.white;
+Color ccLoginButtonBGColor(context) =>
+    Theme.of(context).colorScheme.inversePrimary;
+Color ccLoginButtonFGColor(context) =>
+    Theme.of(context).colorScheme.onBackground;
 Color ccLoginRegisterButtonFGColor(context) =>
-    isDarkMode ? Colors.white : Colors.black;
+    Theme.of(context).colorScheme.onBackground;
 
-Color ccRegisterButtonBGColor(context) => Theme.of(context).primaryColor;
-Color ccRegisterButtonFGColor(context) => Colors.white;
+Color ccRegisterButtonBGColor(context) =>
+    Theme.of(context).colorScheme.inversePrimary;
+Color ccRegisterButtonFGColor(context) =>
+    Theme.of(context).colorScheme.onBackground;
 Color ccRegisterLoginButtonFGColor(context) =>
-    isDarkMode ? Colors.white : Colors.black;
+    Theme.of(context).colorScheme.onBackground;
 
 //HOA Voting
 Color ccHOATitleBannerColor(context) =>

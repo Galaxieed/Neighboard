@@ -11,7 +11,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dar
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post_function.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
-import 'package:neighboard/widgets/others/alert_dialog.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
@@ -95,8 +95,11 @@ class _NewPostState extends State<NewPost> {
 
         _discardPost();
         // ignore: use_build_context_synchronously
-        showAlertDialog(context, 'Success!',
-            'Post have been published!\nJust wait for the admin to approve your post.');
+        successMessage(
+            title: "Success!",
+            desc:
+                'Post have been published!\nJust wait for the admin to approve your post.',
+            context: context);
       }
       setState(() {
         isLoading = false;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -106,6 +107,10 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         foregroundColor: ccLoginRegisterButtonFGColor(context),
                       ),
                       child: const Text('Register'),
@@ -119,6 +124,10 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(5),
                         ),
+                        side: BorderSide(
+                            width: 2,
+                            color:
+                                Theme.of(context).colorScheme.inversePrimary),
                         backgroundColor: ccLoginButtonBGColor(context),
                         foregroundColor: ccLoginButtonFGColor(context),
                       ),
@@ -297,9 +306,13 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                     Expanded(
                       flex: 5,
                       child: Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: AssetImage(homeImage),
+                            image: siteModel != null
+                                ? siteModel!.siteAboutImage == ""
+                                    ? const AssetImage(noImage) as ImageProvider
+                                    : NetworkImage(siteModel!.siteAboutImage)
+                                : const AssetImage(noImage),
                             fit: BoxFit.cover,
                             alignment: Alignment.bottomCenter,
                           ),

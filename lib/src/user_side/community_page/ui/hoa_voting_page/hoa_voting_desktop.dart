@@ -13,6 +13,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -29,7 +30,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   String? chosenVicePresident;
   Map<String, bool> optionsBD = {};
   List selectedBD = [];
-  int maxDirectors = 5, startCount = 0;
+  int maxDirectors = 10, startCount = 0;
 
   TabController controller(context) => DefaultTabController.of(context);
   bool isLoading = true, isElectionOngoing = true, isAlreadyVoted = false;
@@ -147,11 +148,9 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
           electionModel!.electionId, id, voter);
     }
     // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Your vote is successful.'),
-      ),
-    );
+    successMessage(
+        title: "Success!", desc: 'Your vote is successful.', context: context);
+
     setState(() {
       isLoading = false;
       isAlreadyVoted = true;
@@ -322,7 +321,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                     }
                     if (!ctrl.indexIsChanging &&
                         ctrl.index == 2 &&
-                        (startCount == 5 &&
+                        (startCount == 10 &&
                             chosenPresident != null &&
                             chosenVicePresident != null)) {
                       onSaveVote();
@@ -330,7 +329,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: controller(context).index == 2 &&
-                            (startCount != 5 ||
+                            (startCount != 10 ||
                                 chosenPresident == null ||
                                 chosenVicePresident == null)
                         ? Theme.of(context).disabledColor
@@ -395,12 +394,11 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
             chosenVicePresident = candidate.candidateId;
           }
           if (position == "BOARD OF DIRECTORS") {
-            if (!optionsBD[candidate.candidateId]! && startCount >= 5) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('You can only select up to 5 Candidates.'),
-                ),
-              );
+            if (!optionsBD[candidate.candidateId]! && startCount >= 10) {
+              errorMessage(
+                  title: "Warning!",
+                  desc: 'You can only select up to 10 Candidates.',
+                  context: context);
               return;
             } else {
               optionsBD[candidate.candidateId] =
@@ -426,13 +424,12 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                       onChanged: (bool? value) {
                         setState(() {
                           if (!optionsBD[candidate.candidateId]! &&
-                              startCount >= 5) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'You can only select up to 5 options.'),
-                              ),
-                            );
+                              startCount >= 10) {
+                            errorMessage(
+                                title: "Warning!",
+                                desc:
+                                    'You can only select up to 10 Candidates.',
+                                context: context);
                             return;
                           } else {
                             optionsBD[candidate.candidateId] =

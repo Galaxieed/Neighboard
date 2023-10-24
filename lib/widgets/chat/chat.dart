@@ -87,7 +87,7 @@ class _MyChatState extends State<MyChat> {
               : Column(
                   children: [
                     Text(
-                      "Global Chat",
+                      "Community Chat",
                       style: Theme.of(context)
                           .textTheme
                           .titleLarge!

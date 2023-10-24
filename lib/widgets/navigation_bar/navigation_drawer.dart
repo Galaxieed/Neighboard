@@ -158,6 +158,7 @@ class _ThemeColorPickerState extends State<ThemeColorPicker> {
                 onPressed: () {
                   currentThemeColor = pickerColor;
                   themeNotifier.value = currentThemeColor;
+
                   setState(() {});
                   SharedPrefHelper.saveThemeColor(currentThemeColor.value);
                   Navigator.of(context).pop();

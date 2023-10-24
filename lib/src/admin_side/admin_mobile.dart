@@ -48,7 +48,6 @@ class _AdminMobileState extends State<AdminMobile> {
       getCurrentUserDetails();
       return isLoggedIn = true;
     }
-    //TODO: reject user when tried to open admin side without logging in
     return isLoggedIn = false;
   }
 

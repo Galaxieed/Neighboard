@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
@@ -14,6 +15,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/others/launch_url.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -47,11 +49,18 @@ class _ForumPageMobileState extends State<ForumPageMobile>
 
   void _openChat() {
     showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
       },
     );
+  }
+
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   @override
@@ -77,7 +86,6 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       appBar: widget.isAdmin
           ? null
           : AppBar(
-              title: const Text("NEIGHBOARD"),
               actions: [
                 IconButton(
                   onPressed: () async {
@@ -89,12 +97,20 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                   icon: const Icon(Icons.search),
                   tooltip: "Search Post Title",
                 ),
-                IconButton(
-                  onPressed: () {
-                    _openChat();
-                  },
+                //TODO: Chat count
+                NavBarBadges(
+                  count: null,
                   icon: const Icon(Icons.chat_outlined),
-                  tooltip: "Global Chat",
+                  callback: _openChat,
+                ),
+                NavBarBadges(
+                  count: notificationModels
+                      .where((element) => !element.isRead)
+                      .toList()
+                      .length
+                      .toString(),
+                  icon: const Icon(Icons.notifications_outlined),
+                  callback: _openNotification,
                 ),
                 NavBarCircularImageDropDownButton(
                   callback: Routes().navigate,
@@ -136,6 +152,10 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       drawer: widget.screenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
+      ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Column(

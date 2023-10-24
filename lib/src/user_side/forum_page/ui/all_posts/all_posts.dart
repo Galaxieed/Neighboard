@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
+import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/src/loading_screen/post_shimmer.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';
@@ -36,11 +38,13 @@ class _AllPostsState extends State<AllPosts> {
   void getAllPost() async {
     postModels = await AllPostsFunction.getAllPost() ?? [];
     postModels.sort((a, b) => b.postId.compareTo(a.postId));
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   void getTitlePost() async {
@@ -73,7 +77,7 @@ class _AllPostsState extends State<AllPosts> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const LoadingScreen()
+        ? const LoadingPosts()
         : postModels.isEmpty
             ? const Center(
                 child: Text("No Posts"),
@@ -85,14 +89,10 @@ class _AllPostsState extends State<AllPosts> {
                   return Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: 0.w, vertical: 5.h),
-                    child: Column(
-                      children: [
-                        SinglePost(
-                          post: post,
-                          isAdmin: widget.isAdmin,
-                          deviceScreenType: widget.deviceScreenType,
-                        ),
-                      ],
+                    child: SinglePost(
+                      post: post,
+                      isAdmin: widget.isAdmin,
+                      deviceScreenType: widget.deviceScreenType,
                     ),
                   );
                 },

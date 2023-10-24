@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
           valueListenable: themeNotifier,
           builder: (_, currentMode, __) {
             return MaterialApp(
+              scrollBehavior: MyCustomScrollBehavior(),
               debugShowCheckedModeBanner: false,
               title: 'Neighboard',
               theme: ThemeData(
@@ -72,9 +74,22 @@ Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
   //TODO: change this id based on admin id
   siteModel = await SiteSettingsFunction.getSiteSettings(
-      'ZYsPGzbJdoQutQdpDbZlCllwuj62');
+      'O8dElItKmsUJ5cvZg9FA1eTfi0q2');
   if (siteModel != null) {
     currentThemeColor = Color(siteModel!.siteThemeColor);
+  } else {
+    currentThemeColor = Colors.amber;
   }
-  currentThemeColor = Color(await SharedPrefHelper.loadThemeColor());
+  int currentSystemThemeColor = await SharedPrefHelper.loadThemeColor();
+  if (currentSystemThemeColor != 0) {
+    currentThemeColor = Color(currentSystemThemeColor);
+  }
+}
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
 }

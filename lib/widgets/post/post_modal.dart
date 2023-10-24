@@ -68,8 +68,6 @@ class _PostModalState extends State<PostModal> {
 
       await NotificationFunction.addNotification(
           notificationModel, otherUser!.userId);
-    } else {
-      print("SI CURRENT USER TO");
     }
   }
 
@@ -221,11 +219,14 @@ class _PostModalState extends State<PostModal> {
 
   void onOpenPost() async {
     if (!isAlreadyViewed) {
-      setState(() {
-        isAlreadyViewed = true;
-        widget.postModel.noOfViews += 1;
-      });
-      await PostInteractorsFunctions.onViewPost(widget.postModel.postId, true);
+      if (isLoggedIn && currentUser!.userId != widget.postModel.authorId) {
+        setState(() {
+          isAlreadyViewed = true;
+          widget.postModel.noOfViews += 1;
+        });
+        await PostInteractorsFunctions.onViewPost(
+            widget.postModel.postId, true);
+      }
     }
   }
 

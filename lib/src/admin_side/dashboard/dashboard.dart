@@ -115,6 +115,7 @@ class Dashboard extends StatelessWidget {
     return Card(
       elevation: 5,
       color: color,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () {
           callback();

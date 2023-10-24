@@ -14,4 +14,12 @@ class ChatFunction {
       return;
     }
   }
+
+  static Future<void> viewChat() async {
+    try {
+      //
+    } catch (e) {
+      return;
+    }
+  }
 }

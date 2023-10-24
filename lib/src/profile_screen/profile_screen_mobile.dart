@@ -11,6 +11,7 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import "package:responsive_builder/responsive_builder.dart";
 import 'package:universal_io/io.dart';
 
@@ -156,8 +157,6 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
             appBar: widget.isAdmin
                 ? null
                 : AppBar(
-                    title: const Text("My Profile"),
-                    centerTitle: true,
                     actions: [
                       NavBarCircularImageDropDownButton(
                         callback: Routes().navigate,
@@ -172,17 +171,17 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                 ? const NavDrawer()
                 : null,
             body: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 15.h),
               child: ListView(
                 shrinkWrap: true,
                 children: [
                   Align(
-                    alignment: Alignment.topLeft,
+                    alignment: Alignment.topCenter,
                     child: Text(
-                      "My Profile",
+                      "MY PROFILE",
                       style: Theme.of(context)
                           .textTheme
-                          .headlineLarge!
+                          .titleLarge!
                           .copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -215,7 +214,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                   "Personal \nInformation",
                   style: Theme.of(context)
                       .textTheme
-                      .headlineMedium!
+                      .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -240,17 +239,15 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     if (_formKey.currentState!.validate()) {
                       try {
                         onSavingDetails();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Updated Successfully"),
-                          ),
-                        );
+                        successMessage(
+                            title: "Success!",
+                            desc: "Updated Successfully",
+                            context: context);
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(e.toString()),
-                          ),
-                        );
+                        errorMessage(
+                            title: "Error!",
+                            desc: e.toString(),
+                            context: context);
                       }
                     }
                   },
@@ -384,17 +381,6 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     ),
                   ),
                 ),
-                // Column(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     infoTitle(context, "Social Media Links"),
-                //     for (String links in userModel!.socialMediaLinks)
-                //       TextFormField(
-                //         initialValue: links,
-                //       ),
-                //   ],
-                // ),
               ],
             ),
           ],
@@ -423,7 +409,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                   "Personal \nInformation",
                   style: Theme.of(context)
                       .textTheme
-                      .headlineMedium!
+                      .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 isCurrentUser
@@ -508,15 +494,6 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     ],
                   ),
                 ),
-                // Column(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     infoTitle(context, "Social Media Links"),
-                //     for (String links in userModel!.socialMediaLinks)
-                //       actualInfo(context, links),
-                //   ],
-                // ),
               ],
             ),
           ],
@@ -537,7 +514,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
       title,
       style: Theme.of(context)
           .textTheme
-          .titleLarge!
+          .titleMedium!
           .copyWith(color: ccProfileInfoTextColor),
     );
   }
@@ -546,7 +523,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 7.w, horizontal: 7.w),
+        padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 7.w),
         decoration: BoxDecoration(
           border: Border.all(color: ccProfileContainerBorderColor),
           borderRadius: BorderRadius.circular(20),
@@ -601,7 +578,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                         Stack(
                                           children: [
                                             CircleAvatar(
-                                              radius: 120,
+                                              radius: 100,
                                               backgroundImage: profileImage !=
                                                           null ||
                                                       profileImageByte != null
@@ -624,14 +601,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                                     try {
                                                       pickImage(stateSetter);
                                                     } catch (e) {
-                                                      ScaffoldMessenger.of(
-                                                              context)
-                                                          .showSnackBar(
-                                                        SnackBar(
-                                                          content: Text(
-                                                              e.toString()),
-                                                        ),
-                                                      );
+                                                      errorMessage(
+                                                          title: "Error!",
+                                                          desc: e.toString(),
+                                                          context: context);
                                                     }
                                                   },
                                                   icon: const Icon(
@@ -651,7 +624,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            ElevatedButton.icon(
+                                            IconButton.filledTonal(
                                               onPressed: () {
                                                 Navigator.pop(context);
                                                 profileImage = null;
@@ -659,24 +632,17 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                                 profileImageUrl = "";
                                                 checker = false;
                                               },
-                                              style: ElevatedButton.styleFrom(
-                                                fixedSize:
-                                                    const Size.fromWidth(150),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
+                                              style: IconButton.styleFrom(
                                                 backgroundColor:
                                                     Colors.red[800],
                                                 foregroundColor: Colors.white,
                                               ),
                                               icon: const Icon(Icons.cancel),
-                                              label: const Text("Cancel"),
                                             ),
                                             const SizedBox(
                                               width: 10,
                                             ),
-                                            ElevatedButton.icon(
+                                            IconButton.filledTonal(
                                               onPressed: () {
                                                 try {
                                                   if ((profileImage != null ||
@@ -685,55 +651,35 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                                       checker) {
                                                     onSavingPic();
                                                     Navigator.pop(context);
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                        content: Text(
-                                                            "Profile Picture Updated"),
-                                                      ),
-                                                    );
+                                                    successMessage(
+                                                        title: "Success!",
+                                                        desc:
+                                                            "Profile Picture Updated",
+                                                        context: context);
                                                     //This will now allow user to upload picture
                                                     checker = false;
                                                     setState(() {});
                                                   } else {
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      const SnackBar(
-                                                        content:
-                                                            Text("No changes"),
-                                                      ),
-                                                    );
+                                                    infoMessage(
+                                                        title: "Info!",
+                                                        desc: "No Changes",
+                                                        context: context);
                                                   }
                                                 } catch (e) {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content:
-                                                          Text(e.toString()),
-                                                    ),
-                                                  );
+                                                  errorMessage(
+                                                      title: "Error!",
+                                                      desc: e.toString(),
+                                                      context: context);
                                                 }
                                               },
-                                              style: ElevatedButton.styleFrom(
-                                                fixedSize:
-                                                    const Size.fromWidth(150),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
+                                              style: IconButton.styleFrom(
                                                 backgroundColor:
                                                     Theme.of(context)
                                                         .colorScheme
                                                         .primary,
-                                                foregroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .onPrimary,
+                                                foregroundColor: Colors.white,
                                               ),
                                               icon: const Icon(Icons.save),
-                                              label: const Text("Save"),
                                             ),
                                           ],
                                         ),
@@ -759,15 +705,15 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
               style: Theme.of(context)
                   .textTheme
                   .titleLarge!
-                  .copyWith(fontWeight: FontWeight.w900, letterSpacing: 3),
+                  .copyWith(fontWeight: FontWeight.w900, letterSpacing: 1.5),
             ),
             SizedBox(
               height: 5.h,
             ),
             Text(
               userModel!.username,
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  letterSpacing: 3,
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                  letterSpacing: 1.5,
                   fontWeight: FontWeight.w700,
                   color: ccProfileUserNameTextColor),
             )

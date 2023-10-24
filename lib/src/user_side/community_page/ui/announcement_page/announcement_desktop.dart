@@ -139,46 +139,51 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
                     ],
                   ),
                   Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 5,
-                          child: () {
-                            Widget widget = Container();
-                            for (AnnouncementModel announcementModel
-                                in announcementModels) {
-                              if (announcementModels[0] == announcementModel) {
-                                widget = MainAnnouncement(
-                                  announcementModel: announcementModel,
-                                );
-                                break;
-                              } else {
-                                widget = Container();
-                              }
-                            }
-                            return widget;
-                          }(),
-                        ),
-                        SizedBox(
-                          width: 5.w,
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: ListView.builder(
-                            itemCount: announcementModels.length,
-                            itemBuilder: (context, index) {
-                              var model = announcementModels[index];
-                              if (model != announcementModels[0]) {
-                                return OtherAnnouncement(
-                                    announcementModel: model);
-                              } else {
-                                return Container();
-                              }
-                            },
+                    child: announcementModels.isEmpty
+                        ? const Center(
+                            child: Text("No Announcements"),
+                          )
+                        : Row(
+                            children: [
+                              Expanded(
+                                flex: 5,
+                                child: () {
+                                  Widget widget = Container();
+                                  for (AnnouncementModel announcementModel
+                                      in announcementModels) {
+                                    if (announcementModels[0] ==
+                                        announcementModel) {
+                                      widget = MainAnnouncement(
+                                        announcementModel: announcementModel,
+                                      );
+                                      break;
+                                    } else {
+                                      widget = Container();
+                                    }
+                                  }
+                                  return widget;
+                                }(),
+                              ),
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: ListView.builder(
+                                  itemCount: announcementModels.length,
+                                  itemBuilder: (context, index) {
+                                    var model = announcementModels[index];
+                                    if (model != announcementModels[0]) {
+                                      return OtherAnnouncement(
+                                          announcementModel: model);
+                                    } else {
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),

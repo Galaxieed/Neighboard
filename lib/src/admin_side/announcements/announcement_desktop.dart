@@ -13,6 +13,7 @@ import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_desktop.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:universal_io/io.dart';
@@ -82,13 +83,19 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
       await sendNotifToAll();
       // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Announcement successfully posted"),
-        ),
-      );
+      successMessage(
+          title: "Success!",
+          desc: "Announcement successfully posted",
+          context: context);
     }
     setState(() {
+      _ctrlTitle.clear();
+      _ctrlContent.clear();
+      _postTitle = '';
+      _postContent = '';
+      profileImage = null;
+      profileImageByte = null;
+      profileImageUrl = "";
       isLoading = false;
     });
   }
@@ -364,6 +371,7 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                             },
                           );
                         },
+                        style: ElevatedButton.styleFrom(elevation: 5),
                         icon: const Icon(Icons.add),
                         label: const Text("New Announcement"),
                       ),
@@ -374,6 +382,7 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                         child: AbsorbPointer(
                           child: ElevatedButton.icon(
                             onPressed: () {},
+                            style: ElevatedButton.styleFrom(elevation: 5),
                             icon: const Icon(Icons.sort),
                             label: const Text("Filter"),
                           ),
@@ -385,18 +394,23 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                       ),
                     ],
                   ),
-                  //TODO: fix this when there is no announcement
+                  const SizedBox(
+                    height: 10,
+                  ),
                   if (announcementModels.isNotEmpty)
                     Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          left: 45.w,
-                          right: 45.w,
-                          top: 20.h,
-                          bottom: 20.h,
+                      child: Center(
+                        child: SizedBox(
+                          width: 150.w,
+                          child: MainAnnouncement(
+                              announcementModel: announcementModels[0]),
                         ),
-                        child: MainAnnouncement(
-                            announcementModel: announcementModels[0]),
+                      ),
+                    )
+                  else
+                    const Expanded(
+                      child: Center(
+                        child: Text("No Announcements"),
                       ),
                     ),
                 ],

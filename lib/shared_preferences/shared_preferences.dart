@@ -1,5 +1,4 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/material.dart';
 
 class SharedPrefHelper {
   static Future<void> saveString(
@@ -30,6 +29,6 @@ class SharedPrefHelper {
 
   static Future<int> loadThemeColor() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('color') ?? Colors.amber.value;
+    return prefs.getInt('color') ?? 0;
   }
 }

@@ -43,7 +43,6 @@ class _AdminDesktopState extends State<AdminDesktop> {
       getCurrentUserDetails();
       return isLoggedIn = true;
     }
-    //TODO: reject user when tried to open admin side without logging in
     return isLoggedIn = false;
   }
 
@@ -271,7 +270,7 @@ class _MyDrawerState extends State<MyDrawer> {
               },
               selected: selectedSubButton == "User",
               selectedColor: Theme.of(context).colorScheme.onBackground,
-              selectedTileColor: Colors.amber,
+              selectedTileColor: Theme.of(context).colorScheme.inversePrimary,
             );
           }
 

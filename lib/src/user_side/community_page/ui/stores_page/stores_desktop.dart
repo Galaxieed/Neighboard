@@ -17,6 +17,7 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
@@ -108,10 +109,10 @@ class _StoresDesktopState extends State<StoresDesktop> {
         await sendNotifToAll();
         onNewStore();
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Store successfully added"),
-          ),
+        successMessage(
+          title: "Success!",
+          desc: 'Store successfully added',
+          context: context,
         );
       }
     }
@@ -242,7 +243,14 @@ class _StoresDesktopState extends State<StoresDesktop> {
       padding: EdgeInsets.symmetric(
           horizontal: 15.w, vertical: widget.isAdmin ? 30.h : 15.h),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.onInverseSurface,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Theme.of(context).colorScheme.inversePrimary.withAlpha(100),
+            Theme.of(context).colorScheme.onInverseSurface,
+          ],
+        ),
       ),
       child: Column(
         children: [
@@ -457,6 +465,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
                       onPressed: () {
                         onNewStore();
                       },
+                      style: ElevatedButton.styleFrom(elevation: 5),
                       icon: const Icon(Icons.add),
                       label: const Text("New Store"),
                     )
@@ -469,19 +478,24 @@ class _StoresDesktopState extends State<StoresDesktop> {
                 )
               : Container(),
           Expanded(
-            child: GridView(
-              padding: widget.isAdmin
-                  ? EdgeInsets.symmetric(horizontal: 15.w)
-                  : null,
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 400,
-                childAspectRatio: 400 / 300,
-              ),
-              children: [
-                for (StoreModel stModel in storeModels)
-                  StoresCards(storeModel: stModel),
-              ],
-            ),
+            child: storeModels.isEmpty
+                ? const Center(
+                    child: Text("No Stores"),
+                  )
+                : GridView(
+                    padding: widget.isAdmin
+                        ? EdgeInsets.symmetric(horizontal: 15.w)
+                        : null,
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 500,
+                      childAspectRatio: 400 / 300,
+                    ),
+                    children: [
+                      for (StoreModel stModel in storeModels)
+                        StoresCards(storeModel: stModel),
+                    ],
+                  ),
           ),
         ],
       ),

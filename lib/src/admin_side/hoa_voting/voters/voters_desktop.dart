@@ -223,6 +223,7 @@ class _VotersDesktopState extends State<VotersDesktop> {
 
   Widget theTable({required bool voted}) {
     return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
       child: PaginatedDataTable(
         rowsPerPage: _rowsPerPage,
         availableRowsPerPage: const <int>[5, 10, 20],

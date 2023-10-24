@@ -9,6 +9,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
@@ -16,6 +17,8 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
+import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -107,10 +110,10 @@ class _StoresMobileState extends State<StoresMobile> {
         await sendNotifToAll();
         onNewStore();
         // ignore: use_build_context_synchronously
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Store successfully Added"),
-          ),
+        successMessage(
+          title: "Success!",
+          desc: 'Store successfully added',
+          context: context,
         );
       }
     }
@@ -138,11 +141,19 @@ class _StoresMobileState extends State<StoresMobile> {
 
   void _openChat() {
     showModalBottomSheet(
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
       },
     );
+  }
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  void _openNotification() {
+    _scaffoldKey.currentState!.openEndDrawer();
   }
 
   List<UserModel> allUsers = [];
@@ -199,17 +210,25 @@ class _StoresMobileState extends State<StoresMobile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: widget.isAdmin
           ? null
           : AppBar(
-              title: const Text("Stores"),
               actions: [
-                IconButton(
-                  onPressed: () {
-                    _openChat();
-                  },
+                //TODO: Chat count
+                NavBarBadges(
+                  count: null,
                   icon: const Icon(Icons.chat_outlined),
-                  tooltip: "Global Chat",
+                  callback: _openChat,
+                ),
+                NavBarBadges(
+                  count: notificationModels
+                      .where((element) => !element.isRead)
+                      .toList()
+                      .length
+                      .toString(),
+                  icon: const Icon(Icons.notifications_outlined),
+                  callback: _openNotification,
                 ),
                 NavBarCircularImageDropDownButton(
                   callback: Routes().navigate,
@@ -223,18 +242,26 @@ class _StoresMobileState extends State<StoresMobile> {
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
           ? const NavDrawer()
           : null,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return ScaleTransition(scale: animation, child: child);
-        },
-        child: Container(
-          key: ValueKey(isOnNewPost),
-          child: isOnNewPost && widget.isAdmin
-              ? newStore(context)
-              : allStores(context),
-        ),
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
       ),
+      body: storeModels.isEmpty
+          ? const Center(
+              child: Text("No Stores"),
+            )
+          : AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Container(
+                key: ValueKey(isOnNewPost),
+                child: isOnNewPost && widget.isAdmin
+                    ? newStore(context)
+                    : allStores(context),
+              ),
+            ),
     );
   }
 
@@ -434,13 +461,24 @@ class _StoresMobileState extends State<StoresMobile> {
 
   Container allStores(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+      padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 15.h),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: widget.isAdmin
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [
+          if (!widget.isAdmin)
+            SizedBox(
+              width: double.infinity,
+              child: Text(
+                'STORES',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+            ),
           widget.isAdmin
               ? Container()
               : const SizedBox(
@@ -601,7 +639,7 @@ class StoresCards extends StatelessWidget {
                   decoration: BoxDecoration(
                       color: ccStoresBannerColor(context),
                       borderRadius: BorderRadius.circular(5)),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -626,7 +664,7 @@ class StoresCards extends StatelessWidget {
                         ),
                         child: Text(
                           'View Details',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleSmall,
                         ),
                       )
                     ],

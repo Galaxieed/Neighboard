@@ -7,6 +7,7 @@ import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_ui.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
@@ -42,11 +43,13 @@ class _MyPostsState extends State<MyPosts> {
     } catch (e) {
       return;
     }
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   void getMyPostsByTitle() async {
@@ -65,11 +68,11 @@ class _MyPostsState extends State<MyPosts> {
     super.initState();
     if (_auth.currentUser == null) {
       isLoggedIn = false;
+      isLoading = false;
     } else {
       isLoggedIn = true;
       getMyPosts();
     }
-    isLoading = false;
   }
 
   @override
@@ -85,8 +88,8 @@ class _MyPostsState extends State<MyPosts> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
+        ? const LoadingPosts(
+            postType: "My Posts",
           )
         : !isLoggedIn
             ? Center(

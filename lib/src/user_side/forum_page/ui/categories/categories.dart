@@ -6,10 +6,12 @@ import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_function.dart';
+import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
@@ -48,11 +50,13 @@ class _CategoriesState extends State<Categories> {
       postModels = await AllPostsFunction.getAllPost() ?? [];
       postModels.sort((a, b) => b.postId.compareTo(a.postId));
     }
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
   }
 
   void getCategoryPosts() async {
@@ -79,6 +83,8 @@ class _CategoriesState extends State<Categories> {
     });
     await PendingPostFunction.removePendingPost(postModel);
     await sendNotificaton(postModel, false);
+    // ignore: use_build_context_synchronously
+    errorMessage(title: "Denied!", desc: "Post was Denied!", context: context);
     setState(() {
       postModels.remove(postModel);
       isLoading = false;
@@ -91,6 +97,11 @@ class _CategoriesState extends State<Categories> {
     });
     await PendingPostFunction.approvePendingPost(postModel);
     await sendNotificaton(postModel, true);
+    // ignore: use_build_context_synchronously
+    successMessage(
+        title: "Approved!",
+        desc: "Post Successfully Approved!",
+        context: context);
     setState(() {
       postModels.remove(postModel);
       isLoading = false;
@@ -144,7 +155,7 @@ class _CategoriesState extends State<Categories> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const LoadingScreen()
+        ? const LoadingPosts()
         : postModels.isEmpty
             ? const Center(
                 child: Text("No Posts"),

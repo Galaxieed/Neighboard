@@ -10,6 +10,7 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
@@ -240,17 +241,15 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     if (_formKey.currentState!.validate()) {
                       try {
                         onSavingDetails();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Updated Successfully"),
-                          ),
-                        );
+                        successMessage(
+                            title: "Success!",
+                            desc: "Updated Successfully",
+                            context: context);
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(e.toString()),
-                          ),
-                        );
+                        errorMessage(
+                            title: "Error!",
+                            desc: e.toString(),
+                            context: context);
                       }
                     }
                   },
@@ -657,11 +656,10 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                         try {
                           pickImage(stateSetter);
                         } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(e.toString()),
-                            ),
-                          );
+                          errorMessage(
+                              title: "Error!",
+                              desc: e.toString(),
+                              context: context);
                         }
                       },
                       icon: const Icon(Icons.camera_alt),
@@ -708,27 +706,24 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           checker) {
                         onSavingPic();
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Profile Picture Updated"),
-                          ),
-                        );
+                        successMessage(
+                            title: "Success!",
+                            desc: "Profile Picture Updated",
+                            context: context);
                         //This will now allow user to upload picture
                         checker = false;
                         setState(() {});
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("No changes"),
-                          ),
-                        );
+                        infoMessage(
+                            title: "Info!",
+                            desc: "No changes",
+                            context: context);
                       }
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(e.toString()),
-                        ),
-                      );
+                      errorMessage(
+                          title: "Error!",
+                          desc: e.toString(),
+                          context: context);
                     }
                   },
                   style: ElevatedButton.styleFrom(

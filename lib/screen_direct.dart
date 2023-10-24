@@ -16,10 +16,12 @@ import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 
 String myToken = '';
 List<NotificationModel> notificationModels = [];
-StreamSubscription<QuerySnapshot>? subscription;
+StreamSubscription<QuerySnapshot>? notifSubscription;
+StreamSubscription<QuerySnapshot>? chatSubscription;
 
 class ScreenDirect extends StatefulWidget {
   const ScreenDirect({super.key});
@@ -52,7 +54,6 @@ class _ScreenDirectState extends State<ScreenDirect> {
       listenForNotification();
     } else {
       isLoggedIn = false;
-      subscription?.cancel();
     }
     setState(() {
       isLoading = false;
@@ -63,11 +64,10 @@ class _ScreenDirectState extends State<ScreenDirect> {
     userModel = await ProfileFunction.getUserDetails(userId);
   }
 
-  //for Web
-
+  //Notif for Web
   void listenForNotification() {
     if (isLoggedIn) {
-      subscription = _firestore
+      notifSubscription = _firestore
           .collection("notifications")
           .doc(_auth.currentUser!.uid)
           .collection("all")
@@ -102,7 +102,7 @@ class _ScreenDirectState extends State<ScreenDirect> {
           }
         },
         onError: (error) {
-          print(error);
+          errorMessage(title: "Error!", desc: error, context: context);
         },
         onDone: () {},
       );
@@ -125,18 +125,8 @@ class _ScreenDirectState extends State<ScreenDirect> {
     ).show(context);
   }
 
-  @override
-  void initState() {
-    FirebaseMessaging.onMessage.listen(showFlutterNotification);
-    FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
-    super.initState();
-    getToken();
-    checkIfUserLoggedIn();
-  }
-
   getToken() async {
     myToken = await _messaging.getToken() ?? '';
-    print("TOKEN: $myToken");
   }
 
   Future<void> myBackgroundMessageHandler(RemoteMessage message) async {
@@ -203,10 +193,12 @@ class _ScreenDirectState extends State<ScreenDirect> {
   }
 
   @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    //getToken();
+  void initState() {
+    FirebaseMessaging.onMessage.listen(showFlutterNotification);
+    FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+    super.initState();
+    getToken();
+    checkIfUserLoggedIn();
   }
 
   @override

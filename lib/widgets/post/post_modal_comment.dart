@@ -8,6 +8,7 @@ import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/loading_screen/reply_shimmer.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
@@ -60,7 +61,6 @@ class _PostModalCommentState extends State<PostModalComment> {
       body,
     );
 
-    //TODO:add sa notification TAB
     //Send and add notification sa receiver
     if (otherUser!.userId != widget.currentUser!.userId) {
       NotificationModel notificationModel = NotificationModel(
@@ -354,7 +354,7 @@ class _PostModalCommentState extends State<PostModalComment> {
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const LinearProgressIndicator(); //TODO: Replace with Shimmer
+                return ReplyShimmer(isLoggedIn: widget.isLoggedIn);
               } else if (snapshot.connectionState == ConnectionState.active ||
                   snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasError) {
@@ -365,6 +365,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                       .map((e) => ReplyModel.fromJson(e.data()))
                       .toList();
                   ReplyModel reply = replyModels[index];
+
                   return ReplyItself(
                     replyModel: reply,
                     currentUser: widget.currentUser!,
@@ -531,7 +532,6 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
       controller.text,
     );
 
-    //TODO:add sa notification TAB
     if (otherUser!.userId != widget.currentUser.userId) {
       NotificationModel notificationModel = NotificationModel(
         notifId: DateTime.now().toIso8601String(),
@@ -551,7 +551,6 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     controller.text = "${widget.recipientName} ";
   }

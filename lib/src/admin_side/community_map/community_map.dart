@@ -13,6 +13,7 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -70,7 +71,8 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       currentCenter = LatLng(newLatitude, newLongitude);
       _moveMap();
     } catch (e) {
-      //TODO: Catch error
+      // ignore: use_build_context_synchronously
+      errorMessage(title: "Error!", desc: e.toString(), context: context);
     }
     setState(() {
       isLoading = false;
@@ -115,11 +117,10 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
 
       if (isSuccessful) {
         await sendNotifToAll();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Site successfully updated"),
-          ),
-        );
+        successMessage(
+            title: "Success!",
+            desc: "Site successfully updated",
+            context: context);
       }
       return;
     } else {
@@ -128,11 +129,10 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       };
       await SiteSettingsFunction.updateSiteSettings(siteDetails);
       await sendNotifToAll();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Map location successfully updated"),
-        ),
-      );
+      successMessage(
+          title: "Success!",
+          desc: "Map location successfully updated",
+          context: context);
     }
 
     setState(() {
