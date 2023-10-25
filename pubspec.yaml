@@ -62,6 +62,7 @@ dependencies:
   flutter_local_notifications: ^16.0.0+1
   elegant_notification: ^1.11.2
   shimmer: ^3.0.0
+  collection: ^1.15.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -117,6 +118,10 @@ flutter:
     - assets/robot.png
     - assets/robot_thanks.png
     - assets/icon.png
+    - assets/announcements.png
+    - assets/no_posts.png
+    - assets/chats.png
+    - assets/stores.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
@@ -131,10 +136,13 @@ flutter:
   fonts:
     - family: Lexend Deca
       fonts:
-        - asset: fonts/Lexend_Deca/LexendDeca-VariableFont_wght.ttf
+        - asset: fonts/Lexend_Deca/static/LexendDeca-Regular.ttf
     - family: Montserrat
       fonts:
-        - asset: fonts/Montserrat/Montserrat-VariableFont_wght.ttf
+        - asset: fonts/Montserrat/static/Montserrat-Regular.ttf
+  
+        - asset: fonts/Montserrat/static/Montserrat-Bold.ttf
+          weight: 700
     - family: Roboto
       fonts:
         - asset: fonts/Roboto/Roboto-Regular.ttf    

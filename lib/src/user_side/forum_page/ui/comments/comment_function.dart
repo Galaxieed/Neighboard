@@ -48,6 +48,57 @@ class CommentFunction {
     }
   }
 
+  static Future<bool> removeComment({
+    required String postId,
+    required String commentId,
+  }) async {
+    try {
+      //remove comment
+      await _firestore
+          .collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .delete();
+
+      //updates the number of comments in a post
+      final postReference = _firestore.collection("posts").doc(postId);
+
+      await _firestore.runTransaction((transaction) async {
+        final post = await transaction.get(postReference);
+
+        int commentsCount = post.data()!['no_of_comments'];
+
+        transaction
+            .update(postReference, {"no_of_comments": commentsCount - 1});
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateComment({
+    required String postId,
+    required String commentId,
+    required String commentMessage,
+  }) async {
+    try {
+      //updates the comment
+      await _firestore
+          .collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .update({"comment_message": commentMessage});
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   static Future<List<CommentModel>?> getAllComments(
       {required String postId}) async {
     try {
@@ -99,6 +150,68 @@ class CommentFunction {
       });
     } catch (e) {
       return;
+    }
+  }
+
+  static Future<bool> removeReply({
+    required String postId,
+    required String commentId,
+    required String replyId,
+  }) async {
+    try {
+      //remove comment
+      await _firestore
+          .collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .collection("replies")
+          .doc(replyId)
+          .delete();
+
+      //updates the number of replies in a comment
+      final commentReference = _firestore
+          .collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId);
+
+      await _firestore.runTransaction((transaction) async {
+        final comment = await transaction.get(commentReference);
+
+        int repliesCount = comment.data()!['no_of_replies'];
+
+        transaction
+            .update(commentReference, {"no_of_replies": repliesCount - 1});
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateReply({
+    required String postId,
+    required String commentId,
+    required String replyId,
+    required String replyMessage,
+  }) async {
+    try {
+      //updates the comment
+      await _firestore
+          .collection("posts")
+          .doc(postId)
+          .collection("comments")
+          .doc(commentId)
+          .collection("replies")
+          .doc(replyId)
+          .update({"reply_message": replyMessage});
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 

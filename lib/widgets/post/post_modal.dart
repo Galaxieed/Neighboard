@@ -14,6 +14,7 @@ import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_interactors_function.dart';
 import 'package:neighboard/widgets/post/post_modal_comment.dart';
@@ -21,10 +22,14 @@ import 'package:responsive_builder/responsive_builder.dart';
 
 class PostModal extends StatefulWidget {
   const PostModal(
-      {super.key, required this.postModel, required this.deviceScreenType});
+      {super.key,
+      required this.postModel,
+      required this.deviceScreenType,
+      this.stateSetter});
 
   final PostModel postModel;
   final DeviceScreenType deviceScreenType;
+  final Function? stateSetter;
 
   @override
   State<PostModal> createState() => _PostModalState();
@@ -230,6 +235,49 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
+  removePost() async {
+    if (widget.stateSetter != null) {
+      widget.stateSetter!();
+    }
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
+    successMessage(
+        title: "Success!", desc: "Post was deleted!", context: context);
+    await PostInteractorsFunctions.removePost(postModel: widget.postModel);
+  }
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  bool isEditing = false;
+  updatePost() async {
+    if (_contentController.text.isNotEmpty &&
+        _titleController.text.isNotEmpty) {
+      bool isSucceess = await PostInteractorsFunctions.updatePost(
+        postId: widget.postModel.postId,
+        postTitle: _titleController.text,
+        postContent: _contentController.text,
+      );
+      if (isSucceess) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!",
+            desc: "Post was edited!\nReopen this to see changes",
+            context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Post was not edited",
+            context: context);
+      }
+    }
+    if (widget.stateSetter != null) {
+      widget.stateSetter!();
+    }
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -238,6 +286,8 @@ class _PostModalState extends State<PostModal> {
       isLoggedIn = true;
       checkIfUpVoted();
       checkIfAlreadyViewed();
+      _titleController.text = widget.postModel.title;
+      _contentController.text = widget.postModel.content;
       setState(() {});
     } else {
       isLoggedIn = false;
@@ -292,87 +342,178 @@ class _PostModalState extends State<PostModal> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              postDetails(context),
-              const SizedBox(
-                height: 10,
-              ),
-              Text(
-                widget.postModel.title,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              Text(widget.postModel.content),
-              const SizedBox(
-                width: 10,
-              ),
-              const Divider(),
-              isLoggedIn
-                  ? postActions()
-                  : const Center(child: Text("Login First")),
-              const Divider(),
-              //postComments(),
-              StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection("posts")
-                    .doc(widget.postModel.postId)
-                    .collection("comments")
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else {
-                    return ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: snapshot.data!.docs.length,
-                      itemBuilder: (context, index) {
-                        final result = snapshot.data!;
-                        commentModels = result.docs
-                            .map((e) => CommentModel.fromJson(e.data()))
-                            .toList();
-                        CommentModel comment = commentModels[index];
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    postDetails(context),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    isEditing
+                        ? TextField(
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                                suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _titleController.text =
+                                          widget.postModel.title;
+                                      isEditing = false;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: updatePost,
+                                  icon: Icon(
+                                    Icons.save,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                  ),
+                                )
+                              ],
+                            )),
+                          )
+                        : Text(
+                            widget.postModel.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(fontWeight: FontWeight.bold),
+                          ),
+                    isEditing
+                        ? TextField(
+                            controller: _contentController,
+                            decoration: InputDecoration(
+                                suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _contentController.text =
+                                          widget.postModel.content;
+                                      isEditing = false;
+                                    });
+                                  },
+                                  icon: const Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: updatePost,
+                                  icon: Icon(
+                                    Icons.save,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                  ),
+                                )
+                              ],
+                            )),
+                          )
+                        : Text(widget.postModel.content),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    const Divider(),
+                    isLoggedIn
+                        ? postActions()
+                        : const Center(child: Text("Login First")),
+                    const Divider(),
+                    //postComments(),
+                    StreamBuilder(
+                      stream: FirebaseFirestore.instance
+                          .collection("posts")
+                          .doc(widget.postModel.postId)
+                          .collection("comments")
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else {
+                          return ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: snapshot.data!.docs.length,
+                            itemBuilder: (context, index) {
+                              final result = snapshot.data!;
+                              commentModels = result.docs
+                                  .map((e) => CommentModel.fromJson(e.data()))
+                                  .toList();
+                              CommentModel comment = commentModels[index];
 
-                        return PostModalComment(
-                          currentUser: currentUser,
-                          postModel: widget.postModel,
-                          commentModel: comment,
-                          isLoggedIn: isLoggedIn,
-                          addReplyFunc: addReplyCallback,
-                          onTypeReply: onTypeReply,
-                          deviceScreenType: widget.deviceScreenType,
-                        );
+                              return PostModalComment(
+                                currentUser: currentUser,
+                                postModel: widget.postModel,
+                                commentModel: comment,
+                                isLoggedIn: isLoggedIn,
+                                addReplyFunc: addReplyCallback,
+                                onTypeReply: onTypeReply,
+                                deviceScreenType: widget.deviceScreenType,
+                              );
+                            },
+                          );
+                        }
                       },
-                    );
-                  }
-                },
+                    ),
+                  ],
+                ),
               ),
+              if (currentUser != null &&
+                  currentUser!.userId == widget.postModel.authorId)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: PopupMenuButton(
+                    onSelected: (value) {
+                      if (value == "Edit") {
+                        setState(() {
+                          isEditing = !isEditing;
+                        });
+                      } else if (value == "Delete") {
+                        removePost();
+                      }
+                    },
+                    itemBuilder: (context) {
+                      return [
+                        const PopupMenuItem(
+                          value: "Edit",
+                          child: ListTile(
+                            leading: Icon(Icons.edit),
+                            title: Text("Edit"),
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: "Delete",
+                          child: ListTile(
+                            leading: Icon(Icons.delete_outlined),
+                            title: Text("Delete"),
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                )
             ],
           ),
         ),
       ),
     );
   }
-
-  // ListView postComments(List<CommentModel> commentModels) {
-  //   return ListView.builder(
-  //     shrinkWrap: true,
-  //     itemCount: commentModels.length,
-  //     itemBuilder: (context, index) {
-  //       CommentModel comment = commentModels[index];
-  //       return PostModalComment(
-  //         currentUser: currentUser,
-  //         postModel: widget.postModel,
-  //         commentModel: comment,
-  //         isLoggedIn: isLoggedIn,
-  //       );
-  //     },
-  //   );
-  // }
 
   Row postActions() {
     return Row(
@@ -426,11 +567,6 @@ class _PostModalState extends State<PostModal> {
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ],
-        ),
-        const Spacer(),
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.more_horiz),
         ),
       ],
     );

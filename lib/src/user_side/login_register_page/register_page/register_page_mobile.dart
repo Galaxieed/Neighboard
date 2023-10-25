@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -154,7 +153,7 @@ class _RegisterPageMobileState extends State<RegisterPageMobile> {
                                   height: 10,
                                 ),
                                 const Text(
-                                  'Get more features and priviliges by joining the La Aldea Community',
+                                  'Get more features and priviliges by joining the Villa Roma 5 Community',
                                   style: TextStyle(
                                     fontSize: 16,
                                   ),

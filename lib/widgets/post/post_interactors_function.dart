@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 
 class PostInteractorsFunctions {
@@ -30,6 +31,50 @@ class PostInteractorsFunctions {
       return userModels;
     } catch (e) {
       return null;
+    }
+  }
+
+  static Future<bool> removePost({
+    required PostModel postModel,
+  }) async {
+    try {
+      //remove comment
+      await _firestore.collection("posts").doc(postModel.postId).delete();
+
+      //updates the number of posts in a user
+      final userReference =
+          _firestore.collection("users").doc(postModel.authorId);
+
+      await _firestore.runTransaction((transaction) async {
+        final user = await transaction.get(userReference);
+
+        int postCount = user.data()!['posts'];
+
+        transaction.update(userReference, {"posts": postCount - 1});
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> updatePost({
+    required String postId,
+    required String postTitle,
+    required String postContent,
+  }) async {
+    try {
+      //updates the comment
+      await _firestore
+          .collection("posts")
+          .doc(postId)
+          .update({"title": postTitle, "content": postContent});
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 

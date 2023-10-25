@@ -125,7 +125,7 @@ class NavBarTitle extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                   fontFamily: "Montserrat",
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
                 ),
           ),
         ],
@@ -187,10 +187,15 @@ class _NavBarTextButtonState extends State<NavBarTextButton> {
             widget.text,
             style: TextStyle(
               letterSpacing: 1,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.bold,
               color: _isHovering || widget.currentPage == widget.text
                   ? Theme.of(context).colorScheme.inversePrimary
-                  : Theme.of(context).colorScheme.onBackground,
+                  : isDarkMode
+                      ? Colors.white
+                      : Theme.of(context)
+                          .colorScheme
+                          .onBackground
+                          .withOpacity(.7),
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -289,10 +294,15 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
                   'Community',
                   style: TextStyle(
                     letterSpacing: 1,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.bold,
                     color: _isHovering || widget.currentPage == "Community"
                         ? Theme.of(context).colorScheme.inversePrimary
-                        : Theme.of(context).colorScheme.onBackground,
+                        : isDarkMode
+                            ? Colors.white
+                            : Theme.of(context)
+                                .colorScheme
+                                .onBackground
+                                .withOpacity(.7),
                   ),
                 ),
               ),

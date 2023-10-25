@@ -181,6 +181,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         'site_about': tcAbout.text,
         'site_theme_color': currentThemeColor.value,
         'site_logo': logoImgUrl,
+        'site_logo_dark': logoImgUrlDark,
         'site_homepage_image': homeImgUrl,
         'site_about_image': aboutImgUrl,
       };

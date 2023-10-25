@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/data/posts_data.dart';
@@ -12,7 +13,9 @@ import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_funct
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
+import 'package:neighboard/widgets/page_messages/page_messages.dart';
 import 'package:neighboard/widgets/post/post_interactors.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
@@ -42,6 +45,10 @@ class _CategoriesState extends State<Categories> {
   bool isLoading = true;
 
   void getAllPost() async {
+    setState(() {
+      isLoading = true;
+    });
+    postModels.clear();
     if (widget.isAdmin) {
       postModels = await AllPostsFunction.getAllPendingPost() ?? [];
       postModels.sort((a, b) => b.postId.compareTo(a.postId));
@@ -156,10 +163,9 @@ class _CategoriesState extends State<Categories> {
     return isLoading
         ? const LoadingPosts()
         : postModels.isEmpty
-            ? const Center(
-                child: Text("No Posts"),
-              )
+            ? noPostMessage()
             : ListView.builder(
+                shrinkWrap: true,
                 controller: widget.scrollController,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
@@ -175,6 +181,9 @@ class _CategoriesState extends State<Categories> {
                           denyPost: _denyPost,
                           approvePost: _approvePost,
                           deviceScreenType: widget.deviceScreenType,
+                          stateSetter: () {
+                            getAllPost();
+                          },
                         ),
                       ],
                     ),
@@ -192,20 +201,60 @@ class SinglePost extends StatefulWidget {
     required this.approvePost,
     required this.denyPost,
     required this.deviceScreenType,
+    required this.stateSetter,
   });
   final DeviceScreenType deviceScreenType;
   final PostModel post;
   final bool isAdmin;
-  final Function denyPost, approvePost;
+  final Function denyPost, approvePost, stateSetter;
 
   @override
   State<SinglePost> createState() => _SinglePostState();
 }
 
 class _SinglePostState extends State<SinglePost> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  bool isEditing = false;
+
+  removePost() async {
+    widget.stateSetter();
+    successMessage(
+        title: "Success!", desc: "Post was deleted!", context: context);
+    await PostInteractorsFunctions.removePost(postModel: widget.post);
+  }
+
+  updatePost() async {
+    if (_contentController.text.isNotEmpty &&
+        _titleController.text.isNotEmpty) {
+      bool isSucceess = await PostInteractorsFunctions.updatePost(
+        postId: widget.post.postId,
+        postTitle: _titleController.text,
+        postContent: _contentController.text,
+      );
+      if (isSucceess) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!",
+            desc: "Post was edited!\nReopen this to see changes",
+            context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Post was not edited",
+            context: context);
+      }
+    }
+    widget.stateSetter();
+  }
+
   @override
   void initState() {
     super.initState();
+    _titleController.text = widget.post.title;
+    _contentController.text = widget.post.content;
   }
 
   @override
@@ -222,6 +271,9 @@ class _SinglePostState extends State<SinglePost> {
                       child: PostModal(
                     postModel: widget.post,
                     deviceScreenType: widget.deviceScreenType,
+                    stateSetter: () {
+                      widget.stateSetter();
+                    },
                   )),
                 )
               : showModalBottomSheet(
@@ -232,6 +284,9 @@ class _SinglePostState extends State<SinglePost> {
                   builder: (context) => PostModal(
                     postModel: widget.post,
                     deviceScreenType: widget.deviceScreenType,
+                    stateSetter: () {
+                      widget.stateSetter();
+                    },
                   ),
                 );
         },
@@ -240,37 +295,134 @@ class _SinglePostState extends State<SinglePost> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Stack(
                 children: [
-                  SmallProfilePic(profilePic: widget.post.profilePicture),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                      child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  Row(
                     children: [
-                      AuthorNameText(authorName: widget.post.authorName),
-                      PostTimeText(time: widget.post.timeStamp)
+                      SmallProfilePic(profilePic: widget.post.profilePicture),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          AuthorNameText(authorName: widget.post.authorName),
+                          PostTimeText(time: widget.post.timeStamp)
+                        ],
+                      )),
                     ],
-                  )),
-                  IconButton(
-                      onPressed: () {}, icon: const Icon(Icons.more_vert)),
+                  ),
+                  if (_auth.currentUser != null &&
+                      _auth.currentUser!.uid == widget.post.authorId)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == "Edit") {
+                            setState(() {
+                              isEditing = !isEditing;
+                            });
+                          } else if (value == "Delete") {
+                            removePost();
+                          }
+                        },
+                        itemBuilder: (context) {
+                          return [
+                            const PopupMenuItem(
+                              value: "Edit",
+                              child: ListTile(
+                                leading: Icon(Icons.edit),
+                                title: Text("Edit"),
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: "Delete",
+                              child: ListTile(
+                                leading: Icon(Icons.delete_outlined),
+                                title: Text("Delete"),
+                              ),
+                            ),
+                          ];
+                        },
+                      ),
+                    )
                 ],
               ),
               const SizedBox(
                 height: 10,
               ),
-              PostTitleText(title: widget.post.title),
+              isEditing
+                  ? TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                          suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _titleController.text = widget.post.title;
+                                isEditing = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.red,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: updatePost,
+                            icon: Icon(
+                              Icons.save,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                            ),
+                          )
+                        ],
+                      )),
+                    )
+                  : PostTitleText(title: widget.post.title),
               const SizedBox(
                 height: 5,
               ),
-              PostContentText(
-                content: widget.post.content,
-                maxLine: 1,
-                textOverflow: TextOverflow.ellipsis,
-              ),
+              isEditing
+                  ? TextField(
+                      controller: _contentController,
+                      decoration: InputDecoration(
+                          suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _contentController.text = widget.post.content;
+                                isEditing = false;
+                              });
+                            },
+                            icon: const Icon(
+                              Icons.cancel_outlined,
+                              color: Colors.red,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: updatePost,
+                            icon: Icon(
+                              Icons.save,
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                            ),
+                          )
+                        ],
+                      )),
+                    )
+                  : PostContentText(
+                      content: widget.post.content,
+                      maxLine: 1,
+                      textOverflow: TextOverflow.ellipsis,
+                    ),
               const SizedBox(
                 height: 10,
               ),

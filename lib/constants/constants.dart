@@ -5,6 +5,10 @@ const String guestIcon = 'assets/guest_icon.png';
 const String noImage = 'assets/no_image.jpg';
 const String robotInfo = 'assets/robot.png';
 const String robotThanks = 'assets/robot_thanks.png';
+const String noPost = 'assets/no_posts.png';
+const String noStore = 'assets/stores.png';
+const String noChat = 'assets/chats.png';
+const String announcement = 'assets/announcements.png';
 
 //LandPage Styles
 double ccLandPageBGOpacity = 1;

@@ -9,9 +9,11 @@ import 'package:neighboard/src/user_side/community_page/ui/community_map_page/co
 import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting.dart';
 import 'package:neighboard/src/user_side/community_page/ui/stores_page/stores.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:responsive_builder/responsive_builder.dart';
+import 'package:collection/collection.dart';
 
 class NotificationDrawer extends StatefulWidget {
   const NotificationDrawer(
@@ -34,13 +36,13 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
         title: Text("Mark all as read"),
       ),
     ),
-    const PopupMenuItem(
-      value: "Archive all",
-      child: ListTile(
-        leading: Icon(Icons.archive_outlined),
-        title: Text("Archive all"),
-      ),
-    ),
+    // const PopupMenuItem(
+    //   value: "Archive all",
+    //   child: ListTile(
+    //     leading: Icon(Icons.archive_outlined),
+    //     title: Text("Archive all"),
+    //   ),
+    // ),
   ];
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -259,14 +261,22 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                                             "FORUM") {
                                           Navigator.pop(context);
                                           if (postModels.isNotEmpty) {
-                                            PostModel post =
-                                                postModels.firstWhere(
+                                            PostModel? post =
+                                                postModels.firstWhereOrNull(
                                               (element) =>
                                                   element.postId ==
                                                   notification.notifLocation
                                                       .split("|")[1],
                                             );
-                                            openPostModal(post);
+                                            if (post == null) {
+                                              infoMessage(
+                                                  title: "Post not found!",
+                                                  desc:
+                                                      "This post may be removed by the author!",
+                                                  context: context);
+                                            } else {
+                                              openPostModal(post);
+                                            }
                                           }
                                         }
                                         if (notification.notifLocation ==

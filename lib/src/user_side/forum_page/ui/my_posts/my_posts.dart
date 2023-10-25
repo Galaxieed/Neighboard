@@ -18,6 +18,7 @@ import 'package:neighboard/widgets/others/post_tag_chip.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
+import 'package:neighboard/widgets/page_messages/page_messages.dart';
 
 class MyPosts extends StatefulWidget {
   const MyPosts({Key? key, required this.search}) : super(key: key);
@@ -113,9 +114,7 @@ class _MyPostsState extends State<MyPosts> {
                 ),
               )
             : postModels.isEmpty
-                ? const Center(
-                    child: Text("No posts"),
-                  )
+                ? noPostMessage()
                 : ListView.builder(
                     itemCount: postModels.length,
                     itemBuilder: (context, index) {

@@ -152,7 +152,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                     height: 10,
                                   ),
                                   const Text(
-                                    'Get more features and priviliges by joining the La Aldea Community',
+                                    'Get more features and priviliges by joining the Villa Roma 5 Community',
                                     style: TextStyle(
                                       fontSize: 16,
                                     ),
@@ -166,7 +166,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                       if (value == null || value.isEmpty) {
                                         return "First name is required";
                                       }
-                                      final alpha = RegExp(r'^[a-zA-Z]+$');
+                                      final alpha = RegExp(r'^[a-zA-Z ]+$');
                                       if (!alpha.hasMatch(value)) {
                                         return "Symbols and Numbers are not allowed.\nFor suffixes like 2nd or 3rd, use Roman Numeral letters";
                                       }
@@ -186,7 +186,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                       if (value == null || value.isEmpty) {
                                         return "Last name is required";
                                       }
-                                      final alpha = RegExp(r'^[a-zA-Z]+$');
+                                      final alpha = RegExp(r'^[a-zA-Z ]+$');
                                       if (!alpha.hasMatch(value)) {
                                         return "Symbols and Numbers are not allowed.\nFor suffixes like 2nd or 3rd, use Roman Numeral letters";
                                       }
