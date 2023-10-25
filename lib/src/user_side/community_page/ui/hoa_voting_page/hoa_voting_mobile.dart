@@ -33,9 +33,16 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? chosenPresident;
   String? chosenVicePresident;
+
+  String? chosenSecretary;
+  String? chosenAssistSecretary;
+  String? chosenTreasurer;
+  String? chosenAuditor;
+  String? chosenAssistAuditor;
+
   Map<String, bool> optionsBD = {};
   List selectedBD = [];
-  int maxDirectors = 10, startCount = 0;
+  int maxDirectors = 8, startCount = 0;
 
   TabController controller(context) => DefaultTabController.of(context);
   bool isLoading = true, isElectionOngoing = true, isAlreadyVoted = false;
@@ -148,6 +155,22 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
 
     await HOAVotingFunction.voteCandidate(
         electionModel!.electionId, chosenVicePresident!, voter);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenSecretary!, voter);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenAssistSecretary!, voter);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenTreasurer!, voter);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenAuditor!, voter);
+
+    await HOAVotingFunction.voteCandidate(
+        electionModel!.electionId, chosenAssistAuditor!, voter);
+
     for (String id in selectedBD) {
       await HOAVotingFunction.voteCandidate(
           electionModel!.electionId, id, voter);
@@ -261,7 +284,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                           : isAlreadyVoted
                               ? infoBannerMessage(
                                   context,
-                                  "You already voted. Thank you for participation",
+                                  "You already voted.\nThank you for participation",
                                   robotThanks,
                                 )
                               : Expanded(
@@ -287,7 +310,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
               text,
               style: Theme.of(context)
                   .textTheme
-                  .headlineSmall!
+                  .titleMedium!
                   .copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -300,7 +323,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
   DefaultTabController gridOfCandidates() {
     return DefaultTabController(
       initialIndex: 0,
-      length: 3,
+      length: 8,
       child: Builder(
         builder: (BuildContext context) => Column(
           children: [
@@ -309,6 +332,11 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                 children: [
                   hoaTab("PRESIDENT"),
                   hoaTab("VICE PRESIDENT"),
+                  hoaTab("SECRETARY"),
+                  hoaTab("ASSISTANT SECRETARY"),
+                  hoaTab("TREASURER"),
+                  hoaTab("AUDITOR"),
+                  hoaTab("ASSISTANT AUDITOR"),
                   hoaTab("BOARD OF DIRECTORS"),
                 ],
               ),
@@ -331,11 +359,11 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: ccHOANextButtonBGColor(context),
                       foregroundColor: ccHOANextButtonFGColor(context),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),
+                      elevation: 1,
                     ),
                     child: const Text("Back"),
                   ),
@@ -346,23 +374,33 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                 ElevatedButton(
                   onPressed: () {
                     TabController ctrl = controller(context);
-                    if (!ctrl.indexIsChanging && ctrl.index < 2) {
+                    if (!ctrl.indexIsChanging && ctrl.index < 7) {
                       ctrl.animateTo(ctrl.index + 1);
                       setState(() {});
                     }
                     if (!ctrl.indexIsChanging &&
-                        ctrl.index == 2 &&
-                        (startCount == 10 &&
+                        ctrl.index == 7 &&
+                        (startCount == 8 &&
                             chosenPresident != null &&
-                            chosenVicePresident != null)) {
+                            chosenVicePresident != null &&
+                            chosenSecretary != null &&
+                            chosenAssistSecretary != null &&
+                            chosenTreasurer != null &&
+                            chosenAuditor != null &&
+                            chosenAssistAuditor != null)) {
                       onSaveVote();
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: controller(context).index == 2 &&
-                            (startCount != 10 ||
+                    backgroundColor: controller(context).index == 7 &&
+                            (startCount != 8 ||
                                 chosenPresident == null ||
-                                chosenVicePresident == null)
+                                chosenVicePresident == null ||
+                                chosenSecretary == null ||
+                                chosenAssistSecretary == null ||
+                                chosenTreasurer == null ||
+                                chosenAuditor == null ||
+                                chosenAssistAuditor == null)
                         ? Theme.of(context).disabledColor
                         : ccHOANextButtonBGColor(context),
                     foregroundColor: ccHOANextButtonFGColor(context),
@@ -371,7 +409,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                     ),
                   ),
                   child: Text(
-                    controller(context).index < 2 ? "Next" : "Save",
+                    controller(context).index < 7 ? "Next" : "Save",
                   ),
                 )
               ],
@@ -424,11 +462,26 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
           if (position == "VICE PRESIDENT") {
             chosenVicePresident = candidate.candidateId;
           }
+          if (position == "SECRETARY") {
+            chosenSecretary = candidate.candidateId;
+          }
+          if (position == "ASSISTANT SECRETARY") {
+            chosenAssistSecretary = candidate.candidateId;
+          }
+          if (position == "TREASURER") {
+            chosenTreasurer = candidate.candidateId;
+          }
+          if (position == "AUDITOR") {
+            chosenAuditor = candidate.candidateId;
+          }
+          if (position == "ASSISTANT AUDITOR") {
+            chosenAssistAuditor = candidate.candidateId;
+          }
           if (position == "BOARD OF DIRECTORS") {
-            if (!optionsBD[candidate.candidateId]! && startCount >= 10) {
+            if (!optionsBD[candidate.candidateId]! && startCount >= 8) {
               errorMessage(
                   title: "Warning!",
-                  desc: "You can only select up to 10 Candidates.",
+                  desc: "You can only select up to 8 Candidates.",
                   context: context);
 
               return;
@@ -456,10 +509,10 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                       onChanged: (bool? value) {
                         setState(() {
                           if (!optionsBD[candidate.candidateId]! &&
-                              startCount >= 10) {
+                              startCount >= 8) {
                             errorMessage(
                                 title: "Warning!",
-                                desc: 'You can only select up to 10 options.',
+                                desc: 'You can only select up to 8 options.',
                                 context: context);
 
                             return;
@@ -479,11 +532,25 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                     )
                   : Radio(
                       value: candidate.candidateId,
-                      groupValue: position == "PRESIDENT"
-                          ? chosenPresident
-                          : position == "VICE PRESIDENT"
-                              ? chosenVicePresident
-                              : null,
+                      groupValue: () {
+                        if (position == "PRESIDENT") {
+                          return chosenPresident;
+                        } else if (position == "VICE PRESIDENT") {
+                          return chosenVicePresident;
+                        } else if (position == "SECRETARY") {
+                          return chosenSecretary;
+                        } else if (position == "ASSISTANT SECRETARY") {
+                          return chosenAssistSecretary;
+                        } else if (position == "TREASURER") {
+                          return chosenTreasurer;
+                        } else if (position == "AUDITOR") {
+                          return chosenAuditor;
+                        } else if (position == "ASSISTANT AUDITOR") {
+                          return chosenAssistAuditor;
+                        } else {
+                          return null;
+                        }
+                      }(),
                       onChanged: (val) {
                         if (position == "PRESIDENT") {
                           chosenPresident = val.toString();
@@ -491,7 +558,21 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                         if (position == "VICE PRESIDENT") {
                           chosenVicePresident = val.toString();
                         }
-
+                        if (position == "SECRETARY") {
+                          chosenSecretary = val.toString();
+                        }
+                        if (position == "ASSISTANT SECRETARY") {
+                          chosenAssistSecretary = val.toString();
+                        }
+                        if (position == "TREASURER") {
+                          chosenTreasurer = val.toString();
+                        }
+                        if (position == "AUDITOR") {
+                          chosenAuditor = val.toString();
+                        }
+                        if (position == "ASSISTANT AUDITOR") {
+                          chosenAssistAuditor = val.toString();
+                        }
                         setState(() {});
                       },
                     ),

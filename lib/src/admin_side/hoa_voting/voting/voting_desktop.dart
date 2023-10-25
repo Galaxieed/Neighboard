@@ -120,7 +120,7 @@ class _VotingDesktopState extends State<VotingDesktop> {
   DefaultTabController candidatesTabs() {
     return DefaultTabController(
       initialIndex: 0,
-      length: 3,
+      length: 8,
       child: Builder(
         builder: (context) => Column(
           children: [
@@ -129,6 +129,11 @@ class _VotingDesktopState extends State<VotingDesktop> {
                 children: [
                   hoaAdminTab(context, "PRESIDENT"),
                   hoaAdminTab(context, "VICE PRESIDENT"),
+                  hoaAdminTab(context, "SECRETARY"),
+                  hoaAdminTab(context, "ASSISTANT SECRETARY"),
+                  hoaAdminTab(context, "TREASURER"),
+                  hoaAdminTab(context, "AUDITOR"),
+                  hoaAdminTab(context, "ASSISTANT AUDITOR"),
                   hoaAdminTab(context, "BOARD OF DIRECTORS"),
                 ],
               ),
@@ -163,12 +168,12 @@ class _VotingDesktopState extends State<VotingDesktop> {
                 const SizedBox(
                   width: 10,
                 ),
-                mycontroller(context).index >= 2
+                mycontroller(context).index >= 7
                     ? Container()
                     : ElevatedButton(
                         onPressed: () {
                           TabController ctrl = mycontroller(context);
-                          if (!ctrl.indexIsChanging && ctrl.index < 2) {
+                          if (!ctrl.indexIsChanging && ctrl.index < 7) {
                             ctrl.animateTo(ctrl.index + 1);
                             setState(() {});
                           }

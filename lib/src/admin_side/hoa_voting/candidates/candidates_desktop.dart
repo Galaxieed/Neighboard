@@ -48,7 +48,11 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   String profileImageUrl = "";
   List<List> profileImages = [];
 
-  bool isTherePres = false, isThereVP = false, isThereBD = false;
+  bool isTherePres = false, isThereVP = false;
+  bool isThereSec = false, isThereAssistSec = false;
+  bool isThereTres = false;
+  bool isThereAudit = false, isThereAssistAudit = false;
+  bool isThereBD = false;
   bool isLoading = true;
   bool isElectionOngoing = false;
 
@@ -270,7 +274,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                           child: Text("Election Ongoing"),
                         )
                       : DefaultTabController(
-                          length: 4,
+                          length: 9,
                           child: Builder(
                             builder: (BuildContext context) => Column(
                               children: [
@@ -279,6 +283,12 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                     children: [
                                       hoaAdminTab(context, "PRESIDENT"),
                                       hoaAdminTab(context, "VICE PRESIDENT"),
+                                      hoaAdminTab(context, "SECRETARY"),
+                                      hoaAdminTab(
+                                          context, "ASSISTANT SECRETARY"),
+                                      hoaAdminTab(context, "TREASURER"),
+                                      hoaAdminTab(context, "AUDITOR"),
+                                      hoaAdminTab(context, "ASSISTANT AUDITOR"),
                                       hoaAdminTab(
                                           context, "BOARD OF DIRECTORS"),
                                       hoaAdminTab(context, "VOTING DETAILS"),
@@ -305,14 +315,13 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                           }
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              ccHOANextButtonBGColor(context),
                                           foregroundColor:
                                               ccHOANextButtonFGColor(context),
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
                                                 BorderRadius.circular(4),
                                           ),
+                                          elevation: 1,
                                         ),
                                         child: const Text("Back"),
                                       ),
@@ -325,21 +334,38 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                         TabController ctrl =
                                             controller(context);
                                         if (!ctrl.indexIsChanging &&
-                                            ctrl.index < 3) {
+                                            ctrl.index < 8) {
                                           if (ctrl.index == 0 && isTherePres) {
                                             ctrl.animateTo(1);
                                           }
                                           if (ctrl.index == 1 && isThereVP) {
                                             ctrl.animateTo(2);
                                           }
-                                          if (ctrl.index == 2 && isThereBD) {
+                                          if (ctrl.index == 2 && isThereSec) {
                                             ctrl.animateTo(3);
+                                          }
+                                          if (ctrl.index == 3 &&
+                                              isThereAssistSec) {
+                                            ctrl.animateTo(4);
+                                          }
+                                          if (ctrl.index == 4 && isThereTres) {
+                                            ctrl.animateTo(5);
+                                          }
+                                          if (ctrl.index == 5 && isThereAudit) {
+                                            ctrl.animateTo(6);
+                                          }
+                                          if (ctrl.index == 6 &&
+                                              isThereAssistAudit) {
+                                            ctrl.animateTo(7);
+                                          }
+                                          if (ctrl.index == 7 && isThereBD) {
+                                            ctrl.animateTo(8);
                                           }
 
                                           setState(() {});
                                         }
                                         if (!ctrl.indexIsChanging &&
-                                            ctrl.index == 3) {
+                                            ctrl.index == 8) {
                                           if (candidateModels != [] &&
                                               startingDate != '' &&
                                               endingDate != '') {
@@ -357,7 +383,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                               BorderRadius.circular(4),
                                         ),
                                       ),
-                                      child: Text(controller(context).index < 3
+                                      child: Text(controller(context).index < 8
                                           ? "Next"
                                           : "Save"),
                                     )
@@ -616,11 +642,27 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                             lastName: tcLName.text.trim(),
                             profilePicture: '',
                             address: tcAddress.text.trim(),
-                            position: title == "PRESIDENT"
-                                ? "PRESIDENT"
-                                : title == "VICE PRESIDENT"
-                                    ? "VICE PRESIDENT"
-                                    : "BOARD OF DIRECTORS",
+                            position: () {
+                              if (title == "PRESIDENT") {
+                                return "PRESIDENT";
+                              } else if (title == "VICE PRESIDENT") {
+                                return "VICE PRESIDENT";
+                              } else if (title == "SECRETARY") {
+                                return "SECRETARY";
+                              } else if (title == "ASSISTANT SECRETARY") {
+                                return "ASSISTANT SECRETARY";
+                              } else if (title == "TREASURER") {
+                                return "TREASURER";
+                              } else if (title == "AUDITOR") {
+                                return "AUDITOR";
+                              } else if (title == "ASSISTANT AUDITOR") {
+                                return "ASSISTANT AUDITOR";
+                              } else if (title == "BOARD OF DIRECTORS") {
+                                return "BOARD OF DIRECTORS";
+                              } else {
+                                return "";
+                              }
+                            }(),
                             noOfVotes: 0,
                           );
                           if (candidateModel != null) {
@@ -635,6 +677,16 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                 isTherePres = true;
                               } else if (title == "VICE PRESIDENT") {
                                 isThereVP = true;
+                              } else if (title == "SECRETARY") {
+                                isThereSec = true;
+                              } else if (title == "ASSISTANT SECRETARY") {
+                                isThereAssistSec = true;
+                              } else if (title == "TREASURER") {
+                                isThereTres = true;
+                              } else if (title == "AUDITOR") {
+                                isThereAudit = true;
+                              } else if (title == "ASSISTANT AUDITOR") {
+                                isThereAssistAudit = true;
                               } else {
                                 isThereBD = true;
                               }
