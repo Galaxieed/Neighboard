@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -426,8 +427,33 @@ class _PostModalState extends State<PostModal> {
                           )
                         : Text(widget.postModel.content),
                     const SizedBox(
-                      width: 10,
+                      height: 10,
                     ),
+
+                    //Image
+                    if (widget.postModel.images.isNotEmpty)
+                      CarouselSlider(
+                        options: CarouselOptions(height: 400.0, autoPlay: true),
+                        items: widget.postModel.images.map((i) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              return Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 5.0),
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary),
+                                  child: Image.network(
+                                    i,
+                                    fit: BoxFit.cover,
+                                  ));
+                            },
+                          );
+                        }).toList(),
+                      ),
+
                     const Divider(),
                     isLoggedIn
                         ? postActions()

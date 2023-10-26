@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
@@ -12,6 +15,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_ui.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_tag_chip.dart';
@@ -19,6 +23,7 @@ import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
 import 'package:neighboard/widgets/page_messages/page_messages.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
 
 class MyPosts extends StatefulWidget {
   const MyPosts({Key? key, required this.search}) : super(key: key);
@@ -37,6 +42,9 @@ class _MyPostsState extends State<MyPosts> {
   bool isLoggedIn = false;
 
   void getMyPosts() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       postModels =
           await MyPostFunction.getMyPost(authorId: _auth.currentUser!.uid) ??
@@ -135,7 +143,12 @@ class _MyPostsState extends State<MyPosts> {
                           children: [
                             ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
-                                child: MyPostWithComments(post: post)),
+                                child: MyPostWithComments(
+                                  post: post,
+                                  stateSetter: () {
+                                    getMyPosts();
+                                  },
+                                )),
                           ],
                         ),
                       );
@@ -147,9 +160,11 @@ class MyPostWithComments extends StatefulWidget {
   const MyPostWithComments({
     super.key,
     required this.post,
+    required this.stateSetter,
   });
 
   final PostModel post;
+  final Function stateSetter;
 
   @override
   State<MyPostWithComments> createState() => _MyPostWithCommentsState();
@@ -232,6 +247,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
   void checkIfUpVoted() async {
     isUpvoted =
         await MyPostFunction.isAlreadyUpvoted(postId: widget.post.postId);
+    getCurrentUser();
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -272,8 +288,8 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
   @override
   Widget build(BuildContext context) {
     return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
+        ? const LoadingPosts(
+            postType: "My Posts",
           )
         : ExpansionPanelList(
             expandedHeaderPadding: const EdgeInsets.all(0),
@@ -299,6 +315,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                     upVote: upVoteFunc,
                     isUpvoted: isUpvoted,
                     isCollapsed: index == 0,
+                    stateSetter: widget.stateSetter,
                   );
                 },
                 body: Column(
@@ -329,8 +346,9 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                           .snapshots(),
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const LoadingPosts(
+                            postType: "My Posts",
+                          );
                         } else {
                           return ListView.builder(
                             physics: const NeverScrollableScrollPhysics(),
@@ -343,7 +361,9 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                                   .toList();
                               CommentModel comment = commentModels[index];
                               return CommentUI(
-                                  post: widget.post, comment: comment);
+                                  post: widget.post,
+                                  comment: comment,
+                                  currentUser: currentUser);
                             },
                           );
                         }
@@ -424,18 +444,81 @@ class CommentBox extends StatelessWidget {
   }
 }
 
-class SingleMyPost extends StatelessWidget {
+class SingleMyPost extends StatefulWidget {
   const SingleMyPost({
     super.key,
     required this.post,
     required this.upVote,
     required this.isUpvoted,
     required this.isCollapsed,
+    required this.stateSetter,
   });
 
-  final Function upVote;
+  final Function upVote, stateSetter;
   final PostModel post;
   final bool isUpvoted, isCollapsed;
+
+  @override
+  State<SingleMyPost> createState() => _SingleMyPostState();
+}
+
+class _SingleMyPostState extends State<SingleMyPost> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _contentController = TextEditingController();
+  bool isEditing = false;
+
+  removePost() async {
+    widget.stateSetter();
+    successMessage(
+        title: "Success!", desc: "Post was deleted!", context: context);
+    await PostInteractorsFunctions.removePost(postModel: widget.post);
+  }
+
+  updatePost() async {
+    if (_contentController.text.isNotEmpty &&
+        _titleController.text.isNotEmpty) {
+      bool isSucceess = await PostInteractorsFunctions.updatePost(
+        postId: widget.post.postId,
+        postTitle: _titleController.text,
+        postContent: _contentController.text,
+      );
+      if (isSucceess) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!",
+            desc: "Post was edited!\nReopen this to see changes",
+            context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Post was not edited",
+            context: context);
+      }
+    }
+    isEditing = false;
+    setState(() {});
+    widget.stateSetter();
+  }
+
+  //picture
+  int noOfPics = 0;
+  int extraPics = 0;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.post.images.length < 5) {
+      noOfPics = widget.post.images.length;
+    } else {
+      noOfPics = 4;
+      extraPics = widget.post.images.length - 4;
+    }
+    _titleController.text = widget.post.title;
+    _contentController.text = widget.post.content;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -446,52 +529,251 @@ class SingleMyPost extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Stack(
               children: [
-                SmallProfilePic(profilePic: post.profilePicture),
-                const SizedBox(
-                  width: 10,
+                Row(
+                  children: [
+                    SmallProfilePic(profilePic: widget.post.profilePicture),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          AuthorNameText(authorName: widget.post.authorName),
+                          PostTimeText(time: widget.post.timeStamp),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      AuthorNameText(authorName: post.authorName),
-                      PostTimeText(time: post.timeStamp),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.more_vert),
-                )
+                if (_auth.currentUser != null &&
+                    _auth.currentUser!.uid == widget.post.authorId)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: PopupMenuButton(
+                      onSelected: (value) {
+                        if (value == "Edit") {
+                          setState(() {
+                            isEditing = !isEditing;
+                          });
+                        } else if (value == "Delete") {
+                          removePost();
+                        }
+                      },
+                      itemBuilder: (context) {
+                        return [
+                          const PopupMenuItem(
+                            value: "Edit",
+                            child: ListTile(
+                              leading: Icon(Icons.edit),
+                              title: Text("Edit"),
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: "Delete",
+                            child: ListTile(
+                              leading: Icon(Icons.delete_outlined),
+                              title: Text("Delete"),
+                            ),
+                          ),
+                        ];
+                      },
+                    ),
+                  )
               ],
             ),
             const SizedBox(
               height: 10,
             ),
-            PostTitleText(title: post.title),
+            isEditing
+                ? TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                        suffixIcon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _titleController.text = widget.post.title;
+                              isEditing = false;
+                            });
+                          },
+                          icon: const Icon(
+                            Icons.cancel_outlined,
+                            color: Colors.red,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: updatePost,
+                          icon: Icon(
+                            Icons.save,
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                          ),
+                        )
+                      ],
+                    )),
+                  )
+                : PostTitleText(title: widget.post.title),
             const SizedBox(
               height: 5,
             ),
-            isCollapsed
-                ? PostContentText(
-                    content: post.content,
-                    textOverflow: TextOverflow.visible,
-                  )
-                : PostContentText(
-                    content: post.content,
-                    maxLine: 3,
-                    textOverflow: TextOverflow.ellipsis,
-                  ),
+            widget.isCollapsed
+                ? isEditing
+                    ? TextField(
+                        controller: _contentController,
+                        decoration: InputDecoration(
+                            suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _contentController.text = widget.post.content;
+                                  isEditing = false;
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.cancel_outlined,
+                                color: Colors.red,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: updatePost,
+                              icon: Icon(
+                                Icons.save,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inversePrimary,
+                              ),
+                            )
+                          ],
+                        )),
+                      )
+                    : PostContentText(
+                        content: widget.post.content,
+                        textOverflow: TextOverflow.visible,
+                      )
+                : isEditing
+                    ? TextField(
+                        controller: _contentController,
+                        decoration: InputDecoration(
+                            suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  _contentController.text = widget.post.content;
+                                  isEditing = false;
+                                });
+                              },
+                              icon: const Icon(
+                                Icons.cancel_outlined,
+                                color: Colors.red,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: updatePost,
+                              icon: Icon(
+                                Icons.save,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .inversePrimary,
+                              ),
+                            )
+                          ],
+                        )),
+                      )
+                    : PostContentText(
+                        content: widget.post.content,
+                        maxLine: 3,
+                        textOverflow: TextOverflow.ellipsis,
+                      ),
+            const SizedBox(
+              height: 10,
+            ),
+            if (widget.post.images.isNotEmpty)
+              SizedBox(
+                height: 400,
+                width: double.infinity,
+                child: LayoutGrid(
+                  autoPlacement: AutoPlacement.columnSparse,
+                  rowGap: 10,
+                  columnGap: 10,
+                  columnSizes: [1.fr, 1.fr],
+                  rowSizes: [1.fr, 1.fr],
+                  children: [
+                    for (int i = 0; i < noOfPics; i++)
+                      GridPlacement(
+                        rowSpan: noOfPics <= 2
+                            ? 2
+                            : i == noOfPics - 1 && noOfPics % 2 != 0
+                                ? 2
+                                : 1,
+                        columnSpan: i == noOfPics - 1 && noOfPics == 1 ? 2 : 1,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Image.network(
+                                widget.post.images[i],
+                                height: double.infinity,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                              if (i == noOfPics - 1 && extraPics != 0)
+                                Positioned(
+                                  child: ClipRRect(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 5, sigmaY: 5),
+                                      child: SizedBox(
+                                        height: double.infinity,
+                                        width: double.infinity,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.add,
+                                              size: 75,
+                                              weight: 75,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              extraPics.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 75,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             const SizedBox(
               height: 10,
             ),
             ActionBarMyPost(
-              post: post,
-              upVote: upVote,
-              isUpvoted: isUpvoted,
+              post: widget.post,
+              upVote: widget.upVote,
+              isUpvoted: widget.isUpvoted,
             ),
           ],
         ),

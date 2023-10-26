@@ -107,7 +107,7 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
                 },
                 selected: selectedSubButton == "User",
                 selectedColor: Theme.of(context).colorScheme.onBackground,
-                selectedTileColor: Colors.amber,
+                selectedTileColor: Theme.of(context).colorScheme.inversePrimary,
               );
             }
 

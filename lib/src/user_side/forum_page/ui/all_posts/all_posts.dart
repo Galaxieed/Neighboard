@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
@@ -162,9 +165,19 @@ class _SinglePostState extends State<SinglePost> {
     widget.stateSetter();
   }
 
+  //picture
+  int noOfPics = 0;
+  int extraPics = 0;
+
   @override
   void initState() {
     super.initState();
+    if (widget.post.images.length < 5) {
+      noOfPics = widget.post.images.length;
+    } else {
+      noOfPics = 4;
+      extraPics = widget.post.images.length - 4;
+    }
     _titleController.text = widget.post.title;
     _contentController.text = widget.post.content;
   }
@@ -335,6 +348,81 @@ class _SinglePostState extends State<SinglePost> {
                       maxLine: 1,
                       textOverflow: TextOverflow.ellipsis,
                     ),
+              const SizedBox(
+                height: 10,
+              ),
+              //TODO: PIC
+              if (widget.post.images.isNotEmpty)
+                SizedBox(
+                  height: 400,
+                  width: double.infinity,
+                  child: LayoutGrid(
+                    autoPlacement: AutoPlacement.columnSparse,
+                    rowGap: 10,
+                    columnGap: 10,
+                    columnSizes: [1.fr, 1.fr],
+                    rowSizes: [1.fr, 1.fr],
+                    children: [
+                      for (int i = 0; i < noOfPics; i++)
+                        GridPlacement(
+                          rowSpan: noOfPics <= 2
+                              ? 2
+                              : i == noOfPics - 1 && noOfPics % 2 != 0
+                                  ? 2
+                                  : 1,
+                          columnSpan:
+                              i == noOfPics - 1 && noOfPics == 1 ? 2 : 1,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.network(
+                                  widget.post.images[i],
+                                  height: double.infinity,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                                if (i == noOfPics - 1 && extraPics != 0)
+                                  Positioned(
+                                    child: ClipRRect(
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 5, sigmaY: 5),
+                                        child: SizedBox(
+                                          height: double.infinity,
+                                          width: double.infinity,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              const Icon(
+                                                Icons.add,
+                                                size: 75,
+                                                weight: 75,
+                                                color: Colors.white,
+                                              ),
+                                              Text(
+                                                extraPics.toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 75,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               const SizedBox(
                 height: 10,
               ),

@@ -258,6 +258,13 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                                   controller: _ctrlTitle,
                                                   onSaved: (newValue) =>
                                                       _postTitle = newValue!,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter some text';
+                                                    }
+                                                    return null;
+                                                  },
                                                   decoration:
                                                       const InputDecoration(
                                                     labelText:
@@ -274,6 +281,13 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                                   controller: _ctrlContent,
                                                   onSaved: (newValue) =>
                                                       _postContent = newValue!,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter some text';
+                                                    }
+                                                    return null;
+                                                  },
                                                   decoration:
                                                       const InputDecoration(
                                                     labelText: "Type Text Here",

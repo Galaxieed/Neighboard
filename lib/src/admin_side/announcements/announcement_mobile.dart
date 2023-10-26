@@ -252,6 +252,13 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                             controller: _ctrlTitle,
                                             onSaved: (newValue) =>
                                                 _postTitle = newValue!,
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'Please enter some text';
+                                              }
+                                              return null;
+                                            },
                                             decoration: const InputDecoration(
                                               labelText:
                                                   "Enter Announcement Title",
@@ -270,6 +277,13 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                               alignLabelWithHint: true,
                                               border: OutlineInputBorder(),
                                             ),
+                                            validator: (value) {
+                                              if (value == null ||
+                                                  value.isEmpty) {
+                                                return 'Please enter some text';
+                                              }
+                                              return null;
+                                            },
                                             keyboardType:
                                                 TextInputType.multiline,
                                             expands: false,

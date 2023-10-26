@@ -47,7 +47,7 @@ class PostModalComment extends StatefulWidget {
 
 class _PostModalCommentState extends State<PostModalComment> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   List<ReplyModel> replyModels = [];
   bool isLoading = true;
   bool isRepliesShown = false;
@@ -247,7 +247,7 @@ class _PostModalCommentState extends State<PostModalComment> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _controller.clear();
+    _controller.dispose();
   }
 
   @override
@@ -542,7 +542,7 @@ class ReplyItself extends StatefulWidget {
 }
 
 class _ReplyItselfState extends State<ReplyItself> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   bool isReplyBoxShown = false;
   bool isEditing = false;
 
@@ -599,7 +599,7 @@ class _ReplyItselfState extends State<ReplyItself> {
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _controller.clear();
+    _controller.dispose();
   }
 
   @override

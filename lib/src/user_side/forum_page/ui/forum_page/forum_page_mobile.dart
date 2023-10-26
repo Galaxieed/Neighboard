@@ -12,6 +12,8 @@ import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/search_page/search_ui.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
+import 'package:neighboard/src/user_side/login_register_page/register_page/register_page_ui.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
@@ -37,11 +39,15 @@ class _ForumPageMobileState extends State<ForumPageMobile>
   late TabController _tabController;
   UserModel? userModel;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  bool isLoggedIn = false;
   final scrollController = ScrollController();
 
   void getCurrentUserDetails() async {
-    userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
+    if (_auth.currentUser != null) {
+      isLoggedIn = true;
+      userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
+    }
+
     if (mounted) {
       setState(() {});
     }
@@ -97,27 +103,84 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                   icon: const Icon(Icons.search),
                   tooltip: "Search Post Title",
                 ),
+                const SizedBox(
+                  width: 10,
+                ),
                 //TODO: Chat count
-                NavBarBadges(
-                  count: null,
-                  icon: const Icon(Icons.chat_outlined),
-                  callback: _openChat,
+                if (isLoggedIn)
+                  NavBarBadges(
+                    count: null,
+                    icon: const Icon(Icons.chat_outlined),
+                    callback: _openChat,
+                  ),
+                if (isLoggedIn)
+                  const SizedBox(
+                    width: 10,
+                  ),
+                if (isLoggedIn)
+                  NavBarBadges(
+                    count: notificationModels
+                        .where((element) => !element.isRead)
+                        .toList()
+                        .length
+                        .toString(),
+                    icon: const Icon(Icons.notifications_outlined),
+                    callback: _openNotification,
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => const LoginPage()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onBackground,
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(
+                  width: 10,
                 ),
-                NavBarBadges(
-                  count: notificationModels
-                      .where((element) => !element.isRead)
-                      .toList()
-                      .length
-                      .toString(),
-                  icon: const Icon(Icons.notifications_outlined),
-                  callback: _openNotification,
-                ),
-                NavBarCircularImageDropDownButton(
-                  callback: Routes().navigate,
-                  isAdmin: false,
-                ),
-                SizedBox(
-                  width: 2.5.w,
+                if (isLoggedIn)
+                  NavBarCircularImageDropDownButton(
+                    callback: Routes().navigate,
+                    isAdmin: false,
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const RegisterPage()));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor:
+                          Theme.of(context).colorScheme.inversePrimary,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onBackground,
+                    ),
+                    child: const Text(
+                      "Register",
+                      style: TextStyle(
+                        letterSpacing: 1,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                const SizedBox(
+                  width: 10,
                 )
               ],
             ),

@@ -63,6 +63,8 @@ dependencies:
   elegant_notification: ^1.11.2
   shimmer: ^3.0.0
   collection: ^1.15.0
+  flutter_layout_grid: ^2.0.5
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

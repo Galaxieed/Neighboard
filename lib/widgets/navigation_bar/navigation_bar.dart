@@ -106,6 +106,7 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
                   MaterialPageRoute(builder: (_) => const LoginPage()));
             },
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
               foregroundColor: Theme.of(context).colorScheme.onBackground,
               elevation: 0,
             ),
@@ -519,36 +520,37 @@ class _NavBarCircularImageDropDownButtonState
           }
         },
         itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              isLoggedIn
-                  ? PopupMenuItem(
-                      value: "User",
-                      child: Row(
-                        children: [
-                          userModel!.profilePicture.isEmpty
-                              ? const CircleAvatar()
-                              : CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(userModel!.profilePicture),
-                                ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(userModel!.username),
-                        ],
+              if (!widget.isAdmin)
+                isLoggedIn
+                    ? PopupMenuItem(
+                        value: "User",
+                        child: Row(
+                          children: [
+                            userModel!.profilePicture.isEmpty
+                                ? const CircleAvatar()
+                                : CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(userModel!.profilePicture),
+                                  ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Text(userModel!.username),
+                          ],
+                        ),
+                      )
+                    : const PopupMenuItem(
+                        value: "Login",
+                        child: Row(
+                          children: [
+                            Icon(Icons.login),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text('Login'),
+                          ],
+                        ),
                       ),
-                    )
-                  : const PopupMenuItem(
-                      value: "Login",
-                      child: Row(
-                        children: [
-                          Icon(Icons.login),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text('Login'),
-                        ],
-                      ),
-                    ),
               isLoggedIn
                   ? const PopupMenuItem(
                       value: "Logout",

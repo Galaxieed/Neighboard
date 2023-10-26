@@ -81,6 +81,9 @@ class PostShimmer extends StatelessWidget {
               const SizedBox(
                 height: 10,
               ),
+              const SizedBox(
+                height: 10,
+              ),
               postType == "My Posts"
                   ? const MyPostActionBar()
                   : const ActionBarPosts()

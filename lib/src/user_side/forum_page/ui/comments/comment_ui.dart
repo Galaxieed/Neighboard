@@ -6,19 +6,23 @@ import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/loading_screen/reply_shimmer.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
 
 class CommentUI extends StatefulWidget {
-  const CommentUI({Key? key, required this.post, required this.comment})
+  const CommentUI(
+      {Key? key, required this.post, required this.comment, this.currentUser})
       : super(key: key);
 
   final PostModel post;
   final CommentModel comment;
+  final UserModel? currentUser;
 
   @override
   State<CommentUI> createState() => _CommentUIState();
@@ -113,10 +117,49 @@ class _CommentUIState extends State<CommentUI> {
     }
   }
 
+  final TextEditingController _controller = TextEditingController();
+  removeComment() async {
+    await CommentFunction.removeComment(
+        postId: widget.post.postId, commentId: widget.comment.commentId);
+  }
+
+  bool isEditing = false;
+  updateComment() async {
+    if (_controller.text.isNotEmpty) {
+      bool success = await CommentFunction.updateComment(
+        postId: widget.post.postId,
+        commentId: widget.comment.commentId,
+        commentMessage: _controller.text,
+      );
+      if (success) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!", desc: "Comment was edited", context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Comment was not edited",
+            context: context);
+      }
+    }
+    setState(() {
+      isEditing = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     checkIfLikedOrDisliked();
+    _controller.text = widget.comment.commentMessage;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -137,38 +180,105 @@ class _CommentUIState extends State<CommentUI> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Stack(
                     children: [
-                      SmallProfilePic(
-                          profilePic: widget.comment.senderProfilePicture),
-                      const SizedBox(
-                        width: 10,
+                      Row(
+                        children: [
+                          SmallProfilePic(
+                              profilePic: widget.comment.senderProfilePicture),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                AuthorNameText(
+                                    authorName: widget.comment.senderName),
+                                PostTimeText(time: widget.comment.timeStamp),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            AuthorNameText(
-                                authorName: widget.comment.senderName),
-                            PostTimeText(time: widget.comment.timeStamp),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.more_vert),
-                      )
+                      if (widget.currentUser != null &&
+                          widget.currentUser!.userId == widget.comment.senderId)
+                        Positioned(
+                          top: 1,
+                          right: 1,
+                          child: PopupMenuButton(
+                            onSelected: (value) {
+                              if (value == "Edit") {
+                                setState(() {
+                                  isEditing = !isEditing;
+                                });
+                              } else if (value == "Delete") {
+                                removeComment();
+                              }
+                            },
+                            itemBuilder: (context) {
+                              return [
+                                const PopupMenuItem(
+                                  value: "Edit",
+                                  child: ListTile(
+                                    leading: Icon(Icons.edit),
+                                    title: Text("Edit"),
+                                  ),
+                                ),
+                                const PopupMenuItem(
+                                  value: "Delete",
+                                  child: ListTile(
+                                    leading: Icon(Icons.delete_outlined),
+                                    title: Text("Delete"),
+                                  ),
+                                ),
+                              ];
+                            },
+                          ),
+                        )
                     ],
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  PostContentText(
-                    content:
-                        '${widget.post.authorName}, ${widget.comment.commentMessage}',
-                    textOverflow: TextOverflow.visible,
-                  ),
+                  isEditing
+                      ? TextField(
+                          controller: _controller,
+                          decoration: InputDecoration(
+                              suffixIcon: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _controller.text =
+                                        widget.comment.commentMessage;
+                                    isEditing = false;
+                                  });
+                                },
+                                icon: const Icon(
+                                  Icons.cancel_outlined,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: updateComment,
+                                icon: Icon(
+                                  Icons.save,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
+                                ),
+                              )
+                            ],
+                          )),
+                        )
+                      : PostContentText(
+                          content:
+                              '${widget.post.authorName}, ${widget.comment.commentMessage}',
+                          textOverflow: TextOverflow.visible,
+                        ),
                   const SizedBox(
                     height: 10,
                   ),
@@ -192,6 +302,7 @@ class _CommentUIState extends State<CommentUI> {
           ),
         ),
         RepliesContainer(
+          userModel: widget.currentUser,
           post: widget.post,
           comment: widget.comment,
           setRepliesVisible: setRepliesVisible,
@@ -217,12 +328,14 @@ class RepliesContainer extends StatefulWidget {
     required this.setReplyBoxVisible,
     required this.isReplyBoxVisible,
     required this.isRepliesVisible,
+    this.userModel,
   });
 
   final bool isRepliesVisible, isReplyBoxVisible;
   final Function setRepliesVisible, setReplyBoxVisible;
   final CommentModel comment;
   final PostModel post;
+  final UserModel? userModel;
 
   @override
   State<RepliesContainer> createState() => _RepliesContainerState();
@@ -230,51 +343,18 @@ class RepliesContainer extends StatefulWidget {
 
 class _RepliesContainerState extends State<RepliesContainer> {
   List<ReplyModel> replyModel = [];
-  // bool isLoading = true;
-
-  // void getAllReplies() async {
-  //   replyModel = await CommentFunction.getAllReplies(
-  //           postId: widget.post.postId, commentId: widget.comment.commentId) ??
-  //       [];
-  //   if (mounted) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
 
   addReplyCallback({required ReplyModel reply}) async {
-    // if (mounted) {
-    //   setState(() {
-    //     isLoading = true;
-    //   });
-    // }
     await CommentFunction.postReply(
       postId: widget.post.postId,
       commentId: widget.comment.commentId,
       replyModel: reply,
     );
     replyModel.add(reply);
-    // if (mounted) {
-    //   setState(() {
-    //     isLoading = false;
-    //   });
-    // }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    //getAllReplies();
   }
 
   @override
   Widget build(BuildContext context) {
-    // return isLoading
-    //     ? const Center(
-    //         child: CircularProgressIndicator(),
-    //       )
-    //     :
     return Visibility(
       visible: widget.isRepliesVisible,
       child: Column(
@@ -296,7 +376,7 @@ class _RepliesContainerState extends State<RepliesContainer> {
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
+                return const ReplyShimmer(isLoggedIn: true);
               } else {
                 return ListView.builder(
                   physics: const NeverScrollableScrollPhysics(),
@@ -309,17 +389,17 @@ class _RepliesContainerState extends State<RepliesContainer> {
                         .toList();
                     ReplyModel reply = replyModel[index];
                     return SingleReplyUI(
-                        replyModel: reply, addReply: addReplyCallback);
+                      replyModel: reply,
+                      postModel: widget.post,
+                      commentModel: widget.comment,
+                      userModel: widget.userModel,
+                      addReply: addReplyCallback,
+                    );
                   },
                 );
               }
             },
           ),
-          // for (ReplyModel singleReply in replyModel)
-          //   SingleReplyUI(
-          //     replyModel: singleReply,
-          //     addReply: addReplyCallback,
-          //   ),
         ],
       ),
     );
@@ -331,10 +411,16 @@ class SingleReplyUI extends StatefulWidget {
     super.key,
     required this.replyModel,
     required this.addReply,
+    required this.postModel,
+    required this.commentModel,
+    this.userModel,
   });
 
   final Function addReply;
+  final PostModel postModel;
+  final CommentModel commentModel;
   final ReplyModel replyModel;
+  final UserModel? userModel;
 
   @override
   State<SingleReplyUI> createState() => _SingleReplyUIState();
@@ -347,6 +433,55 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
     setState(() {
       replyBoxVisibility = condition;
     });
+  }
+
+  final TextEditingController _controller = TextEditingController();
+  bool isEditing = false;
+
+  removeReply() async {
+    await CommentFunction.removeReply(
+        postId: widget.postModel.postId,
+        commentId: widget.commentModel.commentId,
+        replyId: widget.replyModel.replyId);
+  }
+
+  updateReply() async {
+    if (_controller.text.isNotEmpty) {
+      bool isSuccess = await CommentFunction.updateReply(
+        postId: widget.postModel.postId,
+        commentId: widget.commentModel.commentId,
+        replyId: widget.replyModel.replyId,
+        replyMessage: _controller.text,
+      );
+      if (isSuccess) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!", desc: "Reply was edited!", context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Reply was not edited!",
+            context: context);
+      }
+    }
+    setState(() {
+      isEditing = false;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _controller.text = widget.replyModel.replyMessage;
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -362,41 +497,119 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  PostContentText(
-                    content:
-                        '${widget.replyModel.recipientName}, ${widget.replyModel.replyMessage}',
-                    textOverflow: TextOverflow.visible,
-                  ),
-                  const Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'by @${widget.replyModel.senderName}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey,
-                        ),
+                      const SizedBox(
+                        height: 10,
                       ),
-                      const Expanded(
-                          child: SizedBox(
-                        width: 10,
-                      )),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            replyBoxVisibility = true;
-                            setReplyBoxVisible(replyBoxVisibility);
-                          });
-                        },
-                        icon: const Icon(Icons.reply_outlined),
-                        label: const Text('Reply'),
+                      isEditing
+                          ? TextField(
+                              controller: _controller,
+                              decoration: InputDecoration(
+                                  suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _controller.text =
+                                            widget.replyModel.replyMessage;
+                                        isEditing = false;
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: updateReply,
+                                    icon: Icon(
+                                      Icons.save,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary,
+                                    ),
+                                  )
+                                ],
+                              )),
+                            )
+                          : PostContentText(
+                              content:
+                                  '${widget.replyModel.recipientName}, ${widget.replyModel.replyMessage}',
+                              textOverflow: TextOverflow.visible,
+                            ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            'by @${widget.replyModel.senderName}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blueGrey,
+                            ),
+                          ),
+                          const Expanded(
+                              child: SizedBox(
+                            width: 10,
+                          )),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                replyBoxVisibility = true;
+                                setReplyBoxVisible(replyBoxVisibility);
+                              });
+                            },
+                            icon: const Icon(Icons.reply_outlined),
+                            label: const Text('Reply'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  if (widget.userModel != null &&
+                      widget.userModel!.userId == widget.replyModel.senderId &&
+                      !isEditing)
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: PopupMenuButton(
+                        onSelected: (value) {
+                          if (value == "Edit") {
+                            setState(() {
+                              isEditing = !isEditing;
+                            });
+                          } else if (value == "Delete") {
+                            removeReply();
+                          }
+                        },
+                        itemBuilder: (context) {
+                          return [
+                            const PopupMenuItem(
+                              value: "Edit",
+                              child: ListTile(
+                                leading: Icon(Icons.edit),
+                                title: Text("Edit"),
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: "Delete",
+                              child: ListTile(
+                                leading: Icon(Icons.delete_outlined),
+                                title: Text("Delete"),
+                              ),
+                            ),
+                          ];
+                        },
+                      ),
+                    )
                 ],
               ),
             ),

@@ -14,6 +14,7 @@ import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
+import 'package:flutter/services.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
   const ProfileScreenDesktop(
@@ -375,6 +376,19 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             infoTitle(context, "Contact Number"),
                             TextFormField(
                               controller: tcCNo,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,11}$')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Contact Number is required';
+                                } else if (value.length != 11) {
+                                  return 'Please enter exactly 11 digits';
+                                }
+                                return null;
+                              },
                             ),
                           ],
                         ),

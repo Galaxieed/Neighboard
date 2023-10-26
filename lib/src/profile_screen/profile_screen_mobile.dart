@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -374,6 +375,19 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                             infoTitle(context, "Contact Number"),
                             TextFormField(
                               controller: tcCNo,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,11}$')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Contact Number is required';
+                                } else if (value.length != 11) {
+                                  return 'Please enter exactly 11 digits';
+                                }
+                                return null;
+                              },
                             ),
                           ],
                         ),
