@@ -385,6 +385,21 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
             SizedBox(
               height: MediaQuery.of(context).size.height / 2.5,
               child: MainAnnouncement(announcementModel: announcementModels[0]),
+            )
+          else
+            Expanded(
+              child: Center(
+                child: Column(
+                  children: [
+                    Image.asset(
+                      announcement,
+                      height: 300,
+                      width: 300,
+                    ),
+                    const Text("No Announcements"),
+                  ],
+                ),
+              ),
             ),
         ],
       ),

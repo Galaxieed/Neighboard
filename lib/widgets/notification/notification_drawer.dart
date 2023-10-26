@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/screen_direct.dart';
@@ -240,7 +241,38 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                                 notificationModels.sort(
                                     (a, b) => b.notifId.compareTo(a.notifId));
                                 getAllUnreadNotifications();
-
+                                //TODO: add here
+                                if (unReadNotifications.isEmpty &&
+                                    selectedVal != "All") {
+                                  return Center(
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          announcement,
+                                          width: 300,
+                                          height: 300,
+                                        ),
+                                        const Text(
+                                            "Nice work! You’re all caught up."),
+                                      ],
+                                    ),
+                                  );
+                                }
+                                if (notificationModels.isEmpty &&
+                                    selectedVal == "All") {
+                                  return Center(
+                                    child: Column(
+                                      children: [
+                                        Image.asset(
+                                          notificationImg,
+                                          width: 300,
+                                          height: 300,
+                                        ),
+                                        const Text("You have 0 notification"),
+                                      ],
+                                    ),
+                                  );
+                                }
                                 return ListView.separated(
                                   shrinkWrap: true,
                                   itemCount: selectedVal == "All"

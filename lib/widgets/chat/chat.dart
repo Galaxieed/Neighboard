@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/chatmessage_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -101,104 +102,130 @@ class _MyChatState extends State<MyChat> {
                             return const Center(
                                 child: CircularProgressIndicator());
                           } else {
-                            return ListView.builder(
+                            return SingleChildScrollView(
                               reverse: true,
-                              shrinkWrap: true,
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (context, index) {
-                                final result = snapshot.data!;
-                                chatModels = result.docs
-                                    .map((e) => ChatModel.fromJson(e.data()))
-                                    .toList();
-                                chatModels.sort(
-                                    (a, b) => b.chatId.compareTo(a.chatId));
-                                ChatModel chat = chatModels[index];
-                                String currentDate =
-                                    chat.timestamp.split('| ')[0];
-                                return Column(
-                                  children: [
-                                    //DATE DIVIDER
-                                    if (currentDate !=
-                                        chatModels[index > 0
-                                                ? index < chatModels.length - 1
-                                                    ? index + 1
-                                                    : index
-                                                : index]
-                                            .timestamp
-                                            .split('| ')[0])
-                                      Row(
-                                        children: [
-                                          const Expanded(child: Divider()),
-                                          Text(
-                                            currentDate,
-                                          ),
-                                          const Expanded(child: Divider()),
-                                        ],
-                                      )
-                                    else if (index == chatModels.length - 1)
-                                      Row(
-                                        children: [
-                                          const Expanded(child: Divider()),
-                                          Text(
-                                            currentDate,
-                                          ),
-                                          const Expanded(child: Divider()),
-                                        ],
-                                      )
-                                    else if (currentDate ==
-                                        chatModels[0].timestamp)
-                                      Row(
-                                        children: [
-                                          const Expanded(child: Divider()),
-                                          Text(
-                                            index.toString(),
-                                          ),
-                                          const Expanded(child: Divider()),
-                                        ],
-                                      ),
-                                    //THE CHAT
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            chat.senderName,
-                                            textAlign: TextAlign.end,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: chat.senderId ==
-                                                      currentUser!.userId
-                                                  ? Theme.of(context)
-                                                      .colorScheme
-                                                      .primary
-                                                  : null,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Expanded(
-                                          flex: 4,
-                                          child: Text(chat.message),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Expanded(
-                                          flex: 2,
-                                          child: Text(
-                                            chat.timestamp.split('| ')[1],
-                                          ),
-                                        ),
-                                      ],
+                              child: Column(
+                                children: [
+                                  Center(
+                                    child: Image.asset(
+                                      noChat,
+                                      height: 300,
+                                      width: 300,
                                     ),
-                                  ],
-                                );
-                              },
+                                  ),
+                                  ListView.builder(
+                                    reverse: true,
+                                    shrinkWrap: true,
+                                    itemCount: snapshot.data!.docs.length,
+                                    itemBuilder: (context, index) {
+                                      final result = snapshot.data!;
+                                      chatModels = result.docs
+                                          .map((e) =>
+                                              ChatModel.fromJson(e.data()))
+                                          .toList();
+                                      chatModels.sort((a, b) =>
+                                          b.chatId.compareTo(a.chatId));
+                                      ChatModel chat = chatModels[index];
+                                      String currentDate =
+                                          chat.timestamp.split('| ')[0];
+                                      return Column(
+                                        children: [
+                                          //DATE DIVIDER
+                                          if (currentDate !=
+                                              chatModels[index > 0
+                                                      ? index <
+                                                              chatModels
+                                                                      .length -
+                                                                  1
+                                                          ? index + 1
+                                                          : index
+                                                      : index]
+                                                  .timestamp
+                                                  .split('| ')[0])
+                                            Row(
+                                              children: [
+                                                const Expanded(
+                                                    child: Divider()),
+                                                Text(
+                                                  currentDate,
+                                                ),
+                                                const Expanded(
+                                                    child: Divider()),
+                                              ],
+                                            )
+                                          else if (index ==
+                                              chatModels.length - 1)
+                                            Row(
+                                              children: [
+                                                const Expanded(
+                                                    child: Divider()),
+                                                Text(
+                                                  currentDate,
+                                                ),
+                                                const Expanded(
+                                                    child: Divider()),
+                                              ],
+                                            )
+                                          else if (currentDate ==
+                                              chatModels[0].timestamp)
+                                            Row(
+                                              children: [
+                                                const Expanded(
+                                                    child: Divider()),
+                                                Text(
+                                                  index.toString(),
+                                                ),
+                                                const Expanded(
+                                                    child: Divider()),
+                                              ],
+                                            ),
+                                          //THE CHAT
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  chat.senderName,
+                                                  textAlign: TextAlign.end,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    color: chat.senderId ==
+                                                            currentUser!.userId
+                                                        ? Theme.of(context)
+                                                            .colorScheme
+                                                            .primary
+                                                        : null,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                flex: 4,
+                                                child: Text(chat.message),
+                                              ),
+                                              const SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  chat.timestamp.split('| ')[1],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
                             );
                           }
                         },

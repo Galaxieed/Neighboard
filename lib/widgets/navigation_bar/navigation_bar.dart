@@ -8,9 +8,12 @@ import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
 import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
+import 'package:neighboard/src/user_side/login_register_page/register_page/register_page_ui.dart';
 
+// ignore: must_be_immutable
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
-  const NavBar(
+  NavBar(
       {Key? key,
       this.openNotification,
       this.openChat,
@@ -22,8 +25,17 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
   final Size preferredSize;
   final String currentPage;
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool isLoggedIn = false;
+  void checkIfLoggedIn() {
+    if (_auth.currentUser != null) {
+      isLoggedIn = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    checkIfLoggedIn();
     return AppBar(
       automaticallyImplyLeading: false,
       elevation: 0,
@@ -31,7 +43,10 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        const NavBarTitle(title: 'NEIGHBOARD'),
+        const NavBarTitle(
+          title: 'NEIGHBOARD',
+          isAdmin: false,
+        ),
         const Spacer(),
         NavBarTextButton(
           text: 'Home',
@@ -60,34 +75,75 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        NavBarBadges(
-          count: null,
-          icon: const Icon(Icons.chat_outlined),
-          callback: () {
-            openChat != null ? openChat!() : null;
-          },
-        ),
+        if (isLoggedIn)
+          NavBarBadges(
+            count: null,
+            icon: const Icon(Icons.chat_outlined),
+            callback: () {
+              openChat != null ? openChat!() : null;
+            },
+          ),
+        if (isLoggedIn)
+          const SizedBox(
+            width: 10,
+          ),
+        if (isLoggedIn)
+          NavBarBadges(
+            count: notificationModels
+                .where((element) => !element.isRead)
+                .toList()
+                .length
+                .toString(),
+            icon: const Icon(Icons.notifications_outlined),
+            callback: () {
+              openNotification != null ? openNotification!() : null;
+            },
+          )
+        else
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()));
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onBackground,
+              elevation: 0,
+            ),
+            child: const Text(
+              "Login",
+              style: TextStyle(
+                letterSpacing: 1,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         const SizedBox(
           width: 10,
         ),
-        NavBarBadges(
-          count: notificationModels
-              .where((element) => !element.isRead)
-              .toList()
-              .length
-              .toString(),
-          icon: const Icon(Icons.notifications_outlined),
-          callback: () {
-            openNotification != null ? openNotification!() : null;
-          },
-        ),
-        const SizedBox(
-          width: 10,
-        ),
-        NavBarCircularImageDropDownButton(
-          callback: Routes().navigate,
-          isAdmin: false,
-        ),
+        if (isLoggedIn)
+          NavBarCircularImageDropDownButton(
+            callback: Routes().navigate,
+            isAdmin: false,
+          )
+        else
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const RegisterPage()));
+            },
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+              foregroundColor: Theme.of(context).colorScheme.onBackground,
+            ),
+            child: const Text(
+              "Register",
+              style: TextStyle(
+                letterSpacing: 1,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         const SizedBox(
           width: 10,
         ),
@@ -97,15 +153,19 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
 }
 
 class NavBarTitle extends StatelessWidget {
-  const NavBarTitle({Key? key, required this.title}) : super(key: key);
+  const NavBarTitle(
+      {Key? key, required this.title, required this.isAdmin, this.callback})
+      : super(key: key);
 
   final String title;
+  final bool isAdmin;
+  final Function? callback;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Routes().navigate("Home", context);
+        isAdmin ? callback!(1) : Routes().navigate("Home", context);
       },
       child: Row(
         children: [
@@ -119,7 +179,8 @@ class NavBarTitle extends StatelessWidget {
                               ? siteModel!.siteLogoDark
                               : siteModel!.siteLogo
                           : siteModel!.siteLogo,
-                      isAntiAlias: true,
+                      fit: BoxFit.contain,
+                      height: 40,
                     ),
           Text(
             title,
@@ -412,33 +473,6 @@ class _NavBarCircularImageDropDownButtonState
       getUserDetails();
     }
   }
-
-  List<PopupMenuItem<String>> menuItemsGuest = [
-    const PopupMenuItem(
-      value: "Login",
-      child: Row(
-        children: [
-          Icon(Icons.login),
-          SizedBox(
-            width: 10,
-          ),
-          Text('Login'),
-        ],
-      ),
-    ),
-    const PopupMenuItem(
-      value: "Register",
-      child: Row(
-        children: [
-          Icon(Icons.app_registration_sharp),
-          SizedBox(
-            width: 10,
-          ),
-          Text('Register'),
-        ],
-      ),
-    ),
-  ];
 
   late String selectedValue;
   @override

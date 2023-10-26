@@ -239,22 +239,31 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                     height: 30,
                   ),
                   !isLoggedIn
-                      ? const Expanded(
+                      ? Expanded(
                           child: Center(
-                            child: Text("Login First"),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  loginFirstImg,
+                                  height: 300,
+                                  width: 300,
+                                ),
+                                const Text("Login First"),
+                              ],
+                            ),
                           ),
                         )
                       : !isElectionOngoing
                           ? infoBannerMessage(
                               context,
                               "There is no election right now",
-                              robotInfo,
+                              noElectionImg,
                             )
                           : isAlreadyVoted
                               ? infoBannerMessage(
                                   context,
                                   "You already voted.\nThank you for participation",
-                                  robotThanks,
+                                  electionImg,
                                 )
                               : Expanded(
                                   child: gridOfCandidates(),
@@ -274,7 +283,11 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(imageString, scale: 5),
+            Image.asset(
+              imageString,
+              width: 300,
+              height: 300,
+            ),
             Text(
               text,
               style: Theme.of(context)

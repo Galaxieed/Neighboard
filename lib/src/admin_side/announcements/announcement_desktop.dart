@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/models/notification_model.dart';
@@ -408,11 +409,19 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                       ),
                     )
                   else
-                    const Expanded(
-                      child: Center(
-                        child: Text("No Announcements"),
+                    Expanded(
+                        child: Center(
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            announcement,
+                            height: 300,
+                            width: 300,
+                          ),
+                          const Text("No Announcements"),
+                        ],
                       ),
-                    ),
+                    )),
                 ],
               ),
             ),

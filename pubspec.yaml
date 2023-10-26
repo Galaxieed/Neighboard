@@ -122,6 +122,11 @@ flutter:
     - assets/no_posts.png
     - assets/chats.png
     - assets/stores.png
+    - assets/election.png
+    - assets/login_first.png
+    - assets/no_election.png
+    - assets/notifications.png
+    
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

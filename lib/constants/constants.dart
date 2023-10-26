@@ -9,6 +9,10 @@ const String noPost = 'assets/no_posts.png';
 const String noStore = 'assets/stores.png';
 const String noChat = 'assets/chats.png';
 const String announcement = 'assets/announcements.png';
+const String electionImg = 'assets/election.png';
+const String loginFirstImg = 'assets/login_first.png';
+const String noElectionImg = 'assets/no_election.png';
+const String notificationImg = 'assets/notifications.png';
 
 //LandPage Styles
 double ccLandPageBGOpacity = 1;

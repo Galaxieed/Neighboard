@@ -183,8 +183,17 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
               height: 10,
             ),
             announcementModels.isEmpty
-                ? const Center(
-                    child: Text("No Announcements"),
+                ? Center(
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          announcement,
+                          height: 300,
+                          width: 300,
+                        ),
+                        const Text("No Announcements"),
+                      ],
+                    ),
                   )
                 : Expanded(
                     child: Column(

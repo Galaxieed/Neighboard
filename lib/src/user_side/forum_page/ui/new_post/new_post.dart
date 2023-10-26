@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -153,22 +154,31 @@ class _NewPostState extends State<NewPost> {
   Widget build(BuildContext context) {
     return !isLoggedIn
         ? Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const LoginPage()));
-                  },
-                  child: const Text(
-                    "Login ",
-                    style: TextStyle(color: Colors.blue),
-                  ),
+                Image.asset(
+                  loginFirstImg,
+                  height: 300,
+                  width: 300,
                 ),
-                const Text("First"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const LoginPage()));
+                      },
+                      child: const Text(
+                        "Login ",
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ),
+                    const Text("First"),
+                  ],
+                ),
               ],
             ),
           )

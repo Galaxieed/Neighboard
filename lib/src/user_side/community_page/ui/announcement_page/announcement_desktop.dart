@@ -108,85 +108,89 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
       ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-        child: announcementModels == []
-            ? const Center(
-                child: Text("No Announcements"),
-              )
-            : Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 15,
-                  ),
-                  Text(
-                    'Announcements',
-                    style: Theme.of(context).textTheme.headlineLarge,
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      PopupMenuButton(
-                        position: PopupMenuPosition.under,
-                        tooltip: "Filter announcements",
-                        icon: const Icon(Icons.filter_alt_outlined),
-                        onSelected: (value) {
-                          sortAnnouncement(value);
-                        },
-                        itemBuilder: (BuildContext context) => _popUpMenuItem,
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: announcementModels.isEmpty
-                        ? const Center(
-                            child: Text("No Announcements"),
-                          )
-                        : Row(
-                            children: [
-                              Expanded(
-                                flex: 5,
-                                child: () {
-                                  Widget widget = Container();
-                                  for (AnnouncementModel announcementModel
-                                      in announcementModels) {
-                                    if (announcementModels[0] ==
-                                        announcementModel) {
-                                      widget = MainAnnouncement(
-                                        announcementModel: announcementModel,
-                                      );
-                                      break;
-                                    } else {
-                                      widget = Container();
-                                    }
-                                  }
-                                  return widget;
-                                }(),
-                              ),
-                              SizedBox(
-                                width: 5.w,
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: ListView.builder(
-                                  itemCount: announcementModels.length,
-                                  itemBuilder: (context, index) {
-                                    var model = announcementModels[index];
-                                    if (model != announcementModels[0]) {
-                                      return OtherAnnouncement(
-                                          announcementModel: model);
-                                    } else {
-                                      return Container();
-                                    }
-                                  },
-                                ),
-                              ),
-                            ],
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(
+              height: 15,
+            ),
+            Text(
+              'Announcements',
+              style: Theme.of(context).textTheme.headlineLarge,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                PopupMenuButton(
+                  position: PopupMenuPosition.under,
+                  tooltip: "Filter announcements",
+                  icon: const Icon(Icons.filter_alt_outlined),
+                  onSelected: (value) {
+                    sortAnnouncement(value);
+                  },
+                  itemBuilder: (BuildContext context) => _popUpMenuItem,
+                ),
+              ],
+            ),
+            Expanded(
+              child: announcementModels.isEmpty
+                  ? Center(
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            announcement,
+                            height: 300,
+                            width: 300,
                           ),
-                  ),
-                ],
-              ),
+                          const Text("No Announcements"),
+                        ],
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: () {
+                            Widget widget = Container();
+                            for (AnnouncementModel announcementModel
+                                in announcementModels) {
+                              if (announcementModels[0] == announcementModel) {
+                                widget = MainAnnouncement(
+                                  announcementModel: announcementModel,
+                                );
+                                break;
+                              } else {
+                                widget = Container();
+                              }
+                            }
+                            return widget;
+                          }(),
+                        ),
+                        SizedBox(
+                          width: 5.w,
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: ListView.builder(
+                            itemCount: announcementModels.length,
+                            itemBuilder: (context, index) {
+                              var model = announcementModels[index];
+                              if (model != announcementModels[0]) {
+                                return OtherAnnouncement(
+                                    announcementModel: model);
+                              } else {
+                                return Container();
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

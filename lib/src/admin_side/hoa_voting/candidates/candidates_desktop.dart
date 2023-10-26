@@ -270,8 +270,17 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                   ),
                 Expanded(
                   child: isElectionOngoing
-                      ? const Center(
-                          child: Text("Election Ongoing"),
+                      ? Center(
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                electionImg,
+                                height: 300,
+                                width: 300,
+                              ),
+                              const Text("Election is ongoing!"),
+                            ],
+                          ),
                         )
                       : DefaultTabController(
                           length: 9,

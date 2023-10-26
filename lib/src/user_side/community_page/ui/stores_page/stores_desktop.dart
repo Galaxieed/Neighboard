@@ -479,8 +479,17 @@ class _StoresDesktopState extends State<StoresDesktop> {
               : Container(),
           Expanded(
             child: storeModels.isEmpty
-                ? const Center(
-                    child: Text("No Stores"),
+                ? Center(
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          noStore,
+                          height: 300,
+                          width: 300,
+                        ),
+                        const Text("No Stores"),
+                      ],
+                    ),
                   )
                 : GridView(
                     padding: widget.isAdmin
