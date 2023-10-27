@@ -30,4 +30,28 @@ class AnnouncementFunction {
       return null;
     }
   }
+
+  static Future<bool> removeAnnouncement(String announcementId) async {
+    try {
+      //remove announcement
+      await _firestore.collection("announcements").doc(announcementId).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateAnnouncement(
+      String announcementId, String title, String content) async {
+    try {
+      //update
+      await _firestore
+          .collection("announcements")
+          .doc(announcementId)
+          .update({"title": title, "details": content});
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

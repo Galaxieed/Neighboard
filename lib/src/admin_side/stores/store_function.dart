@@ -29,4 +29,30 @@ class StoreFunction {
       return null;
     }
   }
+
+  static Future<bool> removeStore(String storeId) async {
+    try {
+      //remove announcement
+      await _firestore.collection("stores").doc(storeId).delete();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> updateStore(String storeId, String name, String offers,
+      String houseNo, String street) async {
+    try {
+      //update
+      await _firestore.collection("stores").doc(storeId).update({
+        "store_name": name,
+        "store_offers": offers,
+        "store_house_number": houseNo,
+        "store_street_name": street
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

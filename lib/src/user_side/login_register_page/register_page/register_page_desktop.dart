@@ -28,8 +28,39 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
     setState(() {
       isLoading = true;
     });
-    registerResult = await RegisterFunction.createAccout(email.text,
-        password.text, firstName.text, lastName.text, username.text);
+    bool isUsernameExist = await RegisterFunction.userExists(username.text);
+    if (isUsernameExist) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Neighboard Says..'),
+            content: Text("The Username ${username.text}\nis already in use."),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    registerResult = await RegisterFunction.createAccout(
+      email.text,
+      password.text,
+      firstName.text,
+      lastName.text,
+      username.text,
+    );
     bool isAccountSuccessfullyCreated = registerResult == "true";
 
     if (isAccountSuccessfullyCreated) {

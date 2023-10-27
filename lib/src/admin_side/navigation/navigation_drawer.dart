@@ -44,10 +44,10 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
       if (newValue == 'Stores') {
         widget.callback(5);
       }
-      if (newValue == 'Candidates') {
+      if (newValue == 'Election') {
         widget.callback(6);
       }
-      if (newValue == 'Voting') {
+      if (newValue == 'Analytics') {
         widget.callback(7);
       }
       if (newValue == 'Voters') {
@@ -69,7 +69,7 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
   void didUpdateWidget(covariant AdminNavDrawer oldWidget) {
     super.didUpdateWidget(oldWidget);
     selectedSubButton = widget.selectedPage;
-    if (selectedSubButton == "Voting") {
+    if (selectedSubButton == "Analytics") {
       _controller.expand();
     }
   }
@@ -153,9 +153,9 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
                       ),
                       child: drawerItem(
                           context,
-                          Icons.people_outline,
-                          "Candidates",
-                          selectedSubButton == "Candidates",
+                          Icons.how_to_vote_outlined,
+                          "Election",
+                          selectedSubButton == "Election",
                           const EdgeInsets.only(left: 50)),
                     ),
                     Container(
@@ -169,9 +169,9 @@ class _AdminNavDrawerState extends State<AdminNavDrawer> {
                       ),
                       child: drawerItem(
                           context,
-                          Icons.how_to_vote,
-                          "Voting",
-                          selectedSubButton == "Voting",
+                          Icons.analytics_outlined,
+                          "Analytics",
+                          selectedSubButton == "Analytics",
                           const EdgeInsets.only(left: 50)),
                     ),
                     drawerItem(

@@ -11,6 +11,7 @@ import 'package:neighboard/src/user_side/login_register_page/register_page/regis
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
@@ -303,7 +304,10 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 20.0),
                                   child: OtherAnnouncement(
-                                      announcementModel: model),
+                                    announcementModel: model,
+                                    stateSetter: getAllAnnouncements,
+                                    isAdmin: false,
+                                  ),
                                 );
                               } else {
                                 return Container();
@@ -466,11 +470,68 @@ class MainAnnouncement extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class OtherAnnouncement extends StatelessWidget {
-  const OtherAnnouncement({super.key, required this.announcementModel});
+  OtherAnnouncement(
+      {super.key,
+      required this.announcementModel,
+      required this.stateSetter,
+      required this.isAdmin});
   final AnnouncementModel announcementModel;
+
+  final Function stateSetter;
+  final bool isAdmin;
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _detailsController = TextEditingController();
+  bool isEditing = false;
+
+  removeAnnouncement(BuildContext context) async {
+    bool isSuccess = await AnnouncementFunction.removeAnnouncement(
+        announcementModel.announcementId);
+    if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      successMessage(
+          title: "Success!", desc: "Refresh to see changes!", context: context);
+      stateSetter();
+    } else {
+      // ignore: use_build_context_synchronously
+      errorMessage(
+          title: "Something went wrong!",
+          desc: "This announcement isn't deleted!",
+          context: context);
+    }
+  }
+
+  updateAnnouncement(BuildContext context) async {
+    if (_titleController.text.isNotEmpty &&
+        _detailsController.text.isNotEmpty) {
+      bool status = await AnnouncementFunction.updateAnnouncement(
+          announcementModel.announcementId,
+          _titleController.text,
+          _detailsController.text);
+
+      if (status) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!",
+            desc: "Refresh to see changes!",
+            context: context);
+        stateSetter();
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "This announcement isn't updated!",
+            context: context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _titleController.text = announcementModel.title;
+    _detailsController.text = announcementModel.details;
     return Padding(
       padding: EdgeInsets.only(bottom: 5.h),
       child: Card(
@@ -532,76 +593,244 @@ class OtherAnnouncement extends StatelessWidget {
                           isScrollControlled: true,
                           context: context,
                           builder: (BuildContext context) {
-                            return SingleChildScrollView(
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Flexible(
-                                      child: Container(
-                                        width: 600,
-                                        height: 300,
-                                        decoration: announcementModel.image ==
-                                                ""
-                                            ? BoxDecoration(
-                                                image: const DecorationImage(
-                                                  image: AssetImage(noImage),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(5))
-                                            : BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      announcementModel.image),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(5)),
+                            return StatefulBuilder(
+                                builder: (context, setState) {
+                              return SingleChildScrollView(
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Container(
+                                          width: 600,
+                                          height: 300,
+                                          decoration: announcementModel.image ==
+                                                  ""
+                                              ? BoxDecoration(
+                                                  image: const DecorationImage(
+                                                    image: AssetImage(noImage),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(5))
+                                              : BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        announcementModel
+                                                            .image),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(5)),
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                    Flexible(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            announcementModel.title,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleLarge!
-                                                .copyWith(
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(
-                                            height: 20,
-                                          ),
-                                          Text(
-                                            "${announcementModel.datePosted}\n${announcementModel.details}",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium,
-                                          ),
-                                        ],
+                                      const SizedBox(
+                                        height: 20,
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 20,
-                                    ),
-                                  ],
+                                      Flexible(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            isEditing
+                                                ? TextField(
+                                                    controller:
+                                                        _titleController,
+                                                    decoration: InputDecoration(
+                                                        suffixIcon: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              _titleController
+                                                                      .text =
+                                                                  announcementModel
+                                                                      .title;
+                                                              isEditing = false;
+                                                            });
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons
+                                                                .cancel_outlined,
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            updateAnnouncement(
+                                                                context);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          icon: Icon(
+                                                            Icons.save,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .inversePrimary,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )),
+                                                  )
+                                                : Text(
+                                                    announcementModel.title,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleLarge!
+                                                        .copyWith(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                            const SizedBox(
+                                              height: 20,
+                                            ),
+                                            isEditing
+                                                ? TextField(
+                                                    controller:
+                                                        _detailsController,
+                                                    maxLines: 10,
+                                                    decoration: InputDecoration(
+                                                        suffixIcon: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              _detailsController
+                                                                      .text =
+                                                                  announcementModel
+                                                                      .details;
+                                                              isEditing = false;
+                                                            });
+                                                          },
+                                                          icon: const Icon(
+                                                            Icons
+                                                                .cancel_outlined,
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            updateAnnouncement(
+                                                                context);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          icon: Icon(
+                                                            Icons.save,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .inversePrimary,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )),
+                                                  )
+                                                : Text(
+                                                    "${announcementModel.datePosted}\n${announcementModel.details}",
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyMedium,
+                                                  ),
+                                            if (isAdmin)
+                                              Container(
+                                                height: 100,
+                                                width: 1000,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      const BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  30),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  30)),
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .inversePrimary,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.max,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          removeAnnouncement(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          foregroundColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onBackground,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4),
+                                                          ),
+                                                        ),
+                                                        child: const Text(
+                                                            "Remove")),
+                                                    const SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    ElevatedButton(
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            isEditing =
+                                                                !isEditing;
+                                                          });
+                                                        },
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                          foregroundColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .background,
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4),
+                                                          ),
+                                                        ),
+                                                        child:
+                                                            const Text("Edit")),
+                                                  ],
+                                                ),
+                                              )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
+                              );
+                            });
                           },
                         );
                       },

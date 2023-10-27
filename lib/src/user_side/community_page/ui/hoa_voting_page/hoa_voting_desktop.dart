@@ -15,6 +15,7 @@ import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+
 import 'package:responsive_builder/responsive_builder.dart';
 
 class HOAVotingDesktop extends StatefulWidget {
@@ -405,7 +406,11 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   Widget hoaTab(String title) {
     return Column(
       children: [
-        hoaTitleBanner(context, title),
+        hoaTitleBanner(
+            context,
+            title == "BOARD OF DIRECTORS"
+                ? "BOARD OF DIRECTORS (select 8 candidates)"
+                : title),
         Expanded(
           child: GridView.builder(
             padding: EdgeInsets.only(

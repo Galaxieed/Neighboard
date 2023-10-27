@@ -390,6 +390,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                           ),
                           title: const Text("Change Logo"),
                         ),
+                        const Divider(),
                         ListTile(
                           onTap: () {
                             pickImage('logoDark');
@@ -413,33 +414,39 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                         const Divider(),
                         const ThemeColorPicker(),
                         const Divider(),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         TextFormField(
                           controller: tcHeader,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Homepage Header",
+                            labelText: "Homepage Header",
+                            alignLabelWithHint: true,
                           ),
                           maxLines: 5,
                         ),
                         const SizedBox(
-                          height: 10,
+                          height: 20,
                         ),
                         TextFormField(
                           controller: tcSubHeader,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Homepage Subheader",
+                            labelText: "Homepage Subheader",
+                            alignLabelWithHint: true,
                           ),
                           maxLines: 5,
                         ),
                         const SizedBox(
-                          height: 10,
+                          height: 20,
                         ),
                         TextFormField(
                           controller: tcAbout,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
-                            hintText: "Homepage About",
+                            labelText: "Homepage About",
+                            alignLabelWithHint: true,
                           ),
                           maxLines: 10,
                         ),

@@ -42,7 +42,7 @@ class _VotingDesktopState extends State<VotingDesktop> {
 
   getAllElection() async {
     electionModels = await CandidatesFunctions.getAllElection() ?? [];
-    electionModels.sort((a, b) => b.electionId.compareTo(a.electionId));
+    electionModels.sort((a, b) => a.electionId.compareTo(b.electionId));
     for (ElectionModel election in electionModels) {
       String dateText =
           '${DateFormat.yMMMd().format(DateTime.parse(election.electionStartDate))} - ${DateFormat.yMMMd().format(DateTime.parse(election.electionEndDate))}';

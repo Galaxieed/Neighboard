@@ -72,4 +72,15 @@ class ProfileFunction {
       return null;
     }
   }
+
+  static Future<void> changePassword(String newPassword) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await user.updatePassword(newPassword);
+      } catch (e) {
+        return;
+      }
+    }
+  }
 }

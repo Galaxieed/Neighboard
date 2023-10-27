@@ -209,6 +209,7 @@ class _NewPostState extends State<NewPost> {
                                   });
                                 },
                                 items: [
+                                  'General Discussion',
                                   'Garbage Collection',
                                   'Parking Space',
                                   'Water Billing',

@@ -11,7 +11,9 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_mobile.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -206,226 +208,346 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    useSafeArea: true,
-                    isScrollControlled: true,
-                    showDragHandle: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Padding(
-                        padding: MediaQuery.of(context).viewInsets,
-                        child: StatefulBuilder(
-                          builder:
-                              (BuildContext context, StateSetter stateSetter) {
-                            return Container(
-                              padding: const EdgeInsets.all(8),
-                              child: SingleChildScrollView(
-                                child: Form(
-                                  key: _formKey,
-                                  child: SizedBox(
-                                    width: 720,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        Text(
-                                          "New Announcement",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: TextFormField(
-                                            controller: _ctrlTitle,
-                                            onSaved: (newValue) =>
-                                                _postTitle = newValue!,
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  value.isEmpty) {
-                                                return 'Please enter some text';
-                                              }
-                                              return null;
-                                            },
-                                            decoration: const InputDecoration(
-                                              labelText:
-                                                  "Enter Announcement Title",
-                                              border: OutlineInputBorder(),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: TextFormField(
-                                            controller: _ctrlContent,
-                                            onSaved: (newValue) =>
-                                                _postContent = newValue!,
-                                            decoration: const InputDecoration(
-                                              labelText: "Type Text Here",
-                                              alignLabelWithHint: true,
-                                              border: OutlineInputBorder(),
-                                            ),
-                                            validator: (value) {
-                                              if (value == null ||
-                                                  value.isEmpty) {
-                                                return 'Please enter some text';
-                                              }
-                                              return null;
-                                            },
-                                            keyboardType:
-                                                TextInputType.multiline,
-                                            expands: false,
-                                            maxLines: 15,
-                                            textAlignVertical:
-                                                TextAlignVertical.top,
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            ElevatedButton.icon(
-                                              icon: const Icon(Icons.image),
-                                              label: const Text('Add Image'),
-                                              style: ElevatedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10)),
-                                                backgroundColor:
-                                                    Colors.indigo[900],
-                                                foregroundColor: Colors.white,
+    return isLoading
+        ? const LoadingScreen()
+        : Container(
+            padding: EdgeInsets.symmetric(vertical: 15.h, horizontal: 15.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          showDragHandle: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Padding(
+                              padding: MediaQuery.of(context).viewInsets,
+                              child: StatefulBuilder(
+                                builder: (BuildContext context,
+                                    StateSetter stateSetter) {
+                                  return Container(
+                                    padding: const EdgeInsets.all(8),
+                                    child: SingleChildScrollView(
+                                      child: Form(
+                                        key: _formKey,
+                                        child: SizedBox(
+                                          width: 720,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: <Widget>[
+                                              Text(
+                                                "New Announcement",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleLarge,
+                                                textAlign: TextAlign.center,
                                               ),
-                                              onPressed: () {
-                                                pickImage(stateSetter);
-                                              },
-                                            ),
-                                            const SizedBox(
-                                              width: 10,
-                                            ),
-                                            profileImage != null ||
-                                                    profileImageByte != null
-                                                ? kIsWeb
-                                                    ? Text(
-                                                        profileImageByte!.name)
-                                                    : Text(profileImage!.path)
-                                                : Container(),
-                                          ],
-                                        ),
-                                        Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: ElevatedButton(
-                                            style: ElevatedButton.styleFrom(
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)),
-                                              backgroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .inversePrimary,
-                                              foregroundColor: Theme.of(context)
-                                                  .colorScheme
-                                                  .onBackground,
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 50,
-                                                  vertical: 2.h),
-                                            ),
-                                            onPressed: () {
-                                              if (_formKey.currentState!
-                                                  .validate()) {
-                                                _formKey.currentState!.save();
-                                                _postAnnouncement();
-                                                Navigator.pop(context);
-                                              }
-                                            },
-                                            child: Text(
-                                              'Post',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyLarge!
-                                                  .copyWith(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                            ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: TextFormField(
+                                                  controller: _ctrlTitle,
+                                                  onSaved: (newValue) =>
+                                                      _postTitle = newValue!,
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter some text';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText:
+                                                        "Enter Announcement Title",
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                  ),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: TextFormField(
+                                                  controller: _ctrlContent,
+                                                  onSaved: (newValue) =>
+                                                      _postContent = newValue!,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: "Type Text Here",
+                                                    alignLabelWithHint: true,
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                  ),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter some text';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  keyboardType:
+                                                      TextInputType.multiline,
+                                                  expands: false,
+                                                  maxLines: 15,
+                                                  textAlignVertical:
+                                                      TextAlignVertical.top,
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  ElevatedButton.icon(
+                                                    icon:
+                                                        const Icon(Icons.image),
+                                                    label:
+                                                        const Text('Add Image'),
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10)),
+                                                      backgroundColor:
+                                                          Colors.indigo[900],
+                                                      foregroundColor:
+                                                          Colors.white,
+                                                    ),
+                                                    onPressed: () {
+                                                      pickImage(stateSetter);
+                                                    },
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  profileImage != null ||
+                                                          profileImageByte !=
+                                                              null
+                                                      ? kIsWeb
+                                                          ? Text(
+                                                              profileImageByte!
+                                                                  .name)
+                                                          : Text(profileImage!
+                                                              .path)
+                                                      : Container(),
+                                                ],
+                                              ),
+                                              Align(
+                                                alignment:
+                                                    Alignment.bottomRight,
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10)),
+                                                    backgroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .inversePrimary,
+                                                    foregroundColor:
+                                                        Theme.of(context)
+                                                            .colorScheme
+                                                            .onBackground,
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 50,
+                                                            vertical: 2.h),
+                                                  ),
+                                                  onPressed: () {
+                                                    if (_formKey.currentState!
+                                                        .validate()) {
+                                                      _formKey.currentState!
+                                                          .save();
+                                                      _postAnnouncement();
+                                                      Navigator.pop(context);
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    'Post',
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodyLarge!
+                                                        .copyWith(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                  );
+                                },
                               ),
                             );
                           },
-                        ),
-                      );
-                    },
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text("New Announcement"),
-              ),
-              SizedBox(width: 2.w),
-              PopupMenuButton(
-                position: PopupMenuPosition.under,
-                tooltip: "Filter announcements",
-                child: AbsorbPointer(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.sort),
-                    label: const Text("Filter"),
-                  ),
-                ),
-                onSelected: (value) {
-                  sortAnnouncement(value);
-                },
-                itemBuilder: (BuildContext context) => _popUpMenuItem,
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 15.h,
-          ),
-          if (announcementModels.isNotEmpty)
-            SizedBox(
-              height: MediaQuery.of(context).size.height / 2.5,
-              child: MainAnnouncement(announcementModel: announcementModels[0]),
-            )
-          else
-            Expanded(
-              child: Center(
-                child: Column(
-                  children: [
-                    Image.asset(
-                      announcement,
-                      height: 300,
-                      width: 300,
+                        );
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("New Announcement"),
                     ),
-                    const Text("No Announcements"),
+                    SizedBox(width: 2.w),
+                    PopupMenuButton(
+                      position: PopupMenuPosition.under,
+                      tooltip: "Filter announcements",
+                      child: AbsorbPointer(
+                        child: ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.sort),
+                          label: const Text("Filter"),
+                        ),
+                      ),
+                      onSelected: (value) {
+                        sortAnnouncement(value);
+                      },
+                      itemBuilder: (BuildContext context) => _popUpMenuItem,
+                    ),
                   ],
                 ),
-              ),
+                SizedBox(
+                  height: 15.h,
+                ),
+                if (announcementModels.isNotEmpty)
+                  Expanded(
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 500,
+                              child: MainAnnouncement(
+                                announcementModel: announcementModels[0],
+                                stateSetter: getAllAnnouncements,
+                                isAdmin: true,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            const Divider(),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: announcementModels.length,
+                              itemBuilder: (context, index) {
+                                var model = announcementModels[index];
+                                if (model != announcementModels[0]) {
+                                  return OtherAnnouncement(
+                                    announcementModel: model,
+                                    stateSetter: getAllAnnouncements,
+                                    isAdmin: true,
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            announcement,
+                            height: 300,
+                            width: 300,
+                          ),
+                          const Text("No Announcements"),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
-    );
+          );
   }
 }
 
+// ignore: must_be_immutable
 class MainAnnouncement extends StatelessWidget {
-  const MainAnnouncement({super.key, required this.announcementModel});
+  MainAnnouncement(
+      {super.key,
+      required this.announcementModel,
+      required this.stateSetter,
+      required this.isAdmin});
   final AnnouncementModel announcementModel;
+  final Function stateSetter;
+  final bool isAdmin;
+
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _detailsController = TextEditingController();
+  bool isEditing = false;
+
+  removeAnnouncement(BuildContext context) async {
+    bool isSuccess = await AnnouncementFunction.removeAnnouncement(
+        announcementModel.announcementId);
+    if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      successMessage(
+          title: "Success!", desc: "Refresh to see changes!", context: context);
+      stateSetter();
+    } else {
+      // ignore: use_build_context_synchronously
+      errorMessage(
+          title: "Something went wrong!",
+          desc: "This announcement isn't deleted!",
+          context: context);
+    }
+  }
+
+  updateAnnouncement(BuildContext context) async {
+    if (_titleController.text.isNotEmpty &&
+        _detailsController.text.isNotEmpty) {
+      bool status = await AnnouncementFunction.updateAnnouncement(
+          announcementModel.announcementId,
+          _titleController.text,
+          _detailsController.text);
+
+      if (status) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Success!",
+            desc: "Refresh to see changes!",
+            context: context);
+        stateSetter();
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "This announcement isn't updated!",
+            context: context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _titleController.text = announcementModel.title;
+    _detailsController.text = announcementModel.details;
     return Column(
       children: [
         Flexible(
@@ -453,61 +575,195 @@ class MainAnnouncement extends StatelessWidget {
               isScrollControlled: true,
               context: context,
               builder: (BuildContext context) {
-                return Container(
-                  padding: const EdgeInsets.all(8),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Container(
-                            width: 350,
-                            height: 200,
-                            decoration: announcementModel.image == ""
-                                ? BoxDecoration(
-                                    image: const DecorationImage(
-                                      image: AssetImage(noImage),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5))
-                                : BoxDecoration(
-                                    image: DecorationImage(
-                                      image:
-                                          NetworkImage(announcementModel.image),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    borderRadius: BorderRadius.circular(5)),
+                return StatefulBuilder(builder: (context, setState) {
+                  return Container(
+                    padding: const EdgeInsets.all(8),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              width: 350,
+                              height: 200,
+                              decoration: announcementModel.image == ""
+                                  ? BoxDecoration(
+                                      image: const DecorationImage(
+                                        image: AssetImage(noImage),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.circular(5))
+                                  : BoxDecoration(
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                            announcementModel.image),
+                                        fit: BoxFit.cover,
+                                      ),
+                                      borderRadius: BorderRadius.circular(5)),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        Flexible(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                announcementModel.title,
-                                style: Theme.of(context).textTheme.titleLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                "${announcementModel.datePosted}\n${announcementModel.details}",
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ],
+                          const SizedBox(
+                            height: 20,
                           ),
-                        ),
-                      ],
+                          Flexible(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                isEditing
+                                    ? TextField(
+                                        controller: _titleController,
+                                        decoration: InputDecoration(
+                                            suffixIcon: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  _titleController.text =
+                                                      announcementModel.title;
+                                                  isEditing = false;
+                                                });
+                                              },
+                                              icon: const Icon(
+                                                Icons.cancel_outlined,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                updateAnnouncement(context);
+                                                Navigator.pop(context);
+                                              },
+                                              icon: Icon(
+                                                Icons.save,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .inversePrimary,
+                                              ),
+                                            )
+                                          ],
+                                        )),
+                                      )
+                                    : Text(
+                                        announcementModel.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                isEditing
+                                    ? TextField(
+                                        controller: _detailsController,
+                                        maxLines: 10,
+                                        decoration: InputDecoration(
+                                            suffixIcon: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  _detailsController.text =
+                                                      announcementModel.details;
+                                                  isEditing = false;
+                                                });
+                                              },
+                                              icon: const Icon(
+                                                Icons.cancel_outlined,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                updateAnnouncement(context);
+                                                Navigator.pop(context);
+                                              },
+                                              icon: Icon(
+                                                Icons.save,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .inversePrimary,
+                                              ),
+                                            )
+                                          ],
+                                        )),
+                                      )
+                                    : Text(
+                                        "${announcementModel.datePosted}\n${announcementModel.details}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                if (isAdmin)
+                                  Container(
+                                    height: 100,
+                                    width: 1000,
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(30),
+                                          topRight: Radius.circular(30)),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .inversePrimary,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              removeAnnouncement(context);
+                                              Navigator.pop(context);
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .onBackground,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                            ),
+                                            child: const Text("Remove")),
+                                        const SizedBox(
+                                          width: 10,
+                                        ),
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                isEditing = !isEditing;
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              foregroundColor: Theme.of(context)
+                                                  .colorScheme
+                                                  .background,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ),
+                                            ),
+                                            child: const Text("Edit")),
+                                      ],
+                                    ),
+                                  )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
+                  );
+                });
               },
             );
           },

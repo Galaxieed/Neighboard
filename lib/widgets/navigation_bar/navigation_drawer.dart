@@ -154,7 +154,7 @@ class _ThemeColorPickerState extends State<ThemeColorPicker> {
             ),
             actions: <Widget>[
               ElevatedButton(
-                child: const Text('Got it'),
+                child: const Text('Save'),
                 onPressed: () {
                   currentThemeColor = pickerColor;
                   themeNotifier.value = currentThemeColor;

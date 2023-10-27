@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard(
-      {super.key, required this.callback, required this.deviceScreenType});
+      {super.key,
+      required this.callback,
+      required this.deviceScreenType,
+      this.currentUser});
 
   final Function callback;
   final DeviceScreenType deviceScreenType;
+  final UserModel? currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +30,11 @@ class Dashboard extends StatelessWidget {
                   : Theme.of(context).textTheme.headlineMedium!.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
-              children: const <TextSpan>[
-                TextSpan(
+              children: <TextSpan>[
+                const TextSpan(
                     text: 'Welcome back, ',
                     style: TextStyle(color: Colors.grey)),
-                TextSpan(text: ' Admin! 👋'),
+                TextSpan(text: ' ${currentUser!.firstName}! 👋'),
               ],
             ),
           ),

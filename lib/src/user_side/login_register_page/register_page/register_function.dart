@@ -69,4 +69,11 @@ class RegisterFunction {
       return;
     }
   }
+
+  static Future<bool> userExists(String username) async => (await _firestore
+          .collection("users")
+          .where("username", isEqualTo: username)
+          .get())
+      .docs
+      .isNotEmpty;
 }

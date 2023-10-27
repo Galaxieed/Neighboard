@@ -45,6 +45,9 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   List<AnnouncementModel> announcementModels = [];
 
   void getAllAnnouncements() async {
+    setState(() {
+      isLoading = true;
+    });
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
@@ -417,25 +420,63 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                       child: Center(
                         child: SizedBox(
                           width: 150.w,
-                          child: MainAnnouncement(
-                              announcementModel: announcementModels[0]),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: MediaQuery.of(context).size.height -
+                                      200.h,
+                                  child: MainAnnouncement(
+                                    announcementModel: announcementModels[0],
+                                    stateSetter: getAllAnnouncements,
+                                    isAdmin: true,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Divider(),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: announcementModels.length,
+                                  itemBuilder: (context, index) {
+                                    var model = announcementModels[index];
+                                    if (model != announcementModels[0]) {
+                                      return OtherAnnouncement(
+                                        announcementModel: model,
+                                        stateSetter: getAllAnnouncements,
+                                        isAdmin: true,
+                                      );
+                                    } else {
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     )
                   else
                     Expanded(
-                        child: Center(
-                      child: Column(
-                        children: [
-                          Image.asset(
-                            announcement,
-                            height: 300,
-                            width: 300,
-                          ),
-                          const Text("No Announcements"),
-                        ],
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              announcement,
+                              height: 300,
+                              width: 300,
+                            ),
+                            const Text("No Announcements"),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                 ],
               ),
             ),

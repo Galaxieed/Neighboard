@@ -185,7 +185,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
                     child: pageIndex == 0 || pageIndex == 1 || userModel == null
                         ? otherLinks(context)
-                        : miniProfile(userModel!),
+                        : miniProfile(context, userModel!),
                   ),
                 ),
               ),
@@ -302,11 +302,18 @@ class ForumPageNavButton extends StatelessWidget {
   }
 }
 
-Widget miniProfile(UserModel userModel) {
+Widget miniProfile(BuildContext context, UserModel userModel) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.center,
     mainAxisSize: MainAxisSize.max,
     children: [
+      Text(
+        "User Engagement",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 6.sp,
+        ),
+      ),
       CircleAvatar(
         radius: 40.sp,
         backgroundImage: NetworkImage(userModel.profilePicture.toString()),

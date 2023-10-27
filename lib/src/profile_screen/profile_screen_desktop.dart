@@ -8,6 +8,7 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
+import 'package:neighboard/src/user_side/login_register_page/register_page/register_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
@@ -33,8 +34,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   final TextEditingController tcEmail = TextEditingController();
   final TextEditingController tcAddress = TextEditingController();
   final TextEditingController tcCNo = TextEditingController();
+  final TextEditingController tcPass = TextEditingController();
+  final TextEditingController tcConfirmPass = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
+  bool passToggle = true;
+  bool passToggle1 = true;
   File? profileImage;
   PlatformFile? profileImageByte;
   String profileImageUrl = "";
@@ -92,11 +96,44 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     });
   }
 
+  String? currentUsername;
   void onSavingDetails() async {
     setState(() {
       isLoading = true;
     });
-
+    bool isUsernameExist = await RegisterFunction.userExists(tcUsername.text);
+    if (isUsernameExist && currentUsername != tcUsername.text) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Neighboard Says..'),
+            content:
+                Text("The Username ${tcUsername.text}\nis already in use."),
+            actions: <Widget>[
+              ElevatedButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+    if (tcPass.text == tcConfirmPass.text &&
+        tcPass.text.isNotEmpty &&
+        tcConfirmPass.text.isNotEmpty) {
+      await ProfileFunction.changePassword(tcConfirmPass.text);
+      tcPass.clear();
+      tcConfirmPass.clear();
+    }
     Map<String, dynamic> userDetails = {
       'first_name': tcFname.text,
       'last_name': tcLname.text,
@@ -104,10 +141,12 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       'email': tcEmail.text,
       'address': tcAddress.text,
       'contact_no': tcCNo.text,
-      // 'social_media_links': [],
     };
     await ProfileFunction.updateUserProfile(userDetails);
     await getCurrentUserDetails();
+    // ignore: use_build_context_synchronously
+    successMessage(
+        title: "Success!", desc: "Updated Successfully", context: context);
     setState(() {
       isLoading = false;
       isEditing = false;
@@ -133,6 +172,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     tcFname.text = userModel!.firstName;
     tcLname.text = userModel!.lastName;
     tcUsername.text = userModel!.username;
+    currentUsername = userModel!.username;
   }
 
   @override
@@ -242,10 +282,6 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     if (_formKey.currentState!.validate()) {
                       try {
                         onSavingDetails();
-                        successMessage(
-                            title: "Success!",
-                            desc: "Updated Successfully",
-                            context: context);
                       } catch (e) {
                         errorMessage(
                             title: "Error!",
@@ -292,7 +328,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                 if (value == null || value.isEmpty) {
                                   return "First name is required";
                                 }
-                                final alpha = RegExp(r'^[a-zA-Z]+$');
+                                final alpha = RegExp(r'^[a-zA-Z ]+$');
                                 if (!alpha.hasMatch(value)) {
                                   return "Symbols and Numbers are not allowed.\nFor suffixes like 2nd or 3rd, use Roman Numeral letters";
                                 }
@@ -341,6 +377,39 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            infoTitle(context, "Address"),
+                            TextFormField(
+                              controller: tcAddress,
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Contact Number"),
+                            TextFormField(
+                              controller: tcCNo,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,11}$')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return null;
+                                } else if (value.length != 11) {
+                                  return 'Please enter exactly 11 digits';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                             infoTitle(context, "Email Address"),
                             TextFormField(
                               controller: tcEmail,
@@ -363,50 +432,81 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            infoTitle(context, "Address"),
+                            infoTitle(context, "New Password"),
                             TextFormField(
-                              controller: tcAddress,
+                              controller: tcPass,
+                              obscureText: passToggle,
+                              decoration: InputDecoration(
+                                suffix: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      passToggle = !passToggle;
+                                    });
+                                  },
+                                  child: Icon(passToggle
+                                      ? Icons.visibility
+                                      : Icons.visibility_off),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return null;
+                                }
+                                String pattern =
+                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$';
+                                RegExp regex = RegExp(pattern);
+                                if (!regex.hasMatch(value)) {
+                                  return 'Password must be at least 8 characters, \nInclude an uppercase letter and a number';
+                                }
+                                return null;
+                              },
                             ),
+                            const SizedBox(height: 20),
                           ],
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            infoTitle(context, "Contact Number"),
+                            infoTitle(context, "Confirm Password"),
                             TextFormField(
-                              controller: tcCNo,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d{0,11}$')),
-                              ],
+                              controller: tcConfirmPass,
+                              obscureText: passToggle1,
+                              decoration: InputDecoration(
+                                suffix: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      passToggle1 = !passToggle1;
+                                    });
+                                  },
+                                  child: Icon(passToggle
+                                      ? Icons.visibility
+                                      : Icons.visibility_off),
+                                ),
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Contact Number is required';
-                                } else if (value.length != 11) {
-                                  return 'Please enter exactly 11 digits';
+                                  return null;
+                                }
+                                if (value != tcPass.text) {
+                                  return "Password does not match";
+                                }
+                                String pattern =
+                                    r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$';
+                                RegExp regex = RegExp(pattern);
+                                if (!regex.hasMatch(value)) {
+                                  return 'Password must be at least 8 characters, \nInclude an uppercase letter and a number';
                                 }
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                // Column(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     infoTitle(context, "Social Media Links"),
-                //     for (String links in userModel!.socialMediaLinks)
-                //       TextFormField(
-                //         initialValue: links,
-                //       ),
-                //   ],
-                // ),
               ],
             ),
           ],
@@ -494,14 +594,6 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          infoTitle(context, "Email Address"),
-                          actualInfo(context, userModel!.email),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
                           infoTitle(context, "Address"),
                           actualInfo(context, userModel!.address),
                         ],
@@ -514,18 +606,17 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           actualInfo(context, userModel!.contactNo),
                         ],
                       ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          infoTitle(context, "Email Address"),
+                          actualInfo(context, userModel!.email),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-                // Column(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     infoTitle(context, "Social Media Links"),
-                //     for (String links in userModel!.socialMediaLinks)
-                //       actualInfo(context, links),
-                //   ],
-                // ),
               ],
             ),
           ],
@@ -565,8 +656,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
             Stack(
               children: [
                 userModel!.profilePicture.isEmpty
-                    ? const CircleAvatar(
+                    ? CircleAvatar(
                         radius: 80,
+                        child: Image.asset(guestIcon),
                       )
                     : CircleAvatar(
                         radius: 80,
@@ -658,7 +750,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           ? kIsWeb
                               ? MemoryImage(profileImageByte!.bytes!)
                               : FileImage(profileImage!) as ImageProvider
-                          : NetworkImage(userModel!.profilePicture),
+                          : userModel!.profilePicture == ""
+                              ? const AssetImage(guestIcon) as ImageProvider
+                              : NetworkImage(userModel!.profilePicture),
                 ),
                 Positioned(
                   bottom: 15,

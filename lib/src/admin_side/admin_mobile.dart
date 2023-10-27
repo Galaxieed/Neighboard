@@ -76,9 +76,9 @@ class _AdminMobileState extends State<AdminMobile> {
       } else if (index == 5) {
         selectedPage = "Stores";
       } else if (index == 6) {
-        selectedPage = "Candidates";
+        selectedPage = "Election";
       } else if (index == 7) {
-        selectedPage = "Voting";
+        selectedPage = "Analytics";
       } else if (index == 8) {
         selectedPage = "Voters";
       } else if (index == 9) {
@@ -149,6 +149,7 @@ class _AdminMobileState extends State<AdminMobile> {
                           )
                         : const Placeholder(),
                     Dashboard(
+                      currentUser: userModel,
                       callback: (i) {
                         switchPage(controller, i);
                       },
