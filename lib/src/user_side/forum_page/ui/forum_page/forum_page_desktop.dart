@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
@@ -12,7 +15,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
-import 'package:neighboard/widgets/others/launch_url.dart';
+import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ForumPageDesktop extends StatefulWidget {
@@ -25,6 +28,7 @@ class ForumPageDesktop extends StatefulWidget {
 class _ForumPageDesktopState extends State<ForumPageDesktop> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String searchedText = "";
+  String categoryText = "";
   int pageIndex = 0;
   changePage(int num) {
     setState(() {
@@ -55,145 +59,169 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     );
   }
 
+  bool isLoading = true;
+
+  List<PostModel> postModels = [];
+  void getAllPost() async {
+    setState(() {
+      isLoading = true;
+    });
+    postModels = await AllPostsFunction.getAllPost() ?? [];
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     if (_auth.currentUser != null) {
+      getAllPost();
       getCurrentUserDetails();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: NavBar(
-        openNotification: _openNotification,
-        openChat: _openChat,
-        currentPage: "Forum",
-      ),
-      endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
-        stateSetter: setState,
-      ),
-      body: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 5,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SearchBar(
-                      leading: const Icon(Icons.search),
-                      hintText: 'Search Post Title...',
-                      constraints: const BoxConstraints(
-                        minWidth: double.infinity,
-                        minHeight: 50,
-                      ),
-                      onChanged: (String searchText) {
-                        setState(() {
-                          searchedText = searchText;
-                        });
-                      },
-                      onTap: () {
-                        // showSearch(
-                        //     context: context, delegate: SearchScreenUI());
-                      },
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    DefaultTabController(
-                      initialIndex: 1,
-                      length: 4,
-                      child: Builder(
-                        builder: (context) => Expanded(
-                          child: Column(
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w, vertical: 0),
-                                child: ForumPageNavBar(
-                                  callback: (index) {
-                                    final TabController controller =
-                                        DefaultTabController.of(context);
-                                    if (!controller.indexIsChanging) {
-                                      controller.animateTo(index);
-                                      changePage(index);
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10.h,
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 15.w, vertical: 0),
-                                  child: TabBarView(
-                                    children: [
-                                      Categories(
-                                        category: searchedText,
-                                        isAdmin: false,
-                                        deviceScreenType:
-                                            DeviceScreenType.desktop,
-                                      ),
-                                      AllPosts(
-                                        category: searchedText,
-                                        isAdmin: false,
-                                        deviceScreenType:
-                                            DeviceScreenType.desktop,
-                                      ),
-                                      MyPosts(search: searchedText),
-                                      const NewPost(
-                                        deviceScreenType:
-                                            DeviceScreenType.desktop,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+    return isLoading
+        ? const LoadingScreen()
+        : Scaffold(
+            key: _scaffoldKey,
+            appBar: NavBar(
+              openNotification: _openNotification,
+              openChat: _openChat,
+              currentPage: "Forum",
+            ),
+            endDrawer: NotificationDrawer(
+              deviceScreenType: DeviceScreenType.desktop,
+              stateSetter: setState,
+            ),
+            body: Container(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SearchBar(
+                            leading: const Icon(Icons.search),
+                            hintText: 'Search Post Title...',
+                            constraints: const BoxConstraints(
+                              minWidth: double.infinity,
+                              minHeight: 50,
+                            ),
+                            onChanged: (String searchText) {
+                              setState(() {
+                                searchedText = searchText;
+                              });
+                            },
+                            onTap: () {
+                              // showSearch(
+                              //     context: context, delegate: SearchScreenUI());
+                            },
                           ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          DefaultTabController(
+                            initialIndex: 1,
+                            length: 4,
+                            child: Builder(
+                              builder: (context) => Expanded(
+                                child: Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w, vertical: 0),
+                                      child: ForumPageNavBar(
+                                        callback: (int index, [String? text]) {
+                                          final TabController controller =
+                                              DefaultTabController.of(context);
+                                          if (!controller.indexIsChanging) {
+                                            if (text != null) {
+                                              categoryText = text;
+                                            }
+                                            controller.animateTo(index);
+                                            changePage(index);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10.h,
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 15.w, vertical: 0),
+                                        child: TabBarView(
+                                          children: [
+                                            Categories(
+                                              searchedText: searchedText,
+                                              category: categoryText,
+                                              isAdmin: false,
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                            AllPosts(
+                                              category: searchedText,
+                                              isAdmin: false,
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                            MyPosts(search: searchedText),
+                                            const NewPost(
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10.w,
+                  ),
+                  Expanded(
+                    // MGA LINKS SA KANAN
+                    flex: 2,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10.w, vertical: 20.h),
+                          child: pageIndex == 0 ||
+                                  pageIndex == 1 ||
+                                  userModel == null
+                              ? otherLinks(context, postModels, getAllPost)
+                              : miniProfile(context, userModel!),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 10.w,
-            ),
-            Expanded(
-              // MGA LINKS SA KANAN
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                child: Card(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-                    child: pageIndex == 0 || pageIndex == 1 || userModel == null
-                        ? otherLinks(context)
-                        : miniProfile(context, userModel!),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
   }
 }
 
@@ -214,17 +242,15 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
   changingButton(String newValue) {
     setState(() {
       selectedSubButton = newValue;
-      if (newValue == 'Categories') {
-        widget.callback(0);
-      }
+
       if (newValue == 'All Posts') {
         widget.callback(1);
-      }
-      if (newValue == 'My Posts') {
+      } else if (newValue == 'My Posts') {
         widget.callback(2);
-      }
-      if (newValue == 'New Post') {
+      } else if (newValue == 'New Post') {
         widget.callback(3);
+      } else {
+        widget.callback(0, newValue);
       }
     });
   }
@@ -234,10 +260,57 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        ForumPageNavButton(
-            selectedSubButton: selectedSubButton,
-            label: 'Categories',
-            callback: changingButton),
+        PopupMenuButton(
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('General Discussion');
+                  },
+                  child: const Text("General Discussion")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Garbage Collection');
+                  },
+                  child: const Text("Garbage Collection")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Parking Space');
+                  },
+                  child: const Text("Parking Space")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Water Billing');
+                  },
+                  child: const Text("Water Billing")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Electric Billing');
+                  },
+                  child: const Text("Electric Billing")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Power Interruption');
+                  },
+                  child: const Text("Power Interruption")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Clubhouse Fees and Rental');
+                  },
+                  child: const Text("Clubhouse Fees and Rental")),
+            ];
+          },
+          child: IgnorePointer(
+            child: ForumPageNavButton(
+                selectedSubButton: selectedSubButton,
+                label: selectedSubButton != 'All Posts' &&
+                        selectedSubButton != 'My Posts' &&
+                        selectedSubButton != 'New Post'
+                    ? selectedSubButton
+                    : "Categories",
+                callback: changingButton),
+          ),
+        ),
         SizedBox(
           width: 5.w,
         ),
@@ -391,7 +464,7 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
   );
 }
 
-Widget otherLinks(context) => Center(
+Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
       child: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
@@ -410,10 +483,10 @@ Widget otherLinks(context) => Center(
                     width: 2.w,
                   ),
                   Text(
-                    'Must-read posts',
+                    'Most Viewed Posts',
                     style: Theme.of(context)
                         .textTheme
-                        .titleLarge!
+                        .titleMedium!
                         .copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -425,30 +498,34 @@ Widget otherLinks(context) => Center(
               SizedBox(
                 height: 5.h,
               ),
-              RichText(
-                text: TextSpan(
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: ccForumLinksColor),
-                  children: [
-                    TextSpan(
-                      text:
-                          'Please read rules before you start working on the platform.\n\n',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launcherUrl('https://www.youtube.com');
-                        },
+              //dito
+              ListView.builder(
+                itemCount: 3,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  postModels.sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => Dialog(
+                            child: PostModal(
+                          postModel: postModels[index],
+                          deviceScreenType: DeviceScreenType.desktop,
+                          stateSetter: stateSetter,
+                        )),
+                      );
+                    },
+                    child: Text(
+                      "- ${postModels[index].title}",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.blue),
                     ),
-                    TextSpan(
-                      text: 'Vision and Strategy of Alemhelp\n',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launcherUrl('https://www.youtube.com');
-                        },
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               SizedBox(
                 height: 5.h,
@@ -464,10 +541,10 @@ Widget otherLinks(context) => Center(
                     width: 2.w,
                   ),
                   Text(
-                    'Featured links',
+                    'Most Upvoted Posts',
                     style: Theme.of(context)
                         .textTheme
-                        .titleLarge!
+                        .titleMedium!
                         .copyWith(fontWeight: FontWeight.bold),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -479,38 +556,36 @@ Widget otherLinks(context) => Center(
               SizedBox(
                 height: 5.h,
               ),
-              RichText(
-                text: TextSpan(
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyLarge!
-                      .copyWith(color: ccForumLinksColor),
-                  children: [
-                    TextSpan(
-                      text: 'Alemhelp source code on GitHub.\n\n',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launcherUrl(
-                              'https://github.com/Galaxieed/Neighboard/tree/master');
-                        },
+              ListView.builder(
+                itemCount: 3,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  postModels
+                      .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) => Dialog(
+                            child: PostModal(
+                          postModel: postModels[index],
+                          deviceScreenType: DeviceScreenType.desktop,
+                          stateSetter: stateSetter,
+                        )),
+                      );
+                    },
+                    child: Text(
+                      "- ${postModels[index].title}",
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(color: Colors.blue),
                     ),
-                    TextSpan(
-                      text: 'Golang best practices\n\n',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launcherUrl('https://www.youtube.com');
-                        },
-                    ),
-                    TextSpan(
-                      text: 'Alem School dashboard',
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          launcherUrl('https://www.youtube.com');
-                        },
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
+              //dito
             ],
           ),
         ),

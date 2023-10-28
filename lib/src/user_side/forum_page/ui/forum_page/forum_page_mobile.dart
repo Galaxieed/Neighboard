@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:neighboard/constants/constants.dart';
+
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
@@ -18,7 +17,6 @@ import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
-import 'package:neighboard/widgets/others/launch_url.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class ForumPageMobile extends StatefulWidget {
@@ -36,6 +34,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String searchedText = "";
+  String categoryText = "";
   late TabController _tabController;
   UserModel? userModel;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -67,6 +66,60 @@ class _ForumPageMobileState extends State<ForumPageMobile>
 
   void _openNotification() {
     _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void _showPopupMenu(Offset offset) async {
+    final screenSize = MediaQuery.of(context).size;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        offset.dx,
+        offset.dy,
+        screenSize.width - offset.dx,
+        screenSize.height - offset.dy,
+      ),
+      items: [
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'General Discussion';
+            },
+            child: const Text("General Discussion")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Garbage Collection';
+            },
+            child: const Text("Garbage Collection")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Parking Space';
+            },
+            child: const Text("Parking Space")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Water Billing';
+            },
+            child: const Text("Water Billing")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Electric Billing';
+            },
+            child: const Text("Electric Billing")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Power Interruption';
+            },
+            child: const Text("Power Interruption")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Clubhouse Fees and Rental';
+            },
+            child: const Text("Clubhouse Fees and Rental")),
+      ],
+      elevation: 8.0,
+    ).then((value) {
+      _tabController.animateTo(0);
+      setState(() {});
+    });
   }
 
   @override
@@ -193,7 +246,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                     text: "Pending",
                   )
                 : const Tab(
-                    icon: Icon(Icons.category),
+                    icon: Icon(Icons.category_outlined),
                     text: "Category",
                   ),
             const Tab(
@@ -219,6 +272,14 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         deviceScreenType: DeviceScreenType.desktop,
         stateSetter: setState,
       ),
+      floatingActionButton: GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            _showPopupMenu(details.globalPosition);
+          },
+          child: const FloatingActionButton(
+            onPressed: null,
+            child: Icon(Icons.category),
+          )),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Column(
@@ -230,7 +291,8 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                 controller: _tabController,
                 children: [
                   Categories(
-                    category: searchedText,
+                    searchedText: searchedText,
+                    category: categoryText,
                     isAdmin: widget.isAdmin,
                     scrollController: scrollController,
                     deviceScreenType: widget.screenType,
@@ -247,232 +309,9 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                 ],
               ),
             ),
-            // SizedBox(
-            //   width: 10.w,
-            // ),
-            // Padding(
-            //   padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-            //   child: Card(
-            //     child: Padding(
-            //       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 20.h),
-            //       child: pageIndex == 0 || pageIndex == 1 || userModel == null
-            //           ? otherLinks
-            //           : miniProfile(userModel!),
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),
     );
   }
 }
-
-Widget miniProfile(UserModel userModel) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      CircleAvatar(
-        radius: 40.sp,
-        backgroundImage: NetworkImage(userModel.profilePicture.toString()),
-      ),
-      SizedBox(
-        height: 10.h,
-      ),
-      Text(
-        "@${userModel.username}",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 6.sp,
-          letterSpacing: 1,
-        ),
-      ),
-      SizedBox(
-        height: 5.h,
-      ),
-      const Divider(),
-      SizedBox(
-        height: 5.h,
-      ),
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.lightbulb_sharp,
-            color: ccLightBulbColor,
-            size: 6.sp,
-            weight: 2,
-          ),
-          SizedBox(
-            width: 2.w,
-          ),
-          Text(
-            '${userModel.rank} [${userModel.posts}]',
-            style: TextStyle(
-              fontSize: 6.sp,
-              fontWeight: FontWeight.bold,
-              color: ccRankColor,
-            ),
-          ),
-        ],
-      ),
-      SizedBox(
-        height: 5.h,
-      ),
-      const Divider(),
-      SizedBox(
-        height: 5.h,
-      ),
-      userModel.socialMediaLinks.isNotEmpty
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.link),
-                ),
-                SizedBox(
-                  width: 2.w,
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.linked_camera),
-                ),
-                SizedBox(
-                  width: 2.w,
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.facebook),
-                ),
-              ],
-            )
-          : Container(),
-    ],
-  );
-}
-
-Widget otherLinks = Center(
-  child: Align(
-    alignment: Alignment.topCenter,
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.star_border,
-                weight: 3,
-              ),
-              SizedBox(
-                width: 2.w,
-              ),
-              const Text(
-                'Must-read posts',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  //fontSize: 6.sp,
-                ),
-              ),
-            ],
-          ),
-          const Divider(
-            color: ccForumDividerColor,
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                color: ccForumLinksColor,
-                //fontSize: 5.sp,
-              ),
-              children: [
-                TextSpan(
-                  text:
-                      'Please read rules before you start working on the platform.\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-                TextSpan(
-                  text: 'Vision and Strategy of Alemhelp\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Icon(
-                Icons.link,
-                weight: 3,
-              ),
-              SizedBox(
-                width: 2.w,
-              ),
-              Text(
-                'Featured links',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 6.sp,
-                ),
-              ),
-            ],
-          ),
-          const Divider(
-            color: ccForumDividerColor,
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                color: ccForumLinksColor,
-                fontSize: 5.sp,
-              ),
-              children: [
-                TextSpan(
-                  text: 'Alemhelp source code on GitHub.\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl(
-                          'https://github.com/Galaxieed/Neighboard/tree/master');
-                    },
-                ),
-                TextSpan(
-                  text: 'Golang best practices\n\n',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-                TextSpan(
-                  text: 'Alem School dashboard',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      launcherUrl('https://www.youtube.com');
-                    },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-  ),
-);

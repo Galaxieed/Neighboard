@@ -387,6 +387,7 @@ class _RepliesContainerState extends State<RepliesContainer> {
                     replyModel = result.docs
                         .map((e) => ReplyModel.fromJson(e.data()))
                         .toList();
+                    replyModel.sort((a, b) => b.replyId.compareTo(a.replyId));
                     ReplyModel reply = replyModel[index];
                     return SingleReplyUI(
                       replyModel: reply,

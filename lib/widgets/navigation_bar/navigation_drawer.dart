@@ -15,12 +15,101 @@ class NavDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             //decoration: BoxDecoration(color: ccNavDrawerHeaderColor(context)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Stack(
               children: [
-                Text("NEIGHBOARD"),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      isDarkMode
+                          ? siteModel!.siteLogoDark
+                          : siteModel!.siteLogo,
+                      width: 70,
+                      height: 70,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text("NEIGHBOARD"),
+                        Text(
+                          "Copyright © 2023 Neighboard. \nAll rights reserved. ",
+                          style: Theme.of(context).textTheme.labelSmall,
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Row(
+                    children: [
+                      Text(
+                        "Contact Details",
+                        style: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          showModalBottomSheet(
+                            showDragHandle: true,
+                            context: context,
+                            builder: (_) => Container(
+                              padding: const EdgeInsets.all(16),
+                              width: double.infinity,
+                              child: Column(
+                                children: [
+                                  Text(
+                                    "CONTACT DETAILS",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    "OFFICE ADDRESS",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "Block 17 Lot 02, Abaño Street, Villa Roma Phase 5, Lias, Marilao, Bulacan, \n3019 Philippines",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall!,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const Divider(),
+                                  Text(
+                                    "MOBILE PHONE NO: ",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "(0906) 279-3960 | (0933) 694-2699",
+                                    style:
+                                        Theme.of(context).textTheme.titleSmall!,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.info_outline),
+                      ),
+                    ],
+                  ),
+                )
               ],
             ),
           ),

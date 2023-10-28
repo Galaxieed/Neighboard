@@ -237,11 +237,11 @@ class _PostModalState extends State<PostModal> {
   }
 
   removePost() async {
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
     if (widget.stateSetter != null) {
       widget.stateSetter!();
     }
-    // ignore: use_build_context_synchronously
-    Navigator.pop(context);
     successMessage(
         title: "Success!", desc: "Post was deleted!", context: context);
     await PostInteractorsFunctions.removePost(postModel: widget.postModel);
@@ -272,11 +272,11 @@ class _PostModalState extends State<PostModal> {
             context: context);
       }
     }
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
     if (widget.stateSetter != null) {
       widget.stateSetter!();
     }
-    // ignore: use_build_context_synchronously
-    Navigator.pop(context);
   }
 
   @override
@@ -481,7 +481,8 @@ class _PostModalState extends State<PostModal> {
                                   .map((e) => CommentModel.fromJson(e.data()))
                                   .toList();
                               CommentModel comment = commentModels[index];
-
+                              commentModels.sort(
+                                  (a, b) => b.commentId.compareTo(a.commentId));
                               return PostModalComment(
                                 currentUser: currentUser,
                                 postModel: widget.postModel,

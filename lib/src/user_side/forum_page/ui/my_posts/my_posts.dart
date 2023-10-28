@@ -49,6 +49,7 @@ class _MyPostsState extends State<MyPosts> {
       postModels =
           await MyPostFunction.getMyPost(authorId: _auth.currentUser!.uid) ??
               [];
+      postModels.sort((a, b) => b.postId.compareTo(a.postId));
     } catch (e) {
       return;
     }
@@ -62,13 +63,21 @@ class _MyPostsState extends State<MyPosts> {
   }
 
   void getMyPostsByTitle() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       postModels = await MyPostFunction.getMyPostByTitle(
               authorId: _auth.currentUser!.uid, title: widget.search) ??
           [];
-      setState(() {});
+      postModels.sort((a, b) => widget.search.trim().compareTo(a.title));
     } catch (e) {
       return;
+    }
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -132,16 +141,17 @@ class _MyPostsState extends State<MyPosts> {
               )
             : postModels.isEmpty
                 ? noPostMessage()
-                : ListView.builder(
-                    itemCount: postModels.length,
-                    itemBuilder: (context, index) {
-                      PostModel post = postModels[index];
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 0.w, vertical: 5.h),
-                        child: Column(
-                          children: [
-                            ClipRRect(
+                : SingleChildScrollView(
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: postModels.length,
+                        itemBuilder: (context, index) {
+                          PostModel post = postModels[index];
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 0.w, vertical: 5.h),
+                            child: ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
                                 child: MyPostWithComments(
                                   post: post,
@@ -149,10 +159,9 @@ class _MyPostsState extends State<MyPosts> {
                                     getMyPosts();
                                   },
                                 )),
-                          ],
-                        ),
-                      );
-                    });
+                          );
+                        }),
+                  );
   }
 }
 
@@ -359,6 +368,8 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
                               commentModels = result.docs
                                   .map((e) => CommentModel.fromJson(e.data()))
                                   .toList();
+                              commentModels.sort(
+                                  (a, b) => b.commentId.compareTo(a.commentId));
                               CommentModel comment = commentModels[index];
                               return CommentUI(
                                   post: widget.post,

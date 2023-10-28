@@ -13,15 +13,15 @@ class LandingPageMobile extends StatelessWidget {
     required this.about,
     required this.bgImage,
     required this.aboutImage,
+    required this.subdName,
   });
 
-  final String header, subHeader, about, bgImage, aboutImage;
+  final String subdName, header, subHeader, about, bgImage, aboutImage;
 
   @override
   Widget build(BuildContext context) {
     return PageView(
-      clipBehavior: Clip.antiAlias,
-      physics: const BouncingScrollPhysics(),
+      physics: const PageScrollPhysics(),
       scrollDirection: Axis.vertical,
       children: [
         HomePage(
@@ -29,12 +29,143 @@ class LandingPageMobile extends StatelessWidget {
           subHeader: subHeader,
           bgImage: bgImage,
         ),
+        const OffersPage(),
         AboutPage(
           header: 'ABOUT',
           subHeader: about,
           aboutImage: aboutImage,
         ),
       ],
+    );
+  }
+}
+
+class OffersPage extends StatelessWidget {
+  const OffersPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.inversePrimary,
+                  Theme.of(context).colorScheme.primary,
+                ],
+                //stops: const [0.3, 0.6, 1.0],
+              ),
+            ),
+          ),
+          const Spacer(),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(width: 20),
+                offersCard(
+                  context,
+                  Icons.location_city_outlined,
+                  "Close to Town",
+                  "There are various establishments, such as mall, churches, and resort within the the area.",
+                ),
+                const SizedBox(width: 20),
+                offersCard(
+                  context,
+                  Icons.nature_people_rounded,
+                  "Clean Environment",
+                  "Subdivision is surrounded by trees and plants, and the streets are kept clean.",
+                ),
+                const SizedBox(width: 20),
+                offersCard(
+                  context,
+                  Icons.security_outlined,
+                  "Secured Community",
+                  "The subdivision is secured due to their 24hrs duty of security guards and curfew hours.",
+                ),
+                const SizedBox(width: 20),
+              ],
+            ),
+          ),
+          const Spacer(),
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.inversePrimary,
+                  Theme.of(context).colorScheme.primary,
+                ],
+                //stops: const [0.3, 0.6, 1.0],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container offersCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String details,
+  ) {
+    return Container(
+      height: 350,
+      width: 300,
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        color: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              radius: 60,
+              child: Icon(
+                icon,
+                size: 65,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge!
+                  .copyWith(fontWeight: FontWeight.w900),
+              overflow: TextOverflow.fade,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              details,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium!,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -89,6 +220,57 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AboutPage extends StatelessWidget {
+  const AboutPage({
+    super.key,
+    required this.header,
+    required this.subHeader,
+    required this.aboutImage,
+  });
+
+  final String header, subHeader, aboutImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: aboutImage == ''
+              ? const AssetImage(noImage) as ImageProvider
+              : NetworkImage(aboutImage),
+          fit: BoxFit.cover,
+          alignment: Alignment.bottomCenter,
+          opacity: ccLandPageBGOpacity,
+        ),
+      ),
+      child: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(20.sp),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                LandPageHeader(header: header),
+                const SizedBox(
+                  height: 20,
+                ),
+                LandPageHeaderSmall(
+                  header: subHeader,
+                  color: Colors.white,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+              ],
             ),
           ),
         ),
@@ -191,57 +373,6 @@ class LandPageHeader extends StatelessWidget {
           ]),
       textAlign: TextAlign.center,
       softWrap: true,
-    );
-  }
-}
-
-class AboutPage extends StatelessWidget {
-  const AboutPage({
-    super.key,
-    required this.header,
-    required this.subHeader,
-    required this.aboutImage,
-  });
-
-  final String header, subHeader, aboutImage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: aboutImage == ''
-              ? const AssetImage(noImage) as ImageProvider
-              : NetworkImage(aboutImage),
-          fit: BoxFit.cover,
-          alignment: Alignment.bottomCenter,
-          opacity: ccLandPageBGOpacity,
-        ),
-      ),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(20.sp),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                LandPageHeader(header: header),
-                const SizedBox(
-                  height: 20,
-                ),
-                LandPageHeaderSmall(
-                  header: subHeader,
-                  color: Colors.white,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

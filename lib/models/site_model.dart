@@ -1,6 +1,6 @@
 class SiteModel {
   late String siteId;
-  late String siteName;
+  late String siteSubdName;
   late String siteLocation;
   late String siteHeader;
   late String siteSubheader;
@@ -13,7 +13,7 @@ class SiteModel {
 
   SiteModel({
     required this.siteId,
-    required this.siteName,
+    required this.siteSubdName,
     required this.siteLocation,
     required this.siteHeader,
     required this.siteSubheader,
@@ -27,7 +27,7 @@ class SiteModel {
 
   SiteModel.fromJson(Map<String, dynamic> json) {
     siteId = json['site_id'];
-    siteName = json['site_name'];
+    siteSubdName = json['site_subd_name'];
     siteLocation = json['site_location'];
     siteHeader = json['site_header'];
     siteSubheader = json['site_subheader'];
@@ -42,7 +42,7 @@ class SiteModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['site_id'] = siteId;
-    data['site_name'] = siteName;
+    data['site_subd_name'] = siteSubdName;
     data['site_location'] = siteLocation;
     data['site_header'] = siteHeader;
     data['site_subheader'] = siteSubheader;

@@ -313,8 +313,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 400,
-                        childAspectRatio: 400 / 250,
-                        mainAxisSpacing: 10,
+                        childAspectRatio: 400 / 150,
                         crossAxisSpacing: 10,
                       ),
                       children: [
@@ -562,8 +561,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400,
-                      childAspectRatio: 400 / 250,
-                      mainAxisSpacing: 10,
+                      childAspectRatio: 400 / 150,
                       crossAxisSpacing: 10,
                     ),
                     children: [

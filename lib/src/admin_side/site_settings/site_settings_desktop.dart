@@ -13,6 +13,7 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
@@ -37,6 +38,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController tcHeader = TextEditingController();
+  final TextEditingController tcSubdName = TextEditingController();
   final TextEditingController tcSubHeader = TextEditingController();
   final TextEditingController tcAbout = TextEditingController();
 
@@ -151,7 +153,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       await onSavingPic();
       SiteModel site = SiteModel(
         siteId: _auth.currentUser!.uid,
-        siteName: '',
+        siteSubdName: tcSubdName.text,
         siteLocation: '',
         siteHeader: tcHeader.text,
         siteSubheader: tcSubHeader.text,
@@ -177,6 +179,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       await onSavingPic();
       Map<String, dynamic> siteDetails = {
         'site_header': tcHeader.text,
+        'site_subd_name': tcSubdName.text,
         'site_subheader': tcSubHeader.text,
         'site_about': tcAbout.text,
         'site_theme_color': currentThemeColor.value,
@@ -204,6 +207,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     siteModel =
         await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
     tcHeader.text = siteModel?.siteHeader ?? "";
+    tcSubdName.text = siteModel?.siteSubdName ?? "";
     tcSubHeader.text = siteModel?.siteSubheader ?? "";
     tcAbout.text = siteModel?.siteAbout ?? "";
     homeImgUrl = siteModel?.siteHomepageImage ?? "";
@@ -211,7 +215,9 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     logoImgUrl = siteModel?.siteLogo ?? "";
     logoImgUrlDark = siteModel?.siteLogoDark ?? "";
 
-    setState(() {});
+    setState(() {
+      isLoading = false;
+    });
   }
 
   List<UserModel> allUsers = [];
@@ -258,6 +264,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   @override
   void dispose() {
     tcHeader.dispose();
+    tcSubdName.dispose();
     tcSubHeader.dispose();
     tcAbout.dispose();
     super.dispose();
@@ -265,241 +272,269 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        vertical:
-            widget.deviceScreenType == DeviceScreenType.desktop ? 30.h : 15.h,
-        horizontal: 15.w,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (widget.deviceScreenType == DeviceScreenType.desktop)
-            TabHeader(
-              title: "Site Settings",
-              callback: () {
-                widget.drawer();
-              },
+    return isLoading
+        ? const LoadingScreen()
+        : Container(
+            padding: EdgeInsets.symmetric(
+              vertical: widget.deviceScreenType == DeviceScreenType.desktop
+                  ? 30.h
+                  : 15.h,
+              horizontal: 15.w,
             ),
-          if (widget.deviceScreenType == DeviceScreenType.desktop)
-            const SizedBox(
-              height: 20,
-            ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Center(
-                child: SizedBox(
-                  width: 1024,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        GridView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 500,
-                            childAspectRatio: 500 / 400,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 20,
-                          ),
-                          children: [
-                            Stack(
-                              children: [
-                                Image(
-                                  image: homeImg != null || homeImgByte != null
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  TabHeader(
+                    title: "Site Settings",
+                    callback: () {
+                      widget.drawer();
+                    },
+                  ),
+                if (widget.deviceScreenType == DeviceScreenType.desktop)
+                  const SizedBox(
+                    height: 20,
+                  ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Center(
+                      child: SizedBox(
+                        width: 1024,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GridView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                gridDelegate:
+                                    const SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 500,
+                                  childAspectRatio: 500 / 400,
+                                  crossAxisSpacing: 20,
+                                  mainAxisSpacing: 20,
+                                ),
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Image(
+                                        image: homeImg != null ||
+                                                homeImgByte != null
+                                            ? kIsWeb
+                                                ? MemoryImage(
+                                                    homeImgByte!.bytes!)
+                                                : FileImage(homeImg!)
+                                                    as ImageProvider
+                                            : siteModel?.siteHomepageImage ==
+                                                    null
+                                                ? const AssetImage(noImage)
+                                                    as ImageProvider
+                                                : NetworkImage(siteModel
+                                                        ?.siteHomepageImage ??
+                                                    homeImgUrl),
+                                        fit: BoxFit.cover,
+                                        width: 550,
+                                        height: 400,
+                                      ),
+                                      Positioned(
+                                        bottom: 10,
+                                        left: 10,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () {
+                                            pickImage('home');
+                                          },
+                                          icon:
+                                              const Icon(Icons.image_outlined),
+                                          label: const Text(
+                                              "Change 'Homepage' Image"),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Stack(
+                                    children: [
+                                      Image(
+                                        image: aboutImg != null ||
+                                                aboutImgByte != null
+                                            ? kIsWeb
+                                                ? MemoryImage(
+                                                    aboutImgByte!.bytes!)
+                                                : FileImage(aboutImg!)
+                                                    as ImageProvider
+                                            : siteModel?.siteAboutImage == null
+                                                ? const AssetImage(noImage)
+                                                    as ImageProvider
+                                                : NetworkImage(
+                                                    siteModel?.siteAboutImage ??
+                                                        aboutImgUrl),
+                                        fit: BoxFit.cover,
+                                        width: 550,
+                                        height: 400,
+                                      ),
+                                      Positioned(
+                                        bottom: 10,
+                                        left: 10,
+                                        child: ElevatedButton.icon(
+                                          onPressed: () {
+                                            pickImage('about');
+                                          },
+                                          icon:
+                                              const Icon(Icons.image_outlined),
+                                          label: const Text(
+                                              "Change 'About' Image"),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const Divider(),
+                              ListTile(
+                                onTap: () {
+                                  pickImage('logo');
+                                },
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.white54,
+                                  backgroundImage: logoImg != null ||
+                                          logoImgByte != null
                                       ? kIsWeb
-                                          ? MemoryImage(homeImgByte!.bytes!)
-                                          : FileImage(homeImg!) as ImageProvider
-                                      : siteModel?.siteHomepageImage == null
+                                          ? MemoryImage(logoImgByte!.bytes!)
+                                          : FileImage(logoImg!) as ImageProvider
+                                      : siteModel?.siteLogo == null
+                                          ? const AssetImage(noImage)
+                                              as ImageProvider
+                                          : NetworkImage(siteModel?.siteLogo ??
+                                              logoImgUrl),
+                                ),
+                                title: const Text("Change Logo"),
+                              ),
+                              const Divider(),
+                              ListTile(
+                                onTap: () {
+                                  pickImage('logoDark');
+                                },
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.black54,
+                                  backgroundImage: logoImgDark != null ||
+                                          logoImgByteDark != null
+                                      ? kIsWeb
+                                          ? MemoryImage(logoImgByteDark!.bytes!)
+                                          : FileImage(logoImgDark!)
+                                              as ImageProvider
+                                      : siteModel?.siteLogoDark == null
                                           ? const AssetImage(noImage)
                                               as ImageProvider
                                           : NetworkImage(
-                                              siteModel?.siteHomepageImage ??
-                                                  homeImgUrl),
-                                  fit: BoxFit.cover,
-                                  width: 550,
-                                  height: 400,
+                                              siteModel?.siteLogoDark ??
+                                                  logoImgUrlDark),
                                 ),
-                                Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      pickImage('home');
-                                    },
-                                    icon: const Icon(Icons.image_outlined),
-                                    label:
-                                        const Text("Change 'Homepage' Image"),
+                                title: const Text("Change Logo (Darkmode)"),
+                              ),
+                              const Divider(),
+                              const LightDarkMode(),
+                              const Divider(),
+                              const ThemeColorPicker(),
+                              const Divider(),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              TextFormField(
+                                controller: tcSubdName,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Subdivision Name",
+                                  alignLabelWithHint: true,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              TextFormField(
+                                controller: tcHeader,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Homepage Header",
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 5,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              TextFormField(
+                                controller: tcSubHeader,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Homepage Subheader",
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 5,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              TextFormField(
+                                controller: tcAbout,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Homepage About",
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 10,
+                              ),
+                              const Divider(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton.icon(
+                                      onPressed: () {
+                                        getSiteSettings();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        foregroundColor: Colors.red,
+                                      ),
+                                      icon: const Icon(Icons.delete_outline),
+                                      label: const Text("Discard")),
+                                  const SizedBox(
+                                    width: 10,
                                   ),
-                                ),
-                              ],
-                            ),
-                            Stack(
-                              children: [
-                                Image(
-                                  image: aboutImg != null ||
-                                          aboutImgByte != null
-                                      ? kIsWeb
-                                          ? MemoryImage(aboutImgByte!.bytes!)
-                                          : FileImage(aboutImg!)
-                                              as ImageProvider
-                                      : siteModel?.siteAboutImage == null
-                                          ? const AssetImage(noImage)
-                                              as ImageProvider
-                                          : NetworkImage(
-                                              siteModel?.siteAboutImage ??
-                                                  aboutImgUrl),
-                                  fit: BoxFit.cover,
-                                  width: 550,
-                                  height: 400,
-                                ),
-                                Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      pickImage('about');
-                                    },
-                                    icon: const Icon(Icons.image_outlined),
-                                    label: const Text("Change 'About' Image"),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        ListTile(
-                          onTap: () {
-                            pickImage('logo');
-                          },
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.white54,
-                            backgroundImage: logoImg != null ||
-                                    logoImgByte != null
-                                ? kIsWeb
-                                    ? MemoryImage(logoImgByte!.bytes!)
-                                    : FileImage(logoImg!) as ImageProvider
-                                : siteModel?.siteLogo == null
-                                    ? const AssetImage(noImage) as ImageProvider
-                                    : NetworkImage(
-                                        siteModel?.siteLogo ?? logoImgUrl),
+                                  ElevatedButton.icon(
+                                      onPressed: () {
+                                        onSavingSettings(context);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .inversePrimary,
+                                        foregroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onBackground,
+                                      ),
+                                      icon: const Icon(Icons.save_outlined),
+                                      label: const Text("Save")),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                            ],
                           ),
-                          title: const Text("Change Logo"),
                         ),
-                        const Divider(),
-                        ListTile(
-                          onTap: () {
-                            pickImage('logoDark');
-                          },
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            backgroundImage: logoImgDark != null ||
-                                    logoImgByteDark != null
-                                ? kIsWeb
-                                    ? MemoryImage(logoImgByteDark!.bytes!)
-                                    : FileImage(logoImgDark!) as ImageProvider
-                                : siteModel?.siteLogoDark == null
-                                    ? const AssetImage(noImage) as ImageProvider
-                                    : NetworkImage(siteModel?.siteLogoDark ??
-                                        logoImgUrlDark),
-                          ),
-                          title: const Text("Change Logo (Darkmode)"),
-                        ),
-                        const Divider(),
-                        const LightDarkMode(),
-                        const Divider(),
-                        const ThemeColorPicker(),
-                        const Divider(),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: tcHeader,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Homepage Header",
-                            alignLabelWithHint: true,
-                          ),
-                          maxLines: 5,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          controller: tcSubHeader,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Homepage Subheader",
-                            alignLabelWithHint: true,
-                          ),
-                          maxLines: 5,
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          controller: tcAbout,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Homepage About",
-                            alignLabelWithHint: true,
-                          ),
-                          maxLines: 10,
-                        ),
-                        const Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton.icon(
-                                onPressed: () {
-                                  getSiteSettings();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  foregroundColor: Colors.red,
-                                ),
-                                icon: const Icon(Icons.delete_outline),
-                                label: const Text("Discard")),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            ElevatedButton.icon(
-                                onPressed: () {
-                                  onSavingSettings(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  backgroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary,
-                                  foregroundColor: Theme.of(context)
-                                      .colorScheme
-                                      .onBackground,
-                                ),
-                                icon: const Icon(Icons.save_outlined),
-                                label: const Text("Save")),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 30,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 }

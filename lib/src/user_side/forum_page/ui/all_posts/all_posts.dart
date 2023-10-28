@@ -57,13 +57,18 @@ class _AllPostsState extends State<AllPosts> {
   }
 
   void getTitlePost() async {
+    setState(() {
+      isLoading = true;
+    });
     postModels = await CategoriesFunction.getPostsByTitle(
             title: widget.category.trim()) ??
         [];
 
     postModels.sort((a, b) => widget.category.trim().compareTo(a.title));
     if (mounted) {
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

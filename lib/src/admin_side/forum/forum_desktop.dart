@@ -69,7 +69,8 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                       child: TabBarView(
                         children: [
                           Categories(
-                            category: searchedText,
+                            searchedText: searchedText,
+                            category: "",
                             isAdmin: true,
                             deviceScreenType: DeviceScreenType.desktop,
                           ),

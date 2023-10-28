@@ -101,7 +101,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
     if (siteModel == null) {
       SiteModel site = SiteModel(
         siteId: _auth.currentUser!.uid,
-        siteName: '',
+        siteSubdName: '',
         siteLocation: '$newLatitude|$newLongitude',
         siteHeader: '',
         siteSubheader: '',

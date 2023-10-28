@@ -487,6 +487,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                   replyModels = result.docs
                       .map((e) => ReplyModel.fromJson(e.data()))
                       .toList();
+                  replyModels.sort((a, b) => b.replyId.compareTo(a.replyId));
                   ReplyModel reply = replyModels[index];
 
                   return ReplyItself(

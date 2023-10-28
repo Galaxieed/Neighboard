@@ -33,9 +33,10 @@ class Categories extends StatefulWidget {
       required this.category,
       required this.isAdmin,
       this.scrollController,
-      required this.deviceScreenType})
+      required this.deviceScreenType,
+      required this.searchedText})
       : super(key: key);
-  final String category;
+  final String category, searchedText;
   final bool isAdmin;
   final ScrollController? scrollController;
   final DeviceScreenType deviceScreenType;
@@ -69,20 +70,33 @@ class _CategoriesState extends State<Categories> {
   }
 
   void getCategoryPosts() async {
-    // TODO: sort this based on category
+    setState(() {
+      isLoading = true;
+    });
     postModels = await CategoriesFunction.getPostsByCategory(
-            category: widget.category) ??
+            category: widget.category.trim()) ??
         [];
+    postModels.sort((a, b) => widget.category.trim().compareTo(a.title));
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   void getTitlePost() async {
+    setState(() {
+      isLoading = true;
+    });
     postModels = await CategoriesFunction.getPostsByTitle(
-            title: widget.category.trim()) ??
+            title: widget.searchedText.trim()) ??
         [];
 
-    postModels.sort((a, b) => widget.category.trim().compareTo(a.title));
+    postModels.sort((a, b) => widget.searchedText.trim().compareTo(a.title));
     if (mounted) {
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -155,6 +169,8 @@ class _CategoriesState extends State<Categories> {
     super.didUpdateWidget(oldWidget);
     //this is for filtering based on search and tags
     if (widget.category.isNotEmpty || widget.category != "") {
+      getCategoryPosts();
+    } else if (widget.searchedText.isNotEmpty || widget.searchedText != "") {
       getTitlePost();
     } else {
       getAllPost();
