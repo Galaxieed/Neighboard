@@ -75,8 +75,8 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
   @override
   void initState() {
     super.initState();
+    getAllPost();
     if (_auth.currentUser != null) {
-      getAllPost();
       getCurrentUserDetails();
     }
   }
