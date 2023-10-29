@@ -12,17 +12,14 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return ProfileScreenDesktop(
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
+        return ProfileScreenMobile(
+          deviceScreenType: DeviceScreenType.mobile,
           userId: userId,
           isAdmin: isAdmin,
         );
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
       } else {
-        return ProfileScreenMobile(
-          deviceScreenType: DeviceScreenType.mobile,
+        return ProfileScreenDesktop(
           userId: userId,
           isAdmin: isAdmin,
         );

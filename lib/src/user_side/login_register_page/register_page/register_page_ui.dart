@@ -9,15 +9,12 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return const RegisterPageDesktop();
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return const RegisterPageMobile(
           deviceScreenType: DeviceScreenType.mobile,
         );
+      } else {
+        return const RegisterPageDesktop();
       }
     });
   }

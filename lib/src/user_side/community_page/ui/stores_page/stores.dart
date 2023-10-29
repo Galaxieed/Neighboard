@@ -9,16 +9,13 @@ class StoresPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return const StoresDesktop(
-          isAdmin: false,
-        );
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return const StoresMobile(
           deviceScreenType: DeviceScreenType.mobile,
+          isAdmin: false,
+        );
+      } else {
+        return const StoresDesktop(
           isAdmin: false,
         );
       }

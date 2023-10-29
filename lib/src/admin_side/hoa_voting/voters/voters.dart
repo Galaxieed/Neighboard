@@ -10,15 +10,12 @@ class AdminHOAVoters extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return VotersDesktop(
-            drawer: drawer, deviceScreenType: DeviceScreenType.desktop);
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return VotersDesktop(
             drawer: drawer, deviceScreenType: DeviceScreenType.mobile);
+      } else {
+        return VotersDesktop(
+            drawer: drawer, deviceScreenType: DeviceScreenType.desktop);
       }
     });
   }

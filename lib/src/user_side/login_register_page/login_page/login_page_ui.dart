@@ -9,15 +9,12 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return const LoginPageDesktop();
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return const LoginPageMobile(
           deviceScreenType: DeviceScreenType.mobile,
         );
+      } else {
+        return const LoginPageDesktop();
       }
     });
   }

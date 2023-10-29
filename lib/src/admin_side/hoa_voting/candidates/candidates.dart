@@ -10,17 +10,14 @@ class AdminHOACandidates extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return CandidatesDesktop(
-          deviceScreenType: DeviceScreenType.desktop,
-          drawer: drawer,
-        );
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return CandidatesDesktop(
           deviceScreenType: DeviceScreenType.mobile,
+          drawer: drawer,
+        );
+      } else {
+        return CandidatesDesktop(
+          deviceScreenType: DeviceScreenType.desktop,
           drawer: drawer,
         );
       }

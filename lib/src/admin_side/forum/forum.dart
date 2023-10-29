@@ -9,17 +9,11 @@ class AdminForum extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.desktop) {
-        return const AdminForumDesktop();
-      } else if (sizingInformation.deviceScreenType ==
-          DeviceScreenType.tablet) {
-        return const Placeholder();
-      } else {
+      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
         return const ForumPageMobile(
             isAdmin: true, screenType: DeviceScreenType.mobile);
-        // return const AdminForumMobile(
-        //   deviceScreenType: DeviceScreenType.mobile,
-        // );
+      } else {
+        return const AdminForumDesktop();
       }
     });
   }
