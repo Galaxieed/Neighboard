@@ -31,7 +31,7 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
             ),
             onChanged: (String searchText) {
               setState(() {
-                searchedText = searchText;
+                searchedText = searchText.trim();
               });
             },
             onTap: () {
@@ -66,25 +66,29 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                       height: 10.h,
                     ),
                     Expanded(
-                      child: TabBarView(
-                        children: [
-                          Categories(
-                            searchedText: searchedText,
-                            category: "",
-                            isAdmin: true,
-                            deviceScreenType: DeviceScreenType.desktop,
-                          ),
-                          AllPosts(
-                            searchedText: searchedText,
-                            category: "",
-                            isAdmin: true,
-                            deviceScreenType: DeviceScreenType.desktop,
-                          ),
-                          MyPosts(search: searchedText),
-                          const NewPost(
-                            deviceScreenType: DeviceScreenType.desktop,
-                          ),
-                        ],
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 15.w, vertical: 0),
+                        child: TabBarView(
+                          children: [
+                            Categories(
+                              searchedText: searchedText,
+                              category: "",
+                              isAdmin: true,
+                              deviceScreenType: DeviceScreenType.desktop,
+                            ),
+                            AllPosts(
+                              searchedText: searchedText,
+                              category: "",
+                              isAdmin: true,
+                              deviceScreenType: DeviceScreenType.desktop,
+                            ),
+                            MyPosts(search: searchedText),
+                            const NewPost(
+                              deviceScreenType: DeviceScreenType.desktop,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],

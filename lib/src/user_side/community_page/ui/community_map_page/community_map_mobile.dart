@@ -166,7 +166,7 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
           ? const NavDrawer()
           : null,
       endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
+        deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
       body: Container(

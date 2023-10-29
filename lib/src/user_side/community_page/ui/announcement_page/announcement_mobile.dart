@@ -206,7 +206,7 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
           ? const NavDrawer()
           : null,
       endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
+        deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
       body: Container(

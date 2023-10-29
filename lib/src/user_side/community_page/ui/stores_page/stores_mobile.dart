@@ -311,7 +311,7 @@ class _StoresMobileState extends State<StoresMobile> {
           ? const NavDrawer()
           : null,
       endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
+        deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
       body: isLoading

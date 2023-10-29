@@ -82,6 +82,13 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       items: [
         PopupMenuItem(
             onTap: () {
+              categoryText = '';
+              _tabController.animateTo(0);
+              setState(() {});
+            },
+            child: const Text("All Posts")),
+        PopupMenuItem(
+            onTap: () {
               categoryText = 'General Discussion';
             },
             child: const Text("General Discussion")),
@@ -268,7 +275,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
           ? const NavDrawer()
           : null,
       endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
+        deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
       floatingActionButton: widget.isAdmin

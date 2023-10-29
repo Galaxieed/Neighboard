@@ -69,6 +69,22 @@ class _CategoriesState extends State<Categories> {
     });
   }
 
+  void getCategoryTitlePosts() async {
+    setState(() {
+      isLoading = true;
+    });
+    postModels = await CategoriesFunction.getPostsByCategoryAndTitle(
+            category: widget.category.trim(),
+            searchedWord: widget.searchedText.trim()) ??
+        [];
+    postModels.sort((a, b) => b.postId.compareTo(a.postId));
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void getCategoryPosts() async {
     setState(() {
       isLoading = true;
@@ -89,7 +105,7 @@ class _CategoriesState extends State<Categories> {
       isLoading = true;
     });
     postModels = await CategoriesFunction.getPostsByTitle(
-            title: widget.searchedText.trim()) ??
+            searchedWord: widget.searchedText.trim()) ??
         [];
 
     postModels.sort((a, b) => widget.searchedText.trim().compareTo(a.title));
@@ -168,7 +184,10 @@ class _CategoriesState extends State<Categories> {
   void didUpdateWidget(covariant Categories oldWidget) {
     super.didUpdateWidget(oldWidget);
     //this is for filtering based on search and tags
-    if (widget.category.isNotEmpty || widget.category != "") {
+    if ((widget.category.isNotEmpty || widget.category != "") &&
+        (widget.searchedText.isNotEmpty || widget.searchedText != "")) {
+      getCategoryTitlePosts();
+    } else if (widget.category.isNotEmpty || widget.category != "") {
       getCategoryPosts();
     } else if (widget.searchedText.isNotEmpty || widget.searchedText != "") {
       getTitlePost();

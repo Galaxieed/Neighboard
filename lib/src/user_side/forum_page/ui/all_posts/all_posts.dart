@@ -77,7 +77,7 @@ class _AllPostsState extends State<AllPosts> {
       isLoading = true;
     });
     postModels = await CategoriesFunction.getPostsByTitle(
-            title: widget.searchedText.trim()) ??
+            searchedWord: widget.searchedText.trim()) ??
         [];
 
     postModels.sort((a, b) => widget.searchedText.trim().compareTo(a.title));

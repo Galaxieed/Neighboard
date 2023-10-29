@@ -24,18 +24,30 @@ class MyPostFunction {
   }
 
   static Future<List<PostModel>?> getMyPostByTitle(
-      {required String authorId, required String title}) async {
+      {required String authorId, required String searchedWord}) async {
     try {
       final result = await _firebaseFirestore
           .collection("posts")
           .where("author_id", isEqualTo: authorId)
-          .where("title", isGreaterThanOrEqualTo: title)
           .get();
       List<PostModel> postModels = [];
       postModels =
           result.docs.map((e) => PostModel.fromJson(e.data())).toList();
 
-      return postModels;
+      // .toLowerCase to case insensitive
+      searchedWord = searchedWord.toLowerCase();
+      //search all postModels based on title or searchedWord
+      List<PostModel> postByTitle = [];
+      postByTitle = postModels
+          .where((post) =>
+              post.authorName.toLowerCase().contains(searchedWord) ||
+              post.content.toLowerCase().contains(searchedWord) ||
+              post.tags
+                  .any((tag) => tag.toLowerCase().contains(searchedWord)) ||
+              post.timeStamp.toLowerCase().contains(searchedWord) ||
+              post.title.toLowerCase().contains(searchedWord))
+          .toList();
+      return postByTitle;
     } catch (e) {
       return null;
     }

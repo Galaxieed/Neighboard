@@ -121,7 +121,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                             ),
                             onChanged: (String searchText) {
                               setState(() {
-                                searchedText = searchText;
+                                searchedText = searchText.trim();
                               });
                             },
                             onTap: () {

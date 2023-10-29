@@ -301,7 +301,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
           ? const NavDrawer()
           : null,
       endDrawer: NotificationDrawer(
-        deviceScreenType: DeviceScreenType.desktop,
+        deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
       body: isLoading

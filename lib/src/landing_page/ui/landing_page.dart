@@ -175,7 +175,7 @@ class _LandingPageState extends State<LandingPage> {
               ? const NavDrawer()
               : null,
           endDrawer: NotificationDrawer(
-            deviceScreenType: DeviceScreenType.desktop,
+            deviceScreenType: sizingInformation.deviceScreenType,
             stateSetter: setState,
           ),
           body: LandingPageMobile(

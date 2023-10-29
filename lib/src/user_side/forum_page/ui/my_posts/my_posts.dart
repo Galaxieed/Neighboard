@@ -68,7 +68,7 @@ class _MyPostsState extends State<MyPosts> {
     });
     try {
       postModels = await MyPostFunction.getMyPostByTitle(
-              authorId: _auth.currentUser!.uid, title: widget.search) ??
+              authorId: _auth.currentUser!.uid, searchedWord: widget.search) ??
           [];
       postModels.sort((a, b) => widget.search.trim().compareTo(a.title));
     } catch (e) {
@@ -96,10 +96,12 @@ class _MyPostsState extends State<MyPosts> {
   @override
   void didUpdateWidget(covariant MyPosts oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.search.isNotEmpty || widget.search != "") {
-      getMyPostsByTitle();
-    } else if (isLoggedIn) {
-      getMyPosts();
+    if (isLoggedIn) {
+      if (widget.search.isNotEmpty || widget.search != "") {
+        getMyPostsByTitle();
+      } else {
+        getMyPosts();
+      }
     }
   }
 
