@@ -190,7 +190,6 @@ class _NewPostState extends State<NewPost> {
                   alignment: Alignment.topCenter,
                   child: SingleChildScrollView(
                     child: Card(
-                      color: Colors.white,
                       child: Container(
                         padding: EdgeInsets.symmetric(
                             horizontal: 10.w, vertical: 15.h),

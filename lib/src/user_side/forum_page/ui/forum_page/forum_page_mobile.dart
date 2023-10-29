@@ -69,6 +69,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
   }
 
   void _showPopupMenu(Offset offset) async {
+    categoryText = "";
     final screenSize = MediaQuery.of(context).size;
     await showMenu(
       context: context,
@@ -117,15 +118,17 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       ],
       elevation: 8.0,
     ).then((value) {
-      _tabController.animateTo(0);
-      setState(() {});
+      if (categoryText != "") {
+        _tabController.animateTo(0);
+        setState(() {});
+      }
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: widget.isAdmin ? 4 : 3, vsync: this);
     if (_auth.currentUser != null) {
       getCurrentUserDetails();
     }
@@ -240,15 +243,11 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       bottomNavigationBar: Material(
         child: TabBar(
           tabs: [
-            widget.isAdmin
-                ? const Tab(
-                    icon: Icon(Icons.pending_actions_outlined),
-                    text: "Pending",
-                  )
-                : const Tab(
-                    icon: Icon(Icons.category_outlined),
-                    text: "Category",
-                  ),
+            if (widget.isAdmin)
+              const Tab(
+                icon: Icon(Icons.pending_actions_outlined),
+                text: "Pending",
+              ),
             const Tab(
               icon: Icon(Icons.forum_rounded),
               text: "Posts",
@@ -272,14 +271,16 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         deviceScreenType: DeviceScreenType.desktop,
         stateSetter: setState,
       ),
-      floatingActionButton: GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            _showPopupMenu(details.globalPosition);
-          },
-          child: const FloatingActionButton(
-            onPressed: null,
-            child: Icon(Icons.category),
-          )),
+      floatingActionButton: widget.isAdmin
+          ? null
+          : GestureDetector(
+              onTapDown: (TapDownDetails details) {
+                _showPopupMenu(details.globalPosition);
+              },
+              child: const FloatingActionButton(
+                onPressed: null,
+                child: Icon(Icons.category),
+              )),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Column(
@@ -290,15 +291,17 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  Categories(
+                  if (widget.isAdmin)
+                    Categories(
+                      searchedText: searchedText,
+                      category: categoryText,
+                      isAdmin: widget.isAdmin,
+                      scrollController: scrollController,
+                      deviceScreenType: widget.screenType,
+                    ),
+                  AllPosts(
                     searchedText: searchedText,
                     category: categoryText,
-                    isAdmin: widget.isAdmin,
-                    scrollController: scrollController,
-                    deviceScreenType: widget.screenType,
-                  ),
-                  AllPosts(
-                    category: searchedText,
                     isAdmin: widget.isAdmin,
                     deviceScreenType: widget.screenType,
                   ),

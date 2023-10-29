@@ -173,7 +173,8 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                                   DeviceScreenType.desktop,
                                             ),
                                             AllPosts(
-                                              category: searchedText,
+                                              searchedText: searchedText,
+                                              category: "",
                                               isAdmin: false,
                                               deviceScreenType:
                                                   DeviceScreenType.desktop,
@@ -302,13 +303,14 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
           },
           child: IgnorePointer(
             child: ForumPageNavButton(
-                selectedSubButton: selectedSubButton,
-                label: selectedSubButton != 'All Posts' &&
-                        selectedSubButton != 'My Posts' &&
-                        selectedSubButton != 'New Post'
-                    ? selectedSubButton
-                    : "Categories",
-                callback: changingButton),
+              selectedSubButton: selectedSubButton,
+              label: selectedSubButton != 'All Posts' &&
+                      selectedSubButton != 'My Posts' &&
+                      selectedSubButton != 'New Post'
+                  ? selectedSubButton
+                  : "Categories",
+              callback: changingButton,
+            ),
           ),
         ),
         SizedBox(

@@ -75,7 +75,8 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                             deviceScreenType: DeviceScreenType.desktop,
                           ),
                           AllPosts(
-                            category: searchedText,
+                            searchedText: searchedText,
+                            category: "",
                             isAdmin: true,
                             deviceScreenType: DeviceScreenType.desktop,
                           ),

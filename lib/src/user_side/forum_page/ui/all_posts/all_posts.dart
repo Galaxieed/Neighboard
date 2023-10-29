@@ -25,11 +25,12 @@ class AllPosts extends StatefulWidget {
     super.key,
     required this.isAdmin,
     required this.category,
+    required this.searchedText,
     required this.deviceScreenType,
   });
 
   final bool isAdmin;
-  final String category;
+  final String category, searchedText;
   final DeviceScreenType deviceScreenType;
 
   @override
@@ -56,15 +57,30 @@ class _AllPostsState extends State<AllPosts> {
     });
   }
 
+  void getCategoryPosts() async {
+    setState(() {
+      isLoading = true;
+    });
+    postModels = await CategoriesFunction.getPostsByCategory(
+            category: widget.category.trim()) ??
+        [];
+    postModels.sort((a, b) => b.postId.compareTo(a.postId));
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   void getTitlePost() async {
     setState(() {
       isLoading = true;
     });
     postModels = await CategoriesFunction.getPostsByTitle(
-            title: widget.category.trim()) ??
+            title: widget.searchedText.trim()) ??
         [];
 
-    postModels.sort((a, b) => widget.category.trim().compareTo(a.title));
+    postModels.sort((a, b) => widget.searchedText.trim().compareTo(a.title));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -81,7 +97,10 @@ class _AllPostsState extends State<AllPosts> {
   @override
   void didUpdateWidget(covariant AllPosts oldWidget) {
     super.didUpdateWidget(oldWidget);
+    //this is for filtering based on search and tags
     if (widget.category.isNotEmpty || widget.category != "") {
+      getCategoryPosts();
+    } else if (widget.searchedText.isNotEmpty || widget.searchedText != "") {
       getTitlePost();
     } else {
       getAllPost();

@@ -76,7 +76,7 @@ class _CategoriesState extends State<Categories> {
     postModels = await CategoriesFunction.getPostsByCategory(
             category: widget.category.trim()) ??
         [];
-    postModels.sort((a, b) => widget.category.trim().compareTo(a.title));
+    postModels.sort((a, b) => b.postId.compareTo(a.postId));
     if (mounted) {
       setState(() {
         isLoading = false;
