@@ -7,6 +7,7 @@ import 'package:neighboard/main.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_page.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
+import 'package:page_transition/page_transition.dart';
 
 class ScrollDetector extends StatelessWidget {
   final void Function(PointerScrollEvent event) onPointerScroll;
@@ -236,10 +237,10 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const ForumPage()));
+                        Navigator.of(context).push(PageTransition(
+                            duration: const Duration(milliseconds: 500),
+                            child: const ForumPage(),
+                            type: PageTransitionType.fade));
                       },
                       child: Text(
                         "Forum",
@@ -248,10 +249,10 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const AnnouncementPage()));
+                        Navigator.of(context).push(PageTransition(
+                            duration: const Duration(milliseconds: 500),
+                            child: const AnnouncementPage(),
+                            type: PageTransitionType.fade));
                       },
                       child: Text(
                         "Announcements",
@@ -289,6 +290,16 @@ class OffersPage extends StatelessWidget {
     return Column(
       children: [
         const Spacer(),
+        Text(
+          "ABOUT",
+          style: TextStyle(
+            fontSize: 8.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
@@ -316,7 +327,7 @@ class OffersPage extends StatelessWidget {
         const Spacer(),
         Container(
           width: double.infinity,
-          height: 40.w,
+          height: 30.w,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -411,16 +422,6 @@ class AboutPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "ABOUT",
-                      style: TextStyle(
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
                     Text(
                       header.toUpperCase(),
                       style: TextStyle(

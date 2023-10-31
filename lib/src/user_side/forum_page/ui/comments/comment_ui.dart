@@ -245,6 +245,7 @@ class _CommentUIState extends State<CommentUI> {
                   isEditing
                       ? TextField(
                           controller: _controller,
+                          maxLines: 3,
                           decoration: InputDecoration(
                               suffixIcon: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -509,6 +510,7 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
                       isEditing
                           ? TextField(
                               controller: _controller,
+                              maxLines: 3,
                               decoration: InputDecoration(
                                   suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,

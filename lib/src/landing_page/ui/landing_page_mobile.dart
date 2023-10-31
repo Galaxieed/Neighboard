@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,7 +30,7 @@ class LandingPageMobile extends StatelessWidget {
         ),
         const OffersPage(),
         AboutPage(
-          header: 'ABOUT',
+          header: subdName,
           subHeader: about,
           aboutImage: aboutImage,
         ),
@@ -65,6 +64,16 @@ class OffersPage extends StatelessWidget {
             ),
           ),
           const Spacer(),
+          Text(
+            "ABOUT",
+            style: Theme.of(context)
+                .textTheme
+                .headlineMedium!
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -182,48 +191,61 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: bgImage == ''
-              ? const AssetImage(noImage) as ImageProvider
-              : NetworkImage(bgImage),
-          fit: BoxFit.cover,
-          alignment: Alignment.bottomCenter,
-          opacity: ccLandPageBGOpacity,
-        ),
-      ),
-      child: ClipRRect(
-        child: Center(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(20.sp),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    LandPageHeader(header: header),
-                    SizedBox(
-                      height: 30.h,
-                    ),
-                    LandPageHeaderSmall(
-                      header: subHeader,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      height: 60.h,
-                    ),
-                    LandPageButton(
-                        label: 'Explore', callback: Routes().navigate),
-                  ],
+    return Stack(
+      children: [
+        Positioned(
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(180),
+                bottomRight: Radius.circular(180)),
+            child: Container(
+              height: MediaQuery.of(context).size.height / 2.5,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: bgImage == ''
+                      ? const AssetImage(noImage) as ImageProvider
+                      : NetworkImage(bgImage),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.bottomCenter,
+                  opacity: ccLandPageBGOpacity,
                 ),
               ),
             ),
           ),
         ),
-      ),
+        Positioned(
+          child: ClipRRect(
+            child: Padding(
+              padding:
+                  EdgeInsets.only(bottom: 20.sp, right: 20.sp, left: 20.sp),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  LandPageHeader(header: header),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  LandPageHeaderSmall(
+                    header: subHeader,
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  LandPageButton(label: 'Explore', callback: Routes().navigate),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 }
@@ -240,41 +262,42 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: aboutImage == ''
-              ? const AssetImage(noImage) as ImageProvider
-              : NetworkImage(aboutImage),
-          fit: BoxFit.cover,
-          alignment: Alignment.bottomCenter,
-          opacity: ccLandPageBGOpacity,
-        ),
-      ),
-      child: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(20.sp),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                LandPageHeader(header: header),
-                const SizedBox(
-                  height: 20,
-                ),
-                LandPageHeaderSmall(
-                  header: subHeader,
-                  color: Colors.white,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-              ],
+    return Column(
+      children: [
+        Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(20.sp),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  LandPageHeader(header: header),
+                  LandPageHeaderSmall(
+                    header: subHeader,
+                    color: Theme.of(context).colorScheme.onBackground,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+        Expanded(
+          child: Container(
+            //height: MediaQuery.of(context).size.height / 2.75,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: aboutImage == ''
+                    ? const AssetImage(noImage) as ImageProvider
+                    : NetworkImage(aboutImage),
+                fit: BoxFit.cover,
+                alignment: Alignment.bottomCenter,
+                opacity: ccLandPageBGOpacity,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -325,10 +348,10 @@ class LandPageHeaderSmall extends StatelessWidget {
     return Text(
       header,
       style: TextStyle(
-        fontSize: 20.sp,
+        fontSize: 18.sp,
         color: color,
       ),
-      textAlign: TextAlign.center,
+      textAlign: TextAlign.left,
       softWrap: true,
     );
   }
@@ -349,8 +372,8 @@ class LandPageHeader extends StatelessWidget {
       style: TextStyle(
           fontSize: 37.sp,
           color: ccHeaderFGColor(context),
-          letterSpacing: 5,
-          wordSpacing: 2,
+          letterSpacing: 3,
+          wordSpacing: 1,
           fontWeight: FontWeight.w800,
           fontFamily: "Lexend Deca",
           shadows: const [

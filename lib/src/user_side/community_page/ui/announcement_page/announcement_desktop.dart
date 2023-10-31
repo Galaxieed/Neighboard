@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -117,7 +116,8 @@ class _AnnouncementDesktopState extends State<AnnouncementDesktop> {
             ),
             Text(
               'Announcements',
-              style: Theme.of(context).textTheme.headlineLarge,
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontFamily: "Montserrat", fontWeight: FontWeight.bold),
             ),
             Row(
               mainAxisSize: MainAxisSize.max,
@@ -220,6 +220,8 @@ class MainAnnouncement extends StatelessWidget {
     bool isSuccess = await AnnouncementFunction.removeAnnouncement(
         announcementModel.announcementId);
     if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
@@ -504,8 +506,38 @@ class MainAnnouncement extends StatelessWidget {
                                         children: [
                                           ElevatedButton(
                                               onPressed: () {
-                                                removeAnnouncement(context);
-                                                Navigator.pop(context);
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: const Text(
+                                                          "Confirm Delete?"),
+                                                      content: const Text(
+                                                          "Would you like to continue removing this announcement?"),
+                                                      actions: [
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child:
+                                                              const Text("NO"),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            removeAnnouncement(
+                                                                context);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child:
+                                                              const Text("YES"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 foregroundColor:
@@ -579,7 +611,7 @@ class OtherAnnouncement extends StatelessWidget {
       required this.stateSetter,
       required this.isAdmin});
   final AnnouncementModel announcementModel;
-  final isAdmin;
+  final bool isAdmin;
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
@@ -590,6 +622,8 @@ class OtherAnnouncement extends StatelessWidget {
     bool isSuccess = await AnnouncementFunction.removeAnnouncement(
         announcementModel.announcementId);
     if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
@@ -907,7 +941,38 @@ class OtherAnnouncement extends StatelessWidget {
                                             children: [
                                               ElevatedButton(
                                                   onPressed: () {
-                                                    removeAnnouncement(context);
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              "Confirm Delete?"),
+                                                          content: const Text(
+                                                              "Would you like to continue removing this announcement?"),
+                                                          actions: [
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              child: const Text(
+                                                                  "NO"),
+                                                            ),
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                removeAnnouncement(
+                                                                    context);
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              child: const Text(
+                                                                  "YES"),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
                                                   },
                                                   style:
                                                       ElevatedButton.styleFrom(

@@ -163,7 +163,6 @@ class NavDrawer extends StatelessWidget {
           ),
           const Divider(),
           const LightDarkMode(),
-          const ThemeColorPicker(),
         ],
       ),
     );

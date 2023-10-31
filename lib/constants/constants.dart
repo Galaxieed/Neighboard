@@ -17,9 +17,8 @@ const String notificationImg = 'assets/notifications.png';
 //LandPage Styles
 double ccLandPageBGOpacity = 1;
 
-Color ccExploreButtonBGColor([context]) => isDarkMode
-    ? Theme.of(context).primaryColor
-    : Theme.of(context).colorScheme.inversePrimary;
+Color ccExploreButtonBGColor([context]) =>
+    Theme.of(context).colorScheme.inversePrimary;
 
 Color ccExploreButtonFGColor(context) =>
     Theme.of(context).colorScheme.onBackground;
@@ -58,14 +57,6 @@ const Color ccForumLinksColor = Colors.blue;
 
 //other links styles
 const Color ccForumDividerColor = Colors.black;
-
-//mini profile styles
-Color? ccLightBulbColor = Colors.amber[500];
-
-Color? ccRankColor = Colors.amber[500];
-
-//bottom tab bar styles
-const Color ccBottomTabBarColor = Colors.amber;
 
 //mypost styles
 Color? ccExpansionPostColor([context]) =>

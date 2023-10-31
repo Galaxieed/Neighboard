@@ -135,6 +135,7 @@ class Dashboard extends StatelessWidget {
             ),
             Text(
               text,
+              textAlign: TextAlign.center,
               style: deviceScreenType == DeviceScreenType.mobile
                   ? Theme.of(context)
                       .textTheme

@@ -85,7 +85,8 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
             ),
             Text(
               'Community Map',
-              style: Theme.of(context).textTheme.headlineLarge,
+              style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                  fontFamily: "Montserrat", fontWeight: FontWeight.bold),
             ),
             const SizedBox(
               height: 30,

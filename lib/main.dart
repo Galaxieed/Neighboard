@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'Neighboard',
               theme: ThemeData(
-                fontFamily: "Roboto",
+                fontFamily: "Montserrat",
                 colorScheme: ColorScheme.fromSeed(seedColor: currentThemeColor),
                 useMaterial3: true,
                 scaffoldBackgroundColor: Colors.grey[100],
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
                 useMaterial3: true,
               ).copyWith(
                 textTheme: ThemeData.dark().textTheme.apply(
-                      fontFamily: 'Roboto',
+                      fontFamily: 'Montserrat',
                     ),
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,

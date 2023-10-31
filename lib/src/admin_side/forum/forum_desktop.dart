@@ -202,7 +202,12 @@ class ForumPageNavButton extends StatelessWidget {
             ? ccForumSelectedButtonFGColor(context)
             : ccForumButtonFGColor(context),
       ),
-      child: Text(label),
+      child: Row(
+        children: [
+          if (label == "New Post") const Icon(Icons.add),
+          Text(label),
+        ],
+      ),
     );
   }
 }

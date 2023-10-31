@@ -50,7 +50,7 @@ class _StoresMobileState extends State<StoresMobile> {
   String _offers = '';
   String _houseNo = '';
   String _street = '';
-  String _contactInfo = '';
+  final String _contactInfo = '';
   bool isOnNewPost = false;
 
   File? image;
@@ -58,6 +58,7 @@ class _StoresMobileState extends State<StoresMobile> {
   String imageUrl = "";
 
   List<StoreModel> storeModels = [];
+  List<StoreModel> allStoreModels = [];
 
   bool isLoading = true;
 
@@ -74,6 +75,7 @@ class _StoresMobileState extends State<StoresMobile> {
 
   void getAllStores() async {
     storeModels = await StoreFunction.getAllStores() ?? [];
+    allStoreModels = storeModels;
     storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
     if (mounted) {
       setState(() {
@@ -218,6 +220,21 @@ class _StoresMobileState extends State<StoresMobile> {
     _ctrlOffers.dispose();
     _ctrlStreet.dispose();
     super.dispose();
+  }
+
+  String searchedText = "";
+  void searchStore(String text) {
+    text.toLowerCase();
+    storeModels = allStoreModels;
+    if (text.isNotEmpty) {
+      storeModels = storeModels
+          .where((store) =>
+              store.storeHouseNumber.toLowerCase().contains(text) ||
+              store.storeName.toLowerCase().contains(text) ||
+              store.storeStreetName.toLowerCase().contains(text) ||
+              store.storeOffers.toLowerCase().contains(text))
+          .toList();
+    }
   }
 
   @override
@@ -478,23 +495,6 @@ class _StoresMobileState extends State<StoresMobile> {
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFormField(
-                          controller: _ctrlContactInfo,
-                          onSaved: (newValue) => _contactInfo = newValue!,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 4.0),
-                            ),
-                            labelText: "Contact Information",
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Contact Info is required';
-                            }
-                            return null;
-                          },
-                        ),
                         const SizedBox(
                           height: 10,
                         ),
@@ -571,6 +571,31 @@ class _StoresMobileState extends State<StoresMobile> {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: SizedBox(
+                          width: 100,
+                          child: SearchBar(
+                            leading: const Icon(Icons.search),
+                            hintText: 'Search...',
+                            constraints: const BoxConstraints(
+                              minWidth: double.infinity,
+                              minHeight: 40,
+                            ),
+                            onChanged: (String searchText) {
+                              setState(() {
+                                searchStore(searchText);
+                              });
+                            },
+                            onTap: () {
+                              // showSearch(
+                              //     context: context, delegate: SearchScreenUI());
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
                     ElevatedButton.icon(
                       onPressed: () {
                         onNewStore();
@@ -581,11 +606,33 @@ class _StoresMobileState extends State<StoresMobile> {
                   ],
                 )
               : Container(),
-          widget.isAdmin
-              ? SizedBox(
-                  height: 10.h,
-                )
-              : Container(),
+          if (!widget.isAdmin)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: SearchBar(
+                  leading: const Icon(Icons.search),
+                  hintText: 'Search...',
+                  constraints: const BoxConstraints(
+                    minWidth: double.infinity,
+                    minHeight: 40,
+                  ),
+                  onChanged: (String searchText) {
+                    setState(() {
+                      searchStore(searchText);
+                    });
+                  },
+                  onTap: () {
+                    // showSearch(
+                    //     context: context, delegate: SearchScreenUI());
+                  },
+                ),
+              ),
+            ),
+          SizedBox(
+            height: 10.h,
+          ),
           Expanded(
             child: GridView(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -629,6 +676,8 @@ class StoresCards extends StatelessWidget {
   removeStore(BuildContext context) async {
     bool isSuccess = await StoreFunction.removeStore(storeModel.storeId);
     if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
@@ -898,8 +947,32 @@ class StoresCards extends StatelessWidget {
                               children: [
                                 ElevatedButton(
                                     onPressed: () {
-                                      removeStore(context);
-                                      Navigator.pop(context);
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title:
+                                                const Text("Confirm Delete?"),
+                                            content: const Text(
+                                                "Would you like to continue removing this store?"),
+                                            actions: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("NO"),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  removeStore(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("YES"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       foregroundColor: Theme.of(context)

@@ -27,8 +27,9 @@ class AllPosts extends StatefulWidget {
     required this.category,
     required this.searchedText,
     required this.deviceScreenType,
+    this.scrollController,
   });
-
+  final ScrollController? scrollController;
   final bool isAdmin;
   final String category, searchedText;
   final DeviceScreenType deviceScreenType;
@@ -114,6 +115,7 @@ class _AllPostsState extends State<AllPosts> {
         : postModels.isEmpty
             ? noPostMessage()
             : ListView.builder(
+                controller: widget.scrollController,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
@@ -340,6 +342,7 @@ class _SinglePostState extends State<SinglePost> {
               isEditing
                   ? TextField(
                       controller: _contentController,
+                      maxLines: 3,
                       decoration: InputDecoration(
                           suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,

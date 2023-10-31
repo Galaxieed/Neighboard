@@ -639,6 +639,7 @@ class _SingleMyPostState extends State<SingleMyPost> {
                 ? isEditing
                     ? TextField(
                         controller: _contentController,
+                        maxLines: 3,
                         decoration: InputDecoration(
                             suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -674,6 +675,7 @@ class _SingleMyPostState extends State<SingleMyPost> {
                 : isEditing
                     ? TextField(
                         controller: _contentController,
+                        maxLines: 3,
                         decoration: InputDecoration(
                             suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -787,6 +789,7 @@ class _SingleMyPostState extends State<SingleMyPost> {
               post: widget.post,
               upVote: widget.upVote,
               isUpvoted: widget.isUpvoted,
+              isEditing: isEditing,
             ),
           ],
         ),
@@ -801,11 +804,13 @@ class ActionBarMyPost extends StatelessWidget {
     required this.post,
     required this.upVote,
     required this.isUpvoted,
+    required this.isEditing,
   });
 
   final bool isUpvoted;
   final Function upVote;
   final PostModel post;
+  final bool isEditing;
 
   @override
   Widget build(BuildContext context) {
@@ -821,21 +826,22 @@ class ActionBarMyPost extends StatelessWidget {
             ],
           ),
         ),
-        ElevatedButton.icon(
-          onPressed: () {
-            upVote(postId: post.postId);
-          },
-          icon: const Icon(Icons.arrow_upward_rounded),
-          label: Text(isUpvoted ? 'Voted' : 'Vote'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isUpvoted
-                ? ccMyPostUpVotedBGColor(context)
-                : ccMyPostUpVoteBGColor(context),
-            foregroundColor: isUpvoted
-                ? ccMyPostUpVotedFGColor(context)
-                : ccMyPostUpVoteFGColor(context),
-          ),
-        )
+        if (!isEditing)
+          ElevatedButton.icon(
+            onPressed: () {
+              upVote(postId: post.postId);
+            },
+            icon: const Icon(Icons.arrow_upward_rounded),
+            label: Text(isUpvoted ? 'Voted' : 'Vote'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isUpvoted
+                  ? ccMyPostUpVotedBGColor(context)
+                  : ccMyPostUpVoteBGColor(context),
+              foregroundColor: isUpvoted
+                  ? ccMyPostUpVotedFGColor(context)
+                  : ccMyPostUpVoteFGColor(context),
+            ),
+          )
       ],
     );
   }

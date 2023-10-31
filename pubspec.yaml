@@ -67,6 +67,7 @@ dependencies:
   carousel_slider: ^4.2.1
   web_smooth_scroll: ^1.1.0
   footer: ^0.0.4
+  page_transition: ^2.1.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -89,6 +90,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon.png"
+  adaptive_icon_background: "#FFFFFF"
   min_sdk_android: 19 # android min sdk min:16, default 21
   web:
     generate: true

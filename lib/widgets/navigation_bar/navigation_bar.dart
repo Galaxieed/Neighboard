@@ -10,6 +10,7 @@ import 'package:neighboard/src/profile_screen/profile_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_page_ui.dart';
+import 'package:page_transition/page_transition.dart';
 
 // ignore: must_be_immutable
 class NavBar extends StatelessWidget implements PreferredSizeWidget {
@@ -102,8 +103,10 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         else
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()));
+              Navigator.of(context).push(PageTransition(
+                  duration: const Duration(milliseconds: 500),
+                  child: const LoginPage(),
+                  type: PageTransitionType.fade));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
@@ -129,8 +132,10 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         else
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const RegisterPage()));
+              Navigator.of(context).push(PageTransition(
+                  duration: const Duration(milliseconds: 500),
+                  child: const RegisterPage(),
+                  type: PageTransitionType.fade));
             },
             style: ElevatedButton.styleFrom(
               elevation: 0,
@@ -249,7 +254,8 @@ class _NavBarTextButtonState extends State<NavBarTextButton> {
             widget.text,
             style: TextStyle(
               letterSpacing: 1,
-              fontWeight: FontWeight.bold,
+              fontWeight:
+                  widget.currentPage == widget.text ? FontWeight.bold : null,
               color: _isHovering || widget.currentPage == widget.text
                   ? Theme.of(context).colorScheme.inversePrimary
                   : isDarkMode
@@ -356,7 +362,9 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
                   'Community',
                   style: TextStyle(
                     letterSpacing: 1,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: widget.currentPage == "Community"
+                        ? FontWeight.bold
+                        : null,
                     color: _isHovering || widget.currentPage == "Community"
                         ? Theme.of(context).colorScheme.inversePrimary
                         : isDarkMode
@@ -501,19 +509,21 @@ class _NavBarCircularImageDropDownButtonState
             chatSubscription?.cancel();
             notificationModels.clear();
             // ignore: use_build_context_synchronously
-            Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => const ScreenDirect()),
+            Navigator.of(context).pushAndRemoveUntil(
+                PageTransition(
+                    duration: const Duration(milliseconds: 500),
+                    child: const ScreenDirect(),
+                    type: PageTransitionType.fade),
                 (route) => false);
           } else if (newValue == "User") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ProfileScreen(
-                        userId: userModel!.userId,
-                        isAdmin: widget.isAdmin,
-                      )),
-            );
+            Navigator.of(context).push(PageTransition(
+                duration: const Duration(milliseconds: 500),
+                child: ProfileScreen(
+                  userId: userModel!.userId,
+                  isAdmin: widget.isAdmin,
+                  stateSetter: getUserDetails,
+                ),
+                type: PageTransitionType.fade));
           } else {
             selectedValue = newValue;
             widget.callback(newValue, context);

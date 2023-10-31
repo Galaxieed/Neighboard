@@ -310,6 +310,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                             isEditing
                                 ? TextField(
                                     controller: _controller,
+                                    maxLines: 3,
                                     decoration: InputDecoration(
                                         suffixIcon: Row(
                                       mainAxisSize: MainAxisSize.min,
@@ -637,6 +638,7 @@ class _ReplyItselfState extends State<ReplyItself> {
                       isEditing
                           ? TextField(
                               controller: _controller,
+                              maxLines: 3,
                               decoration: InputDecoration(
                                   suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,

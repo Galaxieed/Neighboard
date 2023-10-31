@@ -19,9 +19,13 @@ import 'package:flutter/services.dart';
 
 class ProfileScreenDesktop extends StatefulWidget {
   const ProfileScreenDesktop(
-      {super.key, required this.userId, required this.isAdmin});
+      {super.key,
+      required this.userId,
+      required this.isAdmin,
+      required this.stateSetter});
   final String userId;
   final bool isAdmin;
+  final Function stateSetter;
 
   @override
   State<ProfileScreenDesktop> createState() => _ProfileScreenDesktopState();
@@ -128,11 +132,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       return;
     }
     if (tcPass.text == tcConfirmPass.text &&
-        tcPass.text.isNotEmpty &&
-        tcConfirmPass.text.isNotEmpty) {
-      await ProfileFunction.changePassword(tcConfirmPass.text);
-      tcPass.clear();
-      tcConfirmPass.clear();
+        (tcPass.text.isNotEmpty || tcConfirmPass.text.isNotEmpty)) {
+      await ProfileFunction.changePassword(tcConfirmPass.text).then((value) {
+        tcPass.clear();
+        tcConfirmPass.clear();
+      });
     }
     Map<String, dynamic> userDetails = {
       'first_name': tcFname.text,
@@ -151,6 +155,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       isLoading = false;
       isEditing = false;
     });
+    widget.stateSetter();
   }
 
   getCurrentUserDetails() async {
@@ -313,7 +318,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                       gridDelegate:
                           const SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 400,
-                        childAspectRatio: 400 / 150,
+                        childAspectRatio: 400 / 200,
                         crossAxisSpacing: 10,
                       ),
                       children: [
@@ -373,39 +378,41 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             ),
                           ],
                         ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Address"),
-                            TextFormField(
-                              controller: tcAddress,
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Contact Number"),
-                            TextFormField(
-                              controller: tcCNo,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d{0,11}$')),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Address"),
+                              TextFormField(
+                                controller: tcAddress,
+                              ),
+                            ],
+                          ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Contact Number"),
+                              TextFormField(
+                                controller: tcCNo,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d{0,11}$')),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return null;
+                                  } else if (value.length != 11) {
+                                    return 'Please enter exactly 11 digits';
+                                  }
                                   return null;
-                                } else if (value.length != 11) {
-                                  return 'Please enter exactly 11 digits';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
+                                },
+                              ),
+                            ],
+                          ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -562,7 +569,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     gridDelegate:
                         const SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400,
-                      childAspectRatio: 400 / 150,
+                      childAspectRatio: 400 / 200,
                       crossAxisSpacing: 10,
                     ),
                     children: [
@@ -590,22 +597,24 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           actualInfo(context, userModel!.username),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          infoTitle(context, "Address"),
-                          actualInfo(context, userModel!.address),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          infoTitle(context, "Contact Number"),
-                          actualInfo(context, userModel!.contactNo),
-                        ],
-                      ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Address"),
+                            actualInfo(context, userModel!.address),
+                          ],
+                        ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Contact Number"),
+                            actualInfo(context, userModel!.contactNo),
+                          ],
+                        ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,

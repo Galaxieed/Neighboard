@@ -440,6 +440,7 @@ class _SinglePostState extends State<SinglePost> {
               isEditing
                   ? TextField(
                       controller: _contentController,
+                      maxLines: 3,
                       decoration: InputDecoration(
                           suffixIcon: Row(
                         mainAxisSize: MainAxisSize.min,

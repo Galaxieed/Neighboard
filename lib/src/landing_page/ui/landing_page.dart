@@ -11,6 +11,7 @@ import 'package:neighboard/widgets/chat/chat.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class LandingPage extends StatefulWidget {
@@ -118,8 +119,10 @@ class _LandingPageState extends State<LandingPage> {
               else
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()));
+                    Navigator.of(context).push(PageTransition(
+                        duration: const Duration(milliseconds: 500),
+                        child: const LoginPage(),
+                        type: PageTransitionType.fade));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -146,10 +149,10 @@ class _LandingPageState extends State<LandingPage> {
               else
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const RegisterPage()));
+                    Navigator.of(context).push(PageTransition(
+                        duration: const Duration(milliseconds: 500),
+                        child: const RegisterPage(),
+                        type: PageTransitionType.fade));
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,

@@ -107,7 +107,10 @@ class _AdminMobileState extends State<AdminMobile> {
               final TabController controller = DefaultTabController.of(context);
               return Scaffold(
                 appBar: AppBar(
-                  title: Text(selectedPage),
+                  title: Text(
+                    selectedPage,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   centerTitle: false,
                   actions: [
                     if (selectedPage == "Forum")
@@ -146,6 +149,7 @@ class _AdminMobileState extends State<AdminMobile> {
                         ? ProfileScreen(
                             userId: _auth.currentUser!.uid,
                             isAdmin: true,
+                            stateSetter: getCurrentUserDetails,
                           )
                         : const Placeholder(),
                     Dashboard(

@@ -78,7 +78,9 @@ class ProfileFunction {
     if (user != null) {
       try {
         await user.updatePassword(newPassword);
+        print(newPassword);
       } catch (e) {
+        print(e);
         return;
       }
     }

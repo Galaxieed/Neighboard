@@ -95,40 +95,43 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                 appBar: AppBar(
                   automaticallyImplyLeading: true,
                   actions: [
-                    OutlinedButton(
-                      onPressed: () {
-                        Routes().navigate("Register", context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide(
-                            width: 2,
-                            color:
-                                Theme.of(context).colorScheme.inversePrimary),
-                        foregroundColor: ccLoginRegisterButtonFGColor(context),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.inversePrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onBackground,
                       ),
-                      child: const Text('Register'),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       width: 10,
                     ),
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide(
-                            width: 2,
-                            color:
-                                Theme.of(context).colorScheme.inversePrimary),
-                        backgroundColor: ccLoginButtonBGColor(context),
-                        foregroundColor: ccLoginButtonFGColor(context),
+                    ElevatedButton(
+                      onPressed: () {
+                        Routes().navigate("Register", context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onBackground,
+                        elevation: 0,
                       ),
-                      icon: const Icon(Icons.person_2_outlined),
-                      label: const Text('Login'),
+                      child: const Text(
+                        "Register",
+                        style: TextStyle(
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       width: 10,

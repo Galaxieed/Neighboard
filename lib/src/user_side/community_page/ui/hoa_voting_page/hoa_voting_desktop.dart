@@ -234,7 +234,8 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                   ),
                   Text(
                     'Board of Directors Election',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                        fontFamily: "Montserrat", fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(
                     height: 30,

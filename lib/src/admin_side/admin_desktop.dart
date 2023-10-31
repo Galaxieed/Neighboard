@@ -126,6 +126,7 @@ class _AdminDesktopState extends State<AdminDesktop> {
                                   ? ProfileScreen(
                                       userId: _auth.currentUser!.uid,
                                       isAdmin: true,
+                                      stateSetter: getCurrentUserDetails,
                                     )
                                   : const Placeholder(),
                               Dashboard(

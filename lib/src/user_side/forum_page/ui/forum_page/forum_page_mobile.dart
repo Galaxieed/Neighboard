@@ -247,29 +247,40 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                 )
               ],
             ),
-      bottomNavigationBar: Material(
-        child: TabBar(
-          tabs: [
-            if (widget.isAdmin)
-              const Tab(
+      bottomNavigationBar: TabBar(
+        isScrollable: true,
+        tabs: [
+          if (widget.isAdmin)
+            const SizedBox(
+              width: 70,
+              child: Tab(
                 icon: Icon(Icons.pending_actions_outlined),
                 text: "Pending",
               ),
-            const Tab(
+            ),
+          const SizedBox(
+            width: 70,
+            child: Tab(
               icon: Icon(Icons.forum_rounded),
               text: "Posts",
             ),
-            const Tab(
+          ),
+          const SizedBox(
+            width: 70,
+            child: Tab(
               icon: Icon(Icons.my_library_books_rounded),
               text: "My Posts",
             ),
-            const Tab(
+          ),
+          const SizedBox(
+            width: 70,
+            child: Tab(
               icon: Icon(Icons.add),
               text: "New Post",
             ),
-          ],
-          controller: _tabController,
-        ),
+          ),
+        ],
+        controller: _tabController,
       ),
       drawer: widget.screenType == DeviceScreenType.mobile
           ? const NavDrawer()

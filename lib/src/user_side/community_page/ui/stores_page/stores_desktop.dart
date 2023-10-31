@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +43,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
   String _offers = '';
   String _houseNo = '';
   String _street = '';
-  String _contactInfo = '';
+  final String _contactInfo = '';
   bool isOnNewPost = false;
 
   File? image;
@@ -52,6 +51,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
   String imageUrl = "";
 
   List<StoreModel> storeModels = [];
+  List<StoreModel> allStoreModels = [];
 
   bool isLoading = true;
 
@@ -71,6 +71,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
       isLoading = true;
     });
     storeModels = await StoreFunction.getAllStores() ?? [];
+    allStoreModels = storeModels;
     storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
     if (mounted) {
       setState(() {
@@ -204,6 +205,21 @@ class _StoresDesktopState extends State<StoresDesktop> {
         return const MyChat();
       },
     );
+  }
+
+  String searchedText = "";
+  void searchStore(String text) {
+    text.toLowerCase();
+    storeModels = allStoreModels;
+    if (text.isNotEmpty) {
+      storeModels = storeModels
+          .where((store) =>
+              store.storeHouseNumber.toLowerCase().contains(text) ||
+              store.storeName.toLowerCase().contains(text) ||
+              store.storeStreetName.toLowerCase().contains(text) ||
+              store.storeOffers.toLowerCase().contains(text))
+          .toList();
+    }
   }
 
   @override
@@ -367,23 +383,6 @@ class _StoresDesktopState extends State<StoresDesktop> {
                             return null;
                           },
                         ),
-                        TextFormField(
-                          controller: _ctrlContactInfo,
-                          onSaved: (newValue) => _contactInfo = newValue!,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 4.0),
-                            ),
-                            labelText: "Contact Information",
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Contact Info is required';
-                            }
-                            return null;
-                          },
-                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -450,30 +449,88 @@ class _StoresDesktopState extends State<StoresDesktop> {
                     widget.drawer!();
                   },
                 )
-              : Text(
-                  'Stores',
-                  style: Theme.of(context).textTheme.headlineLarge,
+              : SizedBox(
+                  width: double.infinity,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        'Stores',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineLarge!
+                            .copyWith(
+                                fontFamily: "Montserrat",
+                                fontWeight: FontWeight.bold),
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: SizedBox(
+                          width: 300,
+                          child: SearchBar(
+                            leading: const Icon(Icons.search),
+                            hintText: 'Search...',
+                            constraints: const BoxConstraints(
+                              minWidth: double.infinity,
+                              minHeight: 40,
+                            ),
+                            onChanged: (String searchText) {
+                              setState(() {
+                                searchStore(searchText);
+                              });
+                            },
+                            onTap: () {
+                              // showSearch(
+                              //     context: context, delegate: SearchScreenUI());
+                            },
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
           widget.isAdmin
               ? Container()
               : const SizedBox(
                   height: 15,
                 ),
-          widget.isAdmin
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        onNewStore();
-                      },
-                      style: ElevatedButton.styleFrom(elevation: 5),
-                      icon: const Icon(Icons.add),
-                      label: const Text("New Store"),
-                    )
-                  ],
+          if (widget.isAdmin)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 300,
+                  child: SearchBar(
+                    leading: const Icon(Icons.search),
+                    hintText: 'Search...',
+                    constraints: const BoxConstraints(
+                      minWidth: double.infinity,
+                      minHeight: 40,
+                    ),
+                    onChanged: (String searchText) {
+                      setState(() {
+                        searchStore(searchText);
+                      });
+                    },
+                    onTap: () {
+                      // showSearch(
+                      //     context: context, delegate: SearchScreenUI());
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  width: 20,
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    onNewStore();
+                  },
+                  style: ElevatedButton.styleFrom(elevation: 5),
+                  icon: const Icon(Icons.add),
+                  label: const Text("New Store"),
                 )
-              : Container(),
+              ],
+            ),
           widget.isAdmin
               ? SizedBox(
                   height: 10.h,
@@ -540,6 +597,8 @@ class StoresCards extends StatelessWidget {
   removeStore(BuildContext context) async {
     bool isSuccess = await StoreFunction.removeStore(storeModel.storeId);
     if (isSuccess) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
@@ -823,8 +882,31 @@ class StoresCards extends StatelessWidget {
                         children: [
                           ElevatedButton(
                               onPressed: () {
-                                removeStore(context);
-                                Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("Confirm Delete?"),
+                                      content: const Text(
+                                          "Would you like to continue removing this store?"),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("NO"),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            removeStore(context);
+                                            Navigator.pop(context);
+                                          },
+                                          child: const Text("YES"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 foregroundColor:

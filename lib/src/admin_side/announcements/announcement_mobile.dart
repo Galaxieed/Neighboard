@@ -507,6 +507,8 @@ class MainAnnouncement extends StatelessWidget {
         announcementModel.announcementId);
     if (isSuccess) {
       // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+      // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
       stateSetter();
@@ -718,8 +720,37 @@ class MainAnnouncement extends StatelessWidget {
                                       children: [
                                         ElevatedButton(
                                             onPressed: () {
-                                              removeAnnouncement(context);
-                                              Navigator.pop(context);
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: const Text(
+                                                        "Confirm Delete?"),
+                                                    content: const Text(
+                                                        "Would you like to continue removing this announcement?"),
+                                                    actions: [
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: const Text("NO"),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          removeAnnouncement(
+                                                              context);
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child:
+                                                            const Text("YES"),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
                                             },
                                             style: ElevatedButton.styleFrom(
                                               foregroundColor: Theme.of(context)

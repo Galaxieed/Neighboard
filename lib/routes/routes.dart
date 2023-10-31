@@ -7,56 +7,57 @@ import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dar
 import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_page_ui.dart';
+import 'package:page_transition/page_transition.dart';
 
 class Routes {
   navigate(String route, [BuildContext? context]) {
     if (route == 'Home') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const LandingPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const LandingPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Forum') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const ForumPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const ForumPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Login') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const LoginPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const LoginPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Register') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const RegisterPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const RegisterPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Announcements') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const AnnouncementPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const AnnouncementPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Community Map') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const CommunityMap()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const CommunityMap(),
+          type: PageTransitionType.fade));
     }
     if (route == 'Stores') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const StoresPage()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const StoresPage(),
+          type: PageTransitionType.fade));
     }
     if (route == 'HOA Voting') {
-      Navigator.push(
-          context!,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const HOAVoting()));
+      Navigator.of(context!).push(PageTransition(
+          duration: const Duration(milliseconds: 500),
+          child: const HOAVoting(),
+          type: PageTransitionType.fade));
     }
   }
 }

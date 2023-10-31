@@ -5,6 +5,7 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/screen_direct.dart';
+import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_page.dart';
 import 'package:neighboard/src/user_side/community_page/ui/community_map_page/community_map.dart';
 import 'package:neighboard/src/user_side/community_page/ui/hoa_voting_page/hoa_voting.dart';
@@ -13,6 +14,7 @@ import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_funct
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:collection/collection.dart';
 
@@ -314,66 +316,79 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                                         if (notification.notifLocation ==
                                             "ANNOUNCEMENT") {
                                           Navigator.pop(context);
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AnnouncementPage(),
-                                            ),
-                                          );
+                                          Navigator.of(context).push(
+                                              PageTransition(
+                                                  duration:
+                                                      const Duration(
+                                                          milliseconds: 500),
+                                                  child:
+                                                      const AnnouncementPage(),
+                                                  type:
+                                                      PageTransitionType.fade));
                                         }
                                         if (notification.notifLocation ==
                                             "MAP") {
                                           Navigator.pop(context);
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const CommunityMap(),
-                                            ),
-                                          );
+                                          Navigator.of(context).push(
+                                              PageTransition(
+                                                  duration: const Duration(
+                                                      milliseconds: 500),
+                                                  child: const CommunityMap(),
+                                                  type:
+                                                      PageTransitionType.fade));
                                         }
                                         if (notification.notifLocation ==
                                             "ELECTION") {
                                           Navigator.pop(context);
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const HOAVoting(),
-                                            ),
-                                          );
+                                          Navigator.of(context).push(
+                                              PageTransition(
+                                                  duration: const Duration(
+                                                      milliseconds: 500),
+                                                  child: const HOAVoting(),
+                                                  type:
+                                                      PageTransitionType.fade));
                                         }
                                         if (notification.notifLocation ==
                                             "SITE") {
                                           Navigator.pop(context);
-                                          Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const ScreenDirect()),
-                                              (route) => false);
+                                          Navigator.of(context)
+                                              .pushAndRemoveUntil(
+                                                  PageTransition(
+                                                      duration: const Duration(
+                                                          milliseconds: 500),
+                                                      child:
+                                                          const LandingPage(),
+                                                      type: PageTransitionType
+                                                          .fade),
+                                                  (route) => false);
                                         }
                                         if (notification.notifLocation ==
                                             "STORE") {
                                           Navigator.pop(context);
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const StoresPage(),
-                                            ),
-                                          );
+                                          Navigator.of(context).push(
+                                              PageTransition(
+                                                  duration: const Duration(
+                                                      milliseconds: 500),
+                                                  child: const StoresPage(),
+                                                  type:
+                                                      PageTransitionType.fade));
                                         }
                                       },
                                       isThreeLine: true,
+                                      leading: !notification.isRead
+                                          ? const Icon(
+                                              Icons.mark_email_unread_rounded)
+                                          : const Icon(
+                                              Icons.mark_email_read_outlined),
                                       title: Text(
-                                        "${notification.notifTitle}${notification.notifBody}",
-                                        style: notification.isRead
-                                            ? null
-                                            : const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                      ),
+                                          "${notification.notifTitle}${notification.notifBody}"),
+                                      titleTextStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!
+                                          .copyWith(
+                                              fontWeight: notification.isRead
+                                                  ? null
+                                                  : FontWeight.bold),
                                       subtitle: Text(
                                         notification.notifTime,
                                         style: notification.isRead
@@ -382,6 +397,9 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                                                 color: Colors.blue,
                                                 fontWeight: FontWeight.bold),
                                       ),
+                                      subtitleTextStyle: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium!,
                                       trailing: notification.isRead
                                           ? null
                                           : const Icon(

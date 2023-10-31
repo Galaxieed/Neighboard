@@ -41,9 +41,6 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
 
   void getCurrentUserDetails() async {
     userModel = await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   void _openNotification() {
@@ -72,157 +69,171 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     });
   }
 
+  final scrollCtrl = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    getAllPost();
     if (_auth.currentUser != null) {
       getCurrentUserDetails();
     }
+    getAllPost();
+  }
+
+  @override
+  void dispose() {
+    scrollCtrl.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? const LoadingScreen()
-        : Scaffold(
-            key: _scaffoldKey,
-            appBar: NavBar(
-              openNotification: _openNotification,
-              openChat: _openChat,
-              currentPage: "Forum",
-            ),
-            endDrawer: NotificationDrawer(
-              deviceScreenType: DeviceScreenType.desktop,
-              stateSetter: setState,
-            ),
-            body: Container(
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SearchBar(
-                            leading: const Icon(Icons.search),
-                            hintText: 'Search Post Title...',
-                            constraints: const BoxConstraints(
-                              minWidth: double.infinity,
-                              minHeight: 50,
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: NavBar(
+        openNotification: _openNotification,
+        openChat: _openChat,
+        currentPage: "Forum",
+      ),
+      endDrawer: NotificationDrawer(
+        deviceScreenType: DeviceScreenType.desktop,
+        stateSetter: setState,
+      ),
+      body: isLoading
+          ? const LoadingScreen()
+          : Scrollbar(
+              controller: scrollCtrl,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SearchBar(
+                              leading: const Icon(Icons.search),
+                              hintText: 'Search...',
+                              constraints: const BoxConstraints(
+                                minWidth: double.infinity,
+                                minHeight: 50,
+                              ),
+                              onChanged: (String searchText) {
+                                setState(() {
+                                  searchedText = searchText.trim();
+                                });
+                              },
+                              onTap: () {
+                                // showSearch(
+                                //     context: context, delegate: SearchScreenUI());
+                              },
                             ),
-                            onChanged: (String searchText) {
-                              setState(() {
-                                searchedText = searchText.trim();
-                              });
-                            },
-                            onTap: () {
-                              // showSearch(
-                              //     context: context, delegate: SearchScreenUI());
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          DefaultTabController(
-                            initialIndex: 1,
-                            length: 4,
-                            child: Builder(
-                              builder: (context) => Expanded(
-                                child: Column(
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 10.w, vertical: 0),
-                                      child: ForumPageNavBar(
-                                        callback: (int index, [String? text]) {
-                                          final TabController controller =
-                                              DefaultTabController.of(context);
-                                          if (!controller.indexIsChanging) {
-                                            if (text != null) {
-                                              categoryText = text;
-                                            }
-                                            controller.animateTo(index);
-                                            changePage(index);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10.h,
-                                    ),
-                                    Expanded(
-                                      child: Padding(
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            DefaultTabController(
+                              initialIndex: 1,
+                              length: 4,
+                              child: Builder(
+                                builder: (context) => Expanded(
+                                  child: Column(
+                                    children: <Widget>[
+                                      Padding(
                                         padding: EdgeInsets.symmetric(
-                                            horizontal: 15.w, vertical: 0),
-                                        child: TabBarView(
-                                          children: [
-                                            Categories(
-                                              searchedText: searchedText,
-                                              category: categoryText,
-                                              isAdmin: false,
-                                              deviceScreenType:
-                                                  DeviceScreenType.desktop,
-                                            ),
-                                            AllPosts(
-                                              searchedText: searchedText,
-                                              category: "",
-                                              isAdmin: false,
-                                              deviceScreenType:
-                                                  DeviceScreenType.desktop,
-                                            ),
-                                            MyPosts(search: searchedText),
-                                            const NewPost(
-                                              deviceScreenType:
-                                                  DeviceScreenType.desktop,
-                                            ),
-                                          ],
+                                            horizontal: 10.w, vertical: 0),
+                                        child: ForumPageNavBar(
+                                          callback: (int index,
+                                              [String? text]) {
+                                            final TabController controller =
+                                                DefaultTabController.of(
+                                                    context);
+                                            if (!controller.indexIsChanging) {
+                                              if (text != null) {
+                                                categoryText = text;
+                                              }
+                                              controller.animateTo(index);
+                                              changePage(index);
+                                            }
+                                          },
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(
+                                        height: 10.h,
+                                      ),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 15.w, vertical: 0),
+                                          child: TabBarView(
+                                            children: [
+                                              Categories(
+                                                searchedText: searchedText,
+                                                category: categoryText,
+                                                isAdmin: false,
+                                                deviceScreenType:
+                                                    DeviceScreenType.desktop,
+                                              ),
+                                              AllPosts(
+                                                scrollController: scrollCtrl,
+                                                searchedText: searchedText,
+                                                category: "",
+                                                isAdmin: false,
+                                                deviceScreenType:
+                                                    DeviceScreenType.desktop,
+                                              ),
+                                              MyPosts(search: searchedText),
+                                              const NewPost(
+                                                deviceScreenType:
+                                                    DeviceScreenType.desktop,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 10.w,
-                  ),
-                  Expanded(
-                    // MGA LINKS SA KANAN
-                    flex: 2,
-                    child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                      child: Card(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10.w, vertical: 20.h),
-                          child: pageIndex == 0 ||
-                                  pageIndex == 1 ||
-                                  userModel == null
-                              ? otherLinks(context, postModels, getAllPost)
-                              : miniProfile(context, userModel!),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      width: 10.w,
+                    ),
+                    Expanded(
+                      // MGA LINKS SA KANAN
+                      flex: 2,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                        child: Card(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.w, vertical: 20.h),
+                            child: pageIndex == 0 ||
+                                    pageIndex == 1 ||
+                                    userModel == null
+                                ? otherLinks(context, postModels, getAllPost)
+                                : miniProfile(context, userModel!),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          );
+    );
   }
 }
 
@@ -372,7 +383,12 @@ class ForumPageNavButton extends StatelessWidget {
             ? ccForumSelectedButtonFGColor(context)
             : ccForumButtonFGColor(context),
       ),
-      child: Text(label),
+      child: Row(
+        children: [
+          if (label == "New Post") const Icon(Icons.add),
+          Text(label),
+        ],
+      ),
     );
   }
 }
@@ -413,7 +429,7 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
         children: [
           Icon(
             Icons.lightbulb_sharp,
-            color: ccLightBulbColor,
+            color: Theme.of(context).colorScheme.inversePrimary,
             size: 6.sp,
             weight: 2,
           ),
@@ -425,7 +441,7 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
             style: TextStyle(
               fontSize: 6.sp,
               fontWeight: FontWeight.bold,
-              color: ccRankColor,
+              color: Theme.of(context).colorScheme.inversePrimary,
             ),
           ),
         ],
@@ -478,19 +494,21 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.star_border,
+                    Icons.remove_red_eye_outlined,
                     weight: 3,
                   ),
                   SizedBox(
                     width: 2.w,
                   ),
-                  Text(
-                    'Most Viewed Posts',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Text(
+                      'Most Viewed Posts',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -507,48 +525,32 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   postModels.sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
-                  return GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) => Dialog(
-                            child: PostModal(
-                          postModel: postModels[index],
-                          deviceScreenType: DeviceScreenType.desktop,
-                          stateSetter: stateSetter,
-                        )),
-                      );
-                    },
-                    child: Text(
-                      "- ${postModels[index].title}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(color: Colors.blue),
-                    ),
-                  );
+                  return TheLinks(
+                      postModel: postModels[index], stateSetter: stateSetter);
                 },
               ),
               SizedBox(
-                height: 5.h,
+                height: 10.h,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   const Icon(
-                    Icons.link,
+                    Icons.arrow_upward_outlined,
                     weight: 3,
                   ),
                   SizedBox(
                     width: 2.w,
                   ),
-                  Text(
-                    'Most Upvoted Posts',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontWeight: FontWeight.bold),
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Text(
+                      'Most Upvoted Posts',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -565,26 +567,8 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
                 itemBuilder: (context, index) {
                   postModels
                       .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-                  return GestureDetector(
-                    onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) => Dialog(
-                            child: PostModal(
-                          postModel: postModels[index],
-                          deviceScreenType: DeviceScreenType.desktop,
-                          stateSetter: stateSetter,
-                        )),
-                      );
-                    },
-                    child: Text(
-                      "- ${postModels[index].title}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(color: Colors.blue),
-                    ),
-                  );
+                  return TheLinks(
+                      postModel: postModels[index], stateSetter: stateSetter);
                 },
               ),
               //dito
@@ -593,3 +577,49 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
         ),
       ),
     );
+
+class TheLinks extends StatefulWidget {
+  const TheLinks(
+      {super.key, required this.postModel, required this.stateSetter});
+
+  final PostModel postModel;
+  final Function stateSetter;
+
+  @override
+  State<TheLinks> createState() => _TheLinksState();
+}
+
+class _TheLinksState extends State<TheLinks> {
+  bool _isHovering = false;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _isHovering = true),
+        onExit: (_) => setState(() => _isHovering = false),
+        child: GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) => Dialog(
+                  child: PostModal(
+                postModel: widget.postModel,
+                deviceScreenType: DeviceScreenType.desktop,
+                stateSetter: widget.stateSetter,
+              )),
+            );
+          },
+          child: Text(
+            widget.postModel.title,
+            style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                color: _isHovering
+                    ? Theme.of(context).colorScheme.inversePrimary
+                    : Theme.of(context).colorScheme.onBackground),
+          ),
+        ),
+      ),
+    );
+  }
+}

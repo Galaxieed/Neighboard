@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/routes/routes.dart';
-import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_function.dart';
+import 'package:page_transition/page_transition.dart';
 
 class RegisterPageDesktop extends StatefulWidget {
   const RegisterPageDesktop({super.key});
@@ -65,9 +66,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
 
     if (isAccountSuccessfullyCreated) {
       // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const ForumPage()),
+      Navigator.of(context).pushAndRemoveUntil(
+          PageTransition(
+              duration: const Duration(milliseconds: 500),
+              child: const ScreenDirect(),
+              type: PageTransitionType.fade),
           (route) => false);
     } else {
       // ignore: use_build_context_synchronously
@@ -113,43 +116,49 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
             body: Center(
               child: Scaffold(
                 appBar: AppBar(
-                  automaticallyImplyLeading: true,
-                  title: const Text('NEIGHBOARD'),
+                  leading: BackButton(
+                    onPressed: () {
+                      Routes().navigate("Home", context);
+                    },
+                  ),
                   actions: [
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide(
-                            width: 2,
-                            color:
-                                Theme.of(context).colorScheme.inversePrimary),
-                        backgroundColor: ccRegisterButtonBGColor(context),
-                        foregroundColor: ccRegisterButtonFGColor(context),
+                    ElevatedButton(
+                      onPressed: () {
+                        Routes().navigate("Login", context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onBackground,
+                        elevation: 0,
                       ),
-                      icon: const Icon(Icons.person_add_alt_1_outlined),
-                      label: const Text('Register'),
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       width: 10,
                     ),
-                    OutlinedButton(
-                      onPressed: () {
-                        Routes().navigate("Login", context);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        side: BorderSide(
-                            width: 2,
-                            color:
-                                Theme.of(context).colorScheme.inversePrimary),
-                        foregroundColor: ccRegisterLoginButtonFGColor(context),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.inversePrimary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onBackground,
                       ),
-                      child: const Text('Login'),
+                      child: const Text(
+                        "Register",
+                        style: TextStyle(
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(
                       width: 10,
