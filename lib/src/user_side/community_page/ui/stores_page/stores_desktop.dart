@@ -209,7 +209,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
 
   String searchedText = "";
   void searchStore(String text) {
-    text.toLowerCase();
+    text = text.toLowerCase();
     storeModels = allStoreModels;
     if (text.isNotEmpty) {
       storeModels = storeModels

@@ -8,6 +8,7 @@ import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
+import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class LoginPageMobile extends StatefulWidget {
@@ -76,6 +77,29 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
     setState(() {
       isLoading = false;
     });
+  }
+
+  sendResetPassword() async {
+    if (email.text.isNotEmpty) {
+      bool status = await LoginFunction.resetPassword(email.text);
+      if (status) {
+        // ignore: use_build_context_synchronously
+        successMessage(
+            title: "Sent!",
+            desc: "Check your email!",
+            duration: 5,
+            context: context);
+      } else {
+        // ignore: use_build_context_synchronously
+        errorMessage(
+            title: "Something went wrong!",
+            desc: "Make sure your email is correct",
+            duration: 5,
+            context: context);
+      }
+    }
+    // ignore: use_build_context_synchronously
+    Navigator.pop(context);
   }
 
   @override
@@ -270,7 +294,7 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                                           ),
                                         ),
                                   const SizedBox(
-                                    height: 20,
+                                    height: 10,
                                   ),
                                   ElevatedButton(
                                     onPressed: () {
@@ -301,6 +325,45 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: TextButton.icon(
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (_) => AlertDialog(
+                                            title: const Text("Reset Password"),
+                                            content: SizedBox(
+                                              width: 500,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Text(
+                                                      "Enter your email"),
+                                                  TextField(
+                                                    controller: email,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            actions: [
+                                              ElevatedButton.icon(
+                                                onPressed: sendResetPassword,
+                                                icon: const Icon(Icons.send),
+                                                label: const Text("Send"),
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      icon:
+                                          const Icon(Icons.lock_reset_outlined),
+                                      label: const Text("Forgot Password?"),
+                                    ),
+                                  )
                                 ],
                               ),
                             ),

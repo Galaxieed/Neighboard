@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 void successMessage(
     {required String title,
     required String desc,
-    required BuildContext context}) {
+    required BuildContext context,
+    int? duration}) {
   ElegantNotification.success(
     width: 360,
+    toastDuration: Duration(seconds: duration ?? 3),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(
@@ -28,9 +30,11 @@ void successMessage(
 void errorMessage(
     {required String title,
     required String desc,
-    required BuildContext context}) {
+    required BuildContext context,
+    int? duration}) {
   ElegantNotification.error(
     width: 360,
+    toastDuration: Duration(seconds: duration ?? 3),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(

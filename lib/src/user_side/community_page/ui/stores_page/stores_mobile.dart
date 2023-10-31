@@ -224,7 +224,7 @@ class _StoresMobileState extends State<StoresMobile> {
 
   String searchedText = "";
   void searchStore(String text) {
-    text.toLowerCase();
+    text = text.toLowerCase();
     storeModels = allStoreModels;
     if (text.isNotEmpty) {
       storeModels = storeModels

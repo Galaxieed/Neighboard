@@ -248,7 +248,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               ],
             ),
       bottomNavigationBar: TabBar(
-        isScrollable: true,
+        isScrollable: widget.isAdmin ? true : false,
         tabs: [
           if (widget.isAdmin)
             const SizedBox(
