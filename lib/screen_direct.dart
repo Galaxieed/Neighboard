@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -198,6 +199,12 @@ class _ScreenDirectState extends State<ScreenDirect> {
     super.initState();
     getToken();
     checkIfUserLoggedIn();
+    initialization();
+  }
+
+  void initialization() async {
+    //await Future.delayed(const Duration(seconds: 2));
+    FlutterNativeSplash.remove();
   }
 
   @override
