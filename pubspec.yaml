@@ -68,7 +68,6 @@ dependencies:
   web_smooth_scroll: ^1.1.0
   footer: ^0.0.4
   page_transition: ^2.1.0
-  flutter_native_splash: ^2.3.5
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
@@ -87,13 +86,6 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-flutter_native_splash:
-  android: true
-  ios: true
-  web: true
-
-  color: "#F0F0F0"
-  image: "assets/icon.png"
 
 flutter_launcher_icons:
   android: "launcher_icon"
