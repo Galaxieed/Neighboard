@@ -69,8 +69,6 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     });
   }
 
-  final scrollCtrl = ScrollController();
-
   @override
   void initState() {
     super.initState();
@@ -78,12 +76,6 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
       getCurrentUserDetails();
     }
     getAllPost();
-  }
-
-  @override
-  void dispose() {
-    scrollCtrl.dispose();
-    super.dispose();
   }
 
   @override
@@ -101,136 +93,130 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
       ),
       body: isLoading
           ? const LoadingScreen()
-          : Scrollbar(
-              controller: scrollCtrl,
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            SearchBar(
-                              leading: const Icon(Icons.search),
-                              hintText: 'Search...',
-                              constraints: const BoxConstraints(
-                                minWidth: double.infinity,
-                                minHeight: 50,
-                              ),
-                              onChanged: (String searchText) {
-                                setState(() {
-                                  searchedText = searchText.trim();
-                                });
-                              },
-                              onTap: () {
-                                // showSearch(
-                                //     context: context, delegate: SearchScreenUI());
-                              },
+          : Container(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 5,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SearchBar(
+                            leading: const Icon(Icons.search),
+                            hintText: 'Search...',
+                            constraints: const BoxConstraints(
+                              minWidth: double.infinity,
+                              minHeight: 50,
                             ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            DefaultTabController(
-                              initialIndex: 1,
-                              length: 4,
-                              child: Builder(
-                                builder: (context) => Expanded(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10.w, vertical: 0),
-                                        child: ForumPageNavBar(
-                                          callback: (int index,
-                                              [String? text]) {
-                                            final TabController controller =
-                                                DefaultTabController.of(
-                                                    context);
-                                            if (!controller.indexIsChanging) {
-                                              if (text != null) {
-                                                categoryText = text;
-                                              }
-                                              controller.animateTo(index);
-                                              changePage(index);
+                            onChanged: (String searchText) {
+                              setState(() {
+                                searchedText = searchText.trim();
+                              });
+                            },
+                            onTap: () {
+                              // showSearch(
+                              //     context: context, delegate: SearchScreenUI());
+                            },
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          DefaultTabController(
+                            initialIndex: 1,
+                            length: 4,
+                            child: Builder(
+                              builder: (context) => Expanded(
+                                child: Column(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w, vertical: 0),
+                                      child: ForumPageNavBar(
+                                        callback: (int index, [String? text]) {
+                                          final TabController controller =
+                                              DefaultTabController.of(context);
+                                          if (!controller.indexIsChanging) {
+                                            if (text != null) {
+                                              categoryText = text;
                                             }
-                                          },
+                                            controller.animateTo(index);
+                                            changePage(index);
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10.h,
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 15.w, vertical: 0),
+                                        child: TabBarView(
+                                          children: [
+                                            Categories(
+                                              searchedText: searchedText,
+                                              category: categoryText,
+                                              isAdmin: false,
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                            AllPosts(
+                                              searchedText: searchedText,
+                                              category: "",
+                                              isAdmin: false,
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                            MyPosts(search: searchedText),
+                                            const NewPost(
+                                              deviceScreenType:
+                                                  DeviceScreenType.desktop,
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: 10.h,
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 15.w, vertical: 0),
-                                          child: TabBarView(
-                                            children: [
-                                              Categories(
-                                                searchedText: searchedText,
-                                                category: categoryText,
-                                                isAdmin: false,
-                                                deviceScreenType:
-                                                    DeviceScreenType.desktop,
-                                              ),
-                                              AllPosts(
-                                                scrollController: scrollCtrl,
-                                                searchedText: searchedText,
-                                                category: "",
-                                                isAdmin: false,
-                                                deviceScreenType:
-                                                    DeviceScreenType.desktop,
-                                              ),
-                                              MyPosts(search: searchedText),
-                                              const NewPost(
-                                                deviceScreenType:
-                                                    DeviceScreenType.desktop,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10.w,
-                    ),
-                    Expanded(
-                      // MGA LINKS SA KANAN
-                      flex: 2,
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
-                        child: Card(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10.w, vertical: 20.h),
-                            child: pageIndex == 0 ||
-                                    pageIndex == 1 ||
-                                    userModel == null
-                                ? otherLinks(context, postModels, getAllPost)
-                                : miniProfile(context, userModel!),
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10.w,
+                  ),
+                  Expanded(
+                    // MGA LINKS SA KANAN
+                    flex: 2,
+                    child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 0, vertical: 10.h),
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10.w, vertical: 20.h),
+                          child: pageIndex == 0 ||
+                                  pageIndex == 1 ||
+                                  userModel == null
+                              ? otherLinks(context, postModels, getAllPost)
+                              : miniProfile(context, userModel!),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
     );
@@ -519,16 +505,18 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
                 height: 5.h,
               ),
               //dito
-              ListView.builder(
-                itemCount: 3,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  postModels.sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
-                  return TheLinks(
-                      postModel: postModels[index], stateSetter: stateSetter);
-                },
-              ),
+              if (postModels.isNotEmpty)
+                ListView.builder(
+                  itemCount: postModels.length > 3 ? 3 : postModels.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    postModels
+                        .sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
+                    return TheLinks(
+                        postModel: postModels[index], stateSetter: stateSetter);
+                  },
+                ),
               SizedBox(
                 height: 10.h,
               ),
@@ -560,17 +548,18 @@ Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
               SizedBox(
                 height: 5.h,
               ),
-              ListView.builder(
-                itemCount: 3,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  postModels
-                      .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-                  return TheLinks(
-                      postModel: postModels[index], stateSetter: stateSetter);
-                },
-              ),
+              if (postModels.isNotEmpty)
+                ListView.builder(
+                  itemCount: postModels.length > 3 ? 3 : postModels.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    postModels
+                        .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
+                    return TheLinks(
+                        postModel: postModels[index], stateSetter: stateSetter);
+                  },
+                ),
               //dito
             ],
           ),

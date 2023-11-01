@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/notification_model.dart';
@@ -124,7 +125,9 @@ class _PostModalCommentState extends State<PostModalComment> {
         //send notification to the author of this comment
         sendNotification(
           widget.commentModel.senderId,
-          '${widget.currentUser!.username} liked on this comment:',
+          widget.postModel.authorId == widget.currentUser!.userId
+              ? 'Anonymous liked on this comment:'
+              : '${widget.currentUser!.username} liked on this comment:',
           widget.commentModel.commentMessage,
         );
       }
@@ -162,7 +165,9 @@ class _PostModalCommentState extends State<PostModalComment> {
         //send notification to the author of this comment
         sendNotification(
           widget.commentModel.senderId,
-          '${widget.currentUser!.username} disliked on this comment:',
+          widget.postModel.authorId == widget.currentUser!.userId
+              ? 'Anonymous disliked on this comment:'
+              : '${widget.currentUser!.username} disliked on this comment:',
           widget.commentModel.commentMessage,
         );
       }
@@ -261,9 +266,14 @@ class _PostModalCommentState extends State<PostModalComment> {
               height: 10,
             ),
             CircleAvatar(
-              backgroundImage: NetworkImage(
-                widget.commentModel.senderProfilePicture,
-              ),
+              backgroundImage: widget.commentModel.senderProfilePicture != ""
+                  ? widget.postModel.authorId == widget.commentModel.senderId &&
+                          widget.postModel.asAnonymous
+                      ? const AssetImage(guestIcon) as ImageProvider
+                      : NetworkImage(
+                          widget.commentModel.senderProfilePicture,
+                        )
+                  : const AssetImage(guestIcon),
             ),
           ],
         ),
@@ -296,7 +306,11 @@ class _PostModalCommentState extends State<PostModalComment> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.commentModel.senderName,
+                              widget.postModel.authorId ==
+                                          widget.commentModel.senderId &&
+                                      widget.postModel.asAnonymous
+                                  ? "Anonymous"
+                                  : widget.commentModel.senderName,
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
@@ -470,43 +484,31 @@ class _PostModalCommentState extends State<PostModalComment> {
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+          return ReplyShimmer(isLoggedIn: widget.isLoggedIn);
         } else {
           return ListView.builder(
+            reverse: true,
             physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return ReplyShimmer(isLoggedIn: widget.isLoggedIn);
-              } else if (snapshot.connectionState == ConnectionState.active ||
-                  snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasError) {
-                  return const Text('Error');
-                } else if (snapshot.hasData) {
-                  final result = snapshot.data!;
-                  replyModels = result.docs
-                      .map((e) => ReplyModel.fromJson(e.data()))
-                      .toList();
-                  replyModels.sort((a, b) => b.replyId.compareTo(a.replyId));
-                  ReplyModel reply = replyModels[index];
+              final result = snapshot.data!;
+              replyModels = result.docs
+                  .map((e) => ReplyModel.fromJson(e.data()))
+                  .toList();
+              replyModels.sort((a, b) => a.replyId.compareTo(b.replyId));
+              ReplyModel reply = replyModels[index];
 
-                  return ReplyItself(
-                    replyModel: reply,
-                    currentUser: widget.currentUser!,
-                    isLoggedIn: widget.isLoggedIn,
-                    addReply: addReplyCallback,
-                    onTypeReply: onTypeReply,
-                    deviceScreenType: widget.deviceScreenType,
-                    postModel: widget.postModel,
-                    commentModel: widget.commentModel,
-                  );
-                } else {
-                  return const Text('Empty data');
-                }
-              } else {
-                return Text('State: ${snapshot.connectionState}');
-              }
+              return ReplyItself(
+                replyModel: reply,
+                currentUser: widget.currentUser!,
+                isLoggedIn: widget.isLoggedIn,
+                addReply: addReplyCallback,
+                onTypeReply: onTypeReply,
+                deviceScreenType: widget.deviceScreenType,
+                postModel: widget.postModel,
+                commentModel: widget.commentModel,
+              );
             },
           );
         }
@@ -682,7 +684,11 @@ class _ReplyItselfState extends State<ReplyItself> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  'by @${widget.replyModel.senderName}',
+                                  widget.postModel.authorId ==
+                                              widget.replyModel.senderId &&
+                                          widget.postModel.asAnonymous
+                                      ? 'by @Anonymous'
+                                      : 'by @${widget.replyModel.senderName}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.blueGrey,
@@ -787,14 +793,20 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
     otherUser = await ProfileFunction.getUserDetails(userId);
     await MyNotification().sendPushMessage(
       otherUser!.deviceToken,
-      '${widget.currentUser.username} replied: ',
+      widget.postModel.authorId == widget.currentUser.userId &&
+              widget.postModel.asAnonymous
+          ? 'Anonymous replied: '
+          : '${widget.currentUser.username} replied: ',
       controller.text,
     );
 
     if (otherUser!.userId != widget.currentUser.userId) {
       NotificationModel notificationModel = NotificationModel(
         notifId: DateTime.now().toIso8601String(),
-        notifTitle: '${widget.currentUser.username} replied: ',
+        notifTitle: widget.postModel.authorId == widget.currentUser.userId &&
+                widget.postModel.asAnonymous
+            ? 'Anonymous replied: '
+            : '${widget.currentUser.username} replied: ',
         notifBody: controller.text,
         notifTime: formattedDate(),
         notifLocation: "FORUM|${widget.postModel.postId}",
@@ -811,7 +823,10 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
   @override
   void initState() {
     super.initState();
-    controller.text = "${widget.recipientName} ";
+    controller.text = widget.postModel.authorId == widget.recipientId &&
+            widget.postModel.asAnonymous
+        ? 'Anonymous '
+        : "${widget.recipientName} ";
   }
 
   @override
@@ -819,9 +834,11 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
     return Row(
       children: [
         CircleAvatar(
-          backgroundImage: NetworkImage(
-            widget.currentUser.profilePicture,
-          ),
+          backgroundImage: widget.currentUser.profilePicture != ''
+              ? NetworkImage(
+                  widget.currentUser.profilePicture,
+                )
+              : const AssetImage(guestIcon) as ImageProvider,
         ),
         Expanded(
           child: Card(

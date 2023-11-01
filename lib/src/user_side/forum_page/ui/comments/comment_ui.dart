@@ -185,7 +185,11 @@ class _CommentUIState extends State<CommentUI> {
                       Row(
                         children: [
                           SmallProfilePic(
-                              profilePic: widget.comment.senderProfilePicture),
+                              profilePic: widget.post.asAnonymous &&
+                                      widget.comment.senderId ==
+                                          widget.post.authorId
+                                  ? ""
+                                  : widget.comment.senderProfilePicture),
                           const SizedBox(
                             width: 10,
                           ),
@@ -195,7 +199,11 @@ class _CommentUIState extends State<CommentUI> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 AuthorNameText(
-                                    authorName: widget.comment.senderName),
+                                    authorName: widget.post.asAnonymous &&
+                                            widget.comment.senderId ==
+                                                widget.post.authorId
+                                        ? "Anonymous"
+                                        : widget.comment.senderName),
                                 PostTimeText(time: widget.comment.timeStamp),
                               ],
                             ),
@@ -276,8 +284,7 @@ class _CommentUIState extends State<CommentUI> {
                           )),
                         )
                       : PostContentText(
-                          content:
-                              '${widget.post.authorName}, ${widget.comment.commentMessage}',
+                          content: widget.comment.commentMessage,
                           textOverflow: TextOverflow.visible,
                         ),
                   const SizedBox(
@@ -541,8 +548,7 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
                               )),
                             )
                           : PostContentText(
-                              content:
-                                  '${widget.replyModel.recipientName}, ${widget.replyModel.replyMessage}',
+                              content: widget.replyModel.replyMessage,
                               textOverflow: TextOverflow.visible,
                             ),
                       const SizedBox(
@@ -553,7 +559,11 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            'by @${widget.replyModel.senderName}',
+                            widget.postModel.authorId ==
+                                        widget.replyModel.senderId &&
+                                    widget.postModel.asAnonymous
+                                ? 'by @Anonymous'
+                                : 'by @${widget.replyModel.senderName}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blueGrey,

@@ -348,7 +348,10 @@ class _SinglePostState extends State<SinglePost> {
                 children: [
                   Row(
                     children: [
-                      SmallProfilePic(profilePic: widget.post.profilePicture),
+                      SmallProfilePic(
+                          profilePic: widget.post.asAnonymous
+                              ? ""
+                              : widget.post.profilePicture),
                       const SizedBox(
                         width: 10,
                       ),
@@ -357,7 +360,10 @@ class _SinglePostState extends State<SinglePost> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          AuthorNameText(authorName: widget.post.authorName),
+                          AuthorNameText(
+                              authorName: widget.post.asAnonymous
+                                  ? "Anonymous"
+                                  : widget.post.authorName),
                           PostTimeText(time: widget.post.timeStamp)
                         ],
                       )),

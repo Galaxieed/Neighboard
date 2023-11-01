@@ -27,9 +27,8 @@ class AllPosts extends StatefulWidget {
     required this.category,
     required this.searchedText,
     required this.deviceScreenType,
-    this.scrollController,
   });
-  final ScrollController? scrollController;
+
   final bool isAdmin;
   final String category, searchedText;
   final DeviceScreenType deviceScreenType;
@@ -115,7 +114,6 @@ class _AllPostsState extends State<AllPosts> {
         : postModels.isEmpty
             ? noPostMessage()
             : ListView.builder(
-                controller: widget.scrollController,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
@@ -249,7 +247,11 @@ class _SinglePostState extends State<SinglePost> {
                 children: [
                   Row(
                     children: [
-                      SmallProfilePic(profilePic: widget.post.profilePicture),
+                      SmallProfilePic(
+                        profilePic: widget.post.asAnonymous
+                            ? ""
+                            : widget.post.profilePicture,
+                      ),
                       const SizedBox(
                         width: 10,
                       ),
@@ -258,7 +260,11 @@ class _SinglePostState extends State<SinglePost> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            AuthorNameText(authorName: widget.post.authorName),
+                            AuthorNameText(
+                              authorName: widget.post.asAnonymous
+                                  ? "Anonymous"
+                                  : widget.post.authorName,
+                            ),
                             PostTimeText(time: widget.post.timeStamp)
                           ],
                         ),

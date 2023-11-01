@@ -249,6 +249,11 @@ class _ForumPageMobileState extends State<ForumPageMobile>
             ),
       bottomNavigationBar: TabBar(
         isScrollable: widget.isAdmin ? true : false,
+        onTap: (value) {
+          setState(() {
+            _tabController.index = value;
+          });
+        },
         tabs: [
           if (widget.isAdmin)
             const SizedBox(
@@ -289,7 +294,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
-      floatingActionButton: widget.isAdmin
+      floatingActionButton: widget.isAdmin || _tabController.index != 0
           ? null
           : GestureDetector(
               onTapDown: (TapDownDetails details) {
@@ -298,7 +303,8 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               child: const FloatingActionButton(
                 onPressed: null,
                 child: Icon(Icons.category),
-              )),
+              ),
+            ),
       body: Container(
         padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
         child: Column(

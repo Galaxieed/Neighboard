@@ -30,6 +30,7 @@ class _NewPostState extends State<NewPost> {
   String? _category;
   String _postTitle = '';
   String _postContent = '';
+  bool asAnonymous = false;
 
   final TextEditingController _cTitlePost = TextEditingController();
   final TextEditingController _cContentPost = TextEditingController();
@@ -83,6 +84,7 @@ class _NewPostState extends State<NewPost> {
           _category!,
         ],
         images: imageUrls,
+        asAnonymous: asAnonymous,
       );
       bool isPostPublished = await NewPostFunction.createNewPost(postModel);
 
@@ -266,6 +268,26 @@ class _NewPostState extends State<NewPost> {
                                   }
                                   return null;
                                 },
+                              ),
+                              SizedBox(
+                                height: 5.h,
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Text("Post as Anonymous"),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Switch(
+                                    value: asAnonymous,
+                                    onChanged: (bool newVal) {
+                                      setState(() {
+                                        asAnonymous = newVal;
+                                      });
+                                    },
+                                  ),
+                                ],
                               ),
                               SizedBox(
                                 height: 5.h,

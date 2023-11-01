@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 
 class SmallProfilePic extends StatelessWidget {
   const SmallProfilePic({
@@ -13,7 +14,7 @@ class SmallProfilePic extends StatelessWidget {
     return CircleAvatar(
       radius: 30,
       backgroundImage: profilePic == ""
-          ? null
+          ? const AssetImage(guestIcon) as ImageProvider
           : NetworkImage(
               profilePic,
             ),

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/notification_model.dart';
@@ -77,6 +78,8 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
+  final scrollController = ScrollController();
+
   void addComment() async {
     if (_ctrlComment.text.isNotEmpty) {
       //for reply in mobile layout
@@ -87,9 +90,7 @@ class _PostModalState extends State<PostModal> {
         FocusManager.instance.primaryFocus?.unfocus();
         return;
       }
-      setState(() {
-        isLoading = true;
-      });
+
       CommentModel commentModel = CommentModel(
         commentId: DateTime.now().toIso8601String(),
         senderId: currentUser!.userId,
@@ -107,12 +108,11 @@ class _PostModalState extends State<PostModal> {
       );
       commentModels.sort((a, b) => b.commentId.compareTo(a.commentId));
       _ctrlComment.clear();
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
       //send notification to the author of this post
       sendNotification(
         widget.postModel.authorId,
@@ -173,7 +173,10 @@ class _PostModalState extends State<PostModal> {
     required String commentId,
   }) {
     if (widget.deviceScreenType == DeviceScreenType.mobile) {
-      _ctrlComment.text = "$recipientName ";
+      _ctrlComment.text = widget.postModel.authorId == recipientId &&
+              widget.postModel.asAnonymous
+          ? 'Anonymous '
+          : "$recipientName ";
       focusComment.requestFocus();
       respondType = response;
       cmntId = commentId;
@@ -186,7 +189,10 @@ class _PostModalState extends State<PostModal> {
     ReplyModel newReply = ReplyModel(
       replyId: DateTime.now().toIso8601String(),
       senderId: currentUser!.userId,
-      senderName: currentUser!.username,
+      senderName: widget.postModel.authorId == currentUser!.userId &&
+              widget.postModel.asAnonymous
+          ? 'Anonymous'
+          : currentUser!.username,
       recipientId: recipientId!,
       recipientName: recipientName!,
       replyMessage: _ctrlComment.text,
@@ -194,7 +200,10 @@ class _PostModalState extends State<PostModal> {
     //send notification to the recipient of this reply (from mobile)
     sendNotification(
       recipientId,
-      '${currentUser!.username} replied: ',
+      widget.postModel.authorId == currentUser!.userId &&
+              widget.postModel.asAnonymous
+          ? 'Anonymous replied: '
+          : '${currentUser!.username} replied: ',
       _ctrlComment.text,
     );
     await CommentFunction.postReply(
@@ -301,6 +310,7 @@ class _PostModalState extends State<PostModal> {
   @override
   void dispose() {
     _ctrlComment.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -325,7 +335,7 @@ class _PostModalState extends State<PostModal> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          "${widget.postModel.authorName}'s Post",
+          "${widget.postModel.asAnonymous ? "Anonymous" : widget.postModel.authorName}'s Post",
           style: Theme.of(context)
               .textTheme
               .titleMedium!
@@ -343,6 +353,7 @@ class _PostModalState extends State<PostModal> {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: SingleChildScrollView(
+          controller: scrollController,
           child: Stack(
             children: [
               SizedBox(
@@ -573,9 +584,10 @@ class _PostModalState extends State<PostModal> {
     return Row(
       children: [
         CircleAvatar(
-          backgroundImage: widget.postModel.profilePicture != ""
+          backgroundImage: widget.postModel.profilePicture != "" &&
+                  !widget.postModel.asAnonymous
               ? NetworkImage(widget.postModel.profilePicture)
-              : null,
+              : const AssetImage(guestIcon) as ImageProvider,
         ),
         const SizedBox(
           width: 10,
@@ -584,7 +596,9 @@ class _PostModalState extends State<PostModal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.postModel.authorName,
+              widget.postModel.asAnonymous
+                  ? "Anonymous"
+                  : widget.postModel.authorName,
               style: Theme.of(context)
                   .textTheme
                   .bodyLarge!
@@ -625,7 +639,7 @@ class _ReplyCommentBoxState extends State<ReplyCommentBox> {
       leading: CircleAvatar(
         backgroundImage: widget.currentUser!.profilePicture != ""
             ? NetworkImage(widget.currentUser!.profilePicture)
-            : null,
+            : const AssetImage(guestIcon) as ImageProvider,
       ),
       title: Card(
         child: TextField(

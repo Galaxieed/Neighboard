@@ -11,6 +11,7 @@ class PostModel {
   late int noOfUpVotes;
   late List<String> tags;
   late List<String> images;
+  late bool asAnonymous;
 
   PostModel({
     required this.postId,
@@ -25,6 +26,7 @@ class PostModel {
     required this.noOfUpVotes,
     required this.tags,
     required this.images,
+    required this.asAnonymous,
   });
 
   PostModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +42,7 @@ class PostModel {
     noOfUpVotes = json['no_of_upVotes'];
     tags = json['tags'].cast<String>();
     images = json['images'].cast<String>();
+    asAnonymous = json['as_anonymous'];
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +59,7 @@ class PostModel {
     data['no_of_upVotes'] = noOfUpVotes;
     data['tags'] = tags;
     data['images'] = images;
+    data['as_anonymous'] = asAnonymous;
     return data;
   }
 }

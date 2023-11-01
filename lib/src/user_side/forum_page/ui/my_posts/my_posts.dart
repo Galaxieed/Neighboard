@@ -87,6 +87,7 @@ class _MyPostsState extends State<MyPosts> {
     if (_auth.currentUser == null) {
       isLoggedIn = false;
       isLoading = false;
+      setState(() {});
     } else {
       isLoggedIn = true;
       getMyPosts();
@@ -546,7 +547,11 @@ class _SingleMyPostState extends State<SingleMyPost> {
               children: [
                 Row(
                   children: [
-                    SmallProfilePic(profilePic: widget.post.profilePicture),
+                    SmallProfilePic(
+                      profilePic: widget.post.asAnonymous
+                          ? ""
+                          : widget.post.profilePicture,
+                    ),
                     const SizedBox(
                       width: 10,
                     ),
@@ -555,7 +560,10 @@ class _SingleMyPostState extends State<SingleMyPost> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          AuthorNameText(authorName: widget.post.authorName),
+                          AuthorNameText(
+                              authorName: widget.post.asAnonymous
+                                  ? "Anonymous"
+                                  : widget.post.authorName),
                           PostTimeText(time: widget.post.timeStamp),
                         ],
                       ),
