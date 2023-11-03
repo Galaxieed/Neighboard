@@ -68,6 +68,9 @@ dependencies:
   web_smooth_scroll: ^1.1.0
   footer: ^0.0.4
   page_transition: ^2.1.0
+  flutter_windowmanager: ^0.2.0
+  share_plus: ^7.2.1
+  
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

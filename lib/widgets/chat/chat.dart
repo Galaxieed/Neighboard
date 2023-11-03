@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/chatmessage_model.dart';
@@ -57,9 +58,18 @@ class _MyChatState extends State<MyChat> {
     }
   }
 
+  secureModeOn() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
+  secureModeOff() async {
+    await FlutterWindowManager.clearFlags(FlutterWindowManager.FLAG_SECURE);
+  }
+
   @override
   void initState() {
     super.initState();
+    secureModeOn();
     getCurrentUser();
   }
 
@@ -67,6 +77,7 @@ class _MyChatState extends State<MyChat> {
   void dispose() {
     _globalChatController.dispose();
     super.dispose();
+    secureModeOff();
   }
 
   @override

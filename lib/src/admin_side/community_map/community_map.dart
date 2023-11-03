@@ -42,7 +42,6 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
 
   void _getLatLngFromAddress(String address) async {
     List<Location> locations = await locationFromAddress(address);
-
     if (locations.isNotEmpty) {
       setState(() {
         isLoading = true;
@@ -59,11 +58,13 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   }
 
   void _getLatLngFromAddressWeb(String address) async {
-    GeoCode geoCode = GeoCode(apiKey: '538204048447379774119x21710');
-    try {
+    if (mounted) {
       setState(() {
         isLoading = true;
       });
+    }
+    try {
+      GeoCode geoCode = GeoCode(apiKey: '538204048447379774119x21710');
       Coordinates coordinates =
           await geoCode.forwardGeocoding(address: address);
       newLatitude = coordinates.latitude ?? 14.827335497500572;
@@ -72,11 +73,14 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       _moveMap();
     } catch (e) {
       // ignore: use_build_context_synchronously
-      errorMessage(title: "Error!", desc: e.toString(), context: context);
+      print(e);
+      //errorMessage(title: "Error!", desc: e.toString(), context: context);
     }
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   getSiteLocation() async {
@@ -191,39 +195,47 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    mapController.dispose();
+    controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        leading: const Icon(Icons.search_rounded),
-        title: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              leading: const Icon(Icons.search_rounded),
+              title: TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintText: "Search location..",
+                ),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    kIsWeb
+                        ? _getLatLngFromAddressWeb(controller.text)
+                        : _getLatLngFromAddress(controller.text);
+                  },
+                  icon: const Icon(Icons.search),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+              ],
             ),
-            hintText: "Search location..",
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              kIsWeb
-                  ? _getLatLngFromAddressWeb(controller.text)
-                  : _getLatLngFromAddress(controller.text);
-            },
-            icon: const Icon(Icons.location_searching_outlined),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
-        ],
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : FlutterMap(
+            body: FlutterMap(
               mapController: mapController,
               options: MapOptions(
                 center: currentCenter,
@@ -253,11 +265,11 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _moveMap,
-        tooltip: 'Move Map',
-        child: const Icon(Icons.my_location_outlined),
-      ),
-    );
+            floatingActionButton: FloatingActionButton(
+              onPressed: _moveMap,
+              tooltip: 'Move Map',
+              child: const Icon(Icons.my_location_outlined),
+            ),
+          );
   }
 }

@@ -4,9 +4,16 @@ import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NavDrawer extends StatelessWidget {
   const NavDrawer({super.key});
+
+  shareNeighboard() async {
+    Share.share(
+        'Hello, let\'s connect here!\nhttps://project-neighboard.web.app',
+        subject: 'Let\'s Connect!');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +54,11 @@ class NavDrawer extends StatelessWidget {
                   bottom: 0,
                   right: 0,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Contact Details",
-                        style: Theme.of(context).textTheme.labelLarge,
-                      ),
+                      IconButton(
+                          onPressed: shareNeighboard,
+                          icon: const Icon(Icons.share)),
                       IconButton(
                         onPressed: () {
                           showModalBottomSheet(

@@ -8,6 +8,7 @@ import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_page.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ScrollDetector extends StatelessWidget {
   final void Function(PointerScrollEvent event) onPointerScroll;
@@ -50,19 +51,21 @@ class LandingPageDesktop extends StatefulWidget {
 class _LandingPageDesktopState extends State<LandingPageDesktop> {
   final PageController _controller = PageController(initialPage: 0);
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _officerScrollController = ScrollController();
 
   bool isLastPage = false;
+  bool isOnFooter = false;
 
   goToPage(page) {
     _scrollController
         .animateTo(
           0.0,
-          duration: const Duration(milliseconds: 1150),
+          duration: const Duration(milliseconds: 1000),
           curve: Curves.ease,
         )
         .then((value) => _controller.animateToPage(
               page,
-              duration: const Duration(milliseconds: 2150),
+              duration: const Duration(milliseconds: 1000),
               curve: Curves.ease,
             ));
   }
@@ -72,6 +75,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
     super.dispose();
     _controller.dispose();
     _scrollController.dispose();
+    _officerScrollController.dispose();
   }
 
   @override
@@ -84,17 +88,18 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
           }
           if (_controller.page! + 1 < _controller.position.maxScrollExtent) {
             _controller.nextPage(
-                duration: const Duration(milliseconds: 2150),
+                duration: const Duration(milliseconds: 1000),
                 curve: Curves.ease);
-            if (_controller.page!.round() == 2) {
+            if (_controller.page!.round() == 3) {
               isLastPage = true;
-              // _scrollController.jumpTo(
-              //   _scrollController.position.maxScrollExtent,
-              // );
-              if (!_scrollController.position.isScrollingNotifier.value) {
+              if (!_scrollController.position.isScrollingNotifier.value &&
+                  _officerScrollController.position.atEdge &&
+                  !(_officerScrollController.position.pixels == 0)) {
+                isOnFooter = true;
+                setState(() {});
                 _scrollController.animateTo(
                   _scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 2150),
+                  duration: const Duration(milliseconds: 1000),
                   curve: Curves.ease,
                 );
               }
@@ -107,16 +112,28 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
           if (_controller.page! - 1 >= _controller.position.minScrollExtent) {
             if (_scrollController.position.pixels != 0 && isLastPage) {
               // _scrollController.jumpTo(0.0);
+              isOnFooter = false;
+              setState(() {});
               _scrollController.animateTo(
                 0.0,
-                duration: const Duration(milliseconds: 2150),
+                duration: const Duration(milliseconds: 1000),
                 curve: Curves.ease,
               );
             } else {
-              if (!_scrollController.position.isScrollingNotifier.value) {
+              if (!_scrollController.position.isScrollingNotifier.value &&
+                  !_officerScrollController.hasClients) {
                 _controller.previousPage(
-                    duration: const Duration(milliseconds: 2150),
-                    curve: Curves.ease);
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.ease,
+                );
+              } else {
+                if (_officerScrollController.position.atEdge &&
+                    _officerScrollController.position.pixels == 0) {
+                  _controller.previousPage(
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.ease,
+                  );
+                }
               }
             }
           }
@@ -148,17 +165,230 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                     subHeader: widget.about,
                     aboutImage: widget.aboutImage,
                   ),
+                  MyOfficers(
+                    isOnFooter: isOnFooter,
+                    officerScrollController: _officerScrollController,
+                  ),
                 ],
               ),
             ),
-            footer(context),
+            MyFooter(
+              goToPage: goToPage,
+            ),
           ],
         ),
       ),
     );
   }
+}
 
-  Container footer(BuildContext context) {
+class MyOfficers extends StatelessWidget {
+  const MyOfficers(
+      {super.key,
+      required this.officerScrollController,
+      required this.isOnFooter});
+  final ScrollController officerScrollController;
+  final bool isOnFooter;
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 40.h, left: 15.w, right: 15.w),
+      child: Column(
+        children: [
+          Text(
+            "MEET THE OFFICERS",
+            style: TextStyle(
+              fontSize: 10.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.inversePrimary,
+            ),
+          ),
+          Text(
+            "The responsible officers who keeps our environment safe and reputable.",
+            style: TextStyle(
+              fontSize: 4.sp,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            child: GridView(
+              physics: isOnFooter ? const NeverScrollableScrollPhysics() : null,
+              controller: officerScrollController,
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 350,
+                childAspectRatio: 250 / 250,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              children: const [
+                OfficerAvatar(
+                  name: "Redentor Reyes",
+                  position: "President",
+                  image:
+                      "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FPresident.png?alt=media&token=353b7b9f-d648-4468-86a8-848d8e53c175",
+                ),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FVice%20President.png?alt=media&token=c41b0ee9-de63-4efa-86c9-3a449d09a9f1",
+                    name: "Armino Ipapo",
+                    position: "Vice President"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FSecretary.png?alt=media&token=e3987afb-e491-4e1b-aab9-f032ad8562a1",
+                    name: "Pamela Bueno",
+                    position: "Secretary"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAssistant%20Sec.png?alt=media&token=05f0b6d4-2596-4a70-b8e0-5d0c2cb1bbd0",
+                    name: "Ravinia Garcia",
+                    position: "Assistant Secretary"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FTreasurer.png?alt=media&token=be7fcaec-8f32-4f7b-bbc7-5a8b68b75b23",
+                    name: "Mila Prado",
+                    position: "Treasurer"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAuditor.png?alt=media&token=b9ea5d4d-4e7f-44c0-bf25-2d566e815aa2",
+                    name: "Josephine Abad",
+                    position: "Auditor"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAssistant%20Aud.png?alt=media&token=638919ec-099b-4293-a07a-aabae2fe2fba",
+                    name: "Revelyn Villegas",
+                    position: "Assistant Auditor"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FLilian%20Rose.png?alt=media&token=2dff7783-5393-4b96-a2bd-140ad43dfb85",
+                    name: "Lilian Rose Cruz",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAnnabel.png?alt=media&token=8b0122f7-906e-4f6b-9d2b-37bb33ae6038",
+                    name: "Annabel Sulleza",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FRowena.png?alt=media&token=bd27155d-07c0-4e3b-bced-3c040733442f",
+                    name: "Rowena Dizon",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FRey.png?alt=media&token=2c865c07-a2ee-4c44-899f-4e05084c4917",
+                    name: "Rey Del Rosario",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FYolando.png?alt=media&token=c32e6306-72e4-420e-a62a-8060fcf862af",
+                    name: "Yolando Gatus",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FGabriel.png?alt=media&token=12e3fea7-6552-42df-86ea-3c687feb339f",
+                    name: "Gabriel Pilongo",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FVic.png?alt=media&token=70ec415f-416d-41b3-a29d-29d4853b77fe",
+                    name: "Vic Lesiguez",
+                    position: "Board of Director"),
+                OfficerAvatar(
+                    image:
+                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FKeith.png?alt=media&token=8c4fe44e-e6a5-460b-93e4-9f803efda6fb",
+                    name: "Keith Vista",
+                    position: "Board of Director"),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OfficerAvatar extends StatefulWidget {
+  const OfficerAvatar({
+    super.key,
+    required this.image,
+    required this.name,
+    required this.position,
+  });
+
+  final String image;
+  final String name;
+  final String position;
+
+  @override
+  State<OfficerAvatar> createState() => _OfficerAvatarState();
+}
+
+class _OfficerAvatarState extends State<OfficerAvatar> {
+  bool _isHovering = false;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        MouseRegion(
+          onEnter: (_) => setState(() => _isHovering = true),
+          onExit: (_) => setState(() => _isHovering = false),
+          child: CircleAvatar(
+            radius: 100,
+            backgroundColor: _isHovering
+                ? Theme.of(context).colorScheme.inversePrimary
+                : null,
+            child: ClipOval(
+              child: CircleAvatar(
+                radius: 95,
+                child: widget.image == ""
+                    ? Image.asset(guestIcon)
+                    : FadeInImage.assetNetwork(
+                        placeholder: guestIcon, image: widget.image),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Text(
+          widget.name,
+          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Text(
+          widget.position,
+          style: Theme.of(context).textTheme.titleMedium!,
+        ),
+      ],
+    );
+  }
+}
+
+class MyFooter extends StatelessWidget {
+  const MyFooter({
+    super.key,
+    required this.goToPage,
+  });
+  final Function goToPage;
+
+  shareNeighboard() async {
+    Share.share(
+        'Hello, let\'s connect here!\nhttps://project-neighboard.web.app',
+        subject: 'Let\'s Connect!');
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 16.w, bottom: 8.w),
       color: Theme.of(context).colorScheme.inversePrimary,
@@ -262,6 +492,16 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                   ],
                 ),
               ),
+              ElevatedButton.icon(
+                onPressed: shareNeighboard,
+                icon: const Icon(Icons.share),
+                label: const Text("Share"),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.inversePrimary,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onBackground),
+              ),
             ],
           ),
           const SizedBox(
@@ -291,7 +531,7 @@ class OffersPage extends StatelessWidget {
       children: [
         const Spacer(),
         Text(
-          "ABOUT",
+          "ABOUT VILLA V",
           style: TextStyle(
             fontSize: 8.sp,
             fontWeight: FontWeight.bold,
@@ -323,6 +563,13 @@ class OffersPage extends StatelessWidget {
               "The subdivision is secured due to their 24hrs duty of security guards and curfew hours.",
             ),
           ],
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Text(
+          "The quality of living that you deserve to have",
+          style: Theme.of(context).textTheme.titleMedium!,
         ),
         const Spacer(),
         Container(

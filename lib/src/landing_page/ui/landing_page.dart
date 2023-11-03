@@ -22,30 +22,23 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  // String header = 'LA ALDEA \nCOMMUNITY \nFORUM';
-  String subdName = siteModel?.siteSubdName ?? 'Sample Subd Name';
-  String header = siteModel?.siteHeader ?? 'Sample Header';
-  // String subHeader =
-  //     'A place where you can freely share your thoughts with one'
-  //     ' another.\nShare your ideas and ask your fellow '
-  //     'residents, Ka-Aldea!';
-  String subHeader = siteModel?.siteSubheader ?? 'Sample Subheader';
-  String about = siteModel?.siteAbout ?? 'Sample About';
-  // String about = 'La Aldea Subdivision is situated along McArthur'
-  //     ' Highway in the so-called Golden Triangle in'
-  //     ' Guiguinto, Bulacan which serves as the center'
-  //     ' of Bulacan. \n\nHighly accessible having '
-  //     'the distinct advantage of being located at '
-  //     'a short distance (approximately 1.5kms) from '
-  //     'the convergence of Bulacan\'s three major '
-  //     'national road networks, otherwise known as '
-  //     'the Central Bulacan Interchange.';
+  String subdName = "";
+  String header = "";
+  String subHeader = "";
+  String about = "";
+  String backgroundImage = "";
+  String aboutImage = "";
 
-  String backgroundImage = siteModel?.siteHomepageImage ?? '';
-  // String backgroundImage = homepageImage;
-  String aboutImage = siteModel?.siteAboutImage ?? '';
-  // String aboutImage = homeImage;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void siteDataInitialization() {
+    subdName = siteModel?.siteSubdName ?? 'Sample Subd Name';
+    header = siteModel?.siteHeader ?? 'Sample Header';
+    subHeader = siteModel?.siteSubheader ?? 'Sample Subheader';
+    about = siteModel?.siteAbout ?? 'Sample About';
+    backgroundImage = siteModel?.siteHomepageImage ?? '';
+    aboutImage = siteModel?.siteAboutImage ?? '';
+  }
 
   void openNotification() {
     scaffoldKey.currentState!.openEndDrawer();
@@ -85,6 +78,7 @@ class _LandingPageState extends State<LandingPage> {
     // TODO: implement initState
     super.initState();
     checkIfLoggedIn();
+    siteDataInitialization();
   }
 
   @override
