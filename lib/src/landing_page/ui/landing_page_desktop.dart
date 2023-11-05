@@ -531,15 +531,16 @@ class OffersPage extends StatelessWidget {
       children: [
         const Spacer(),
         Text(
-          "ABOUT VILLA V",
+          "Quality of Living",
           style: TextStyle(
             fontSize: 8.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
+        const Spacer(),
+        // const SizedBox(
+        //   height: 20,
+        // ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
@@ -564,13 +565,13 @@ class OffersPage extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(
-          height: 20,
-        ),
-        Text(
-          "The quality of living that you deserve to have",
-          style: Theme.of(context).textTheme.titleMedium!,
-        ),
+        // const SizedBox(
+        //   height: 20,
+        // ),
+        // Text(
+        //   "The quality of living that you deserve to have",
+        //   style: Theme.of(context).textTheme.titleMedium!,
+        // ),
         const Spacer(),
         Container(
           width: double.infinity,
@@ -602,21 +603,17 @@ class OffersPage extends StatelessWidget {
       height: 90.w,
       width: 80.w,
       padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(30),
+      //   color: Theme.of(context).colorScheme.inversePrimary,
+      // ),
       child: SingleChildScrollView(
         child: Column(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).primaryColor,
               radius: 15.w,
-              child: Icon(
-                icon,
-                size: 20.w,
-                color: Theme.of(context).primaryColor,
-              ),
+              child: Icon(icon, size: 20.w, color: Colors.white),
             ),
             const SizedBox(
               height: 20,

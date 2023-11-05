@@ -260,15 +260,13 @@ class OffersPage extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            "ABOUT",
+            "Quality of Living",
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium!
                 .copyWith(fontWeight: FontWeight.bold),
           ),
-          const SizedBox(
-            height: 20,
-          ),
+          const Spacer(),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -299,12 +297,12 @@ class OffersPage extends StatelessWidget {
               ],
             ),
           ),
-          const Spacer(),
-          Text(
-            "The quality of living \nthat you deserve to have",
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium!,
-          ),
+          // const Spacer(),
+          // Text(
+          //   "The quality of living \nthat you deserve to have",
+          //   textAlign: TextAlign.center,
+          //   style: Theme.of(context).textTheme.titleMedium!,
+          // ),
           const Spacer(),
           Container(
             width: double.infinity,
@@ -337,20 +335,20 @@ class OffersPage extends StatelessWidget {
       height: 275,
       width: 250,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(30),
+      //   color: Theme.of(context).colorScheme.inversePrimary,
+      // ),
       child: SingleChildScrollView(
         child: Column(
           children: [
             CircleAvatar(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).primaryColor,
               radius: 50,
               child: Icon(
                 icon,
                 size: 55,
-                color: Theme.of(context).primaryColor,
+                color: Colors.white,
               ),
             ),
             const SizedBox(
