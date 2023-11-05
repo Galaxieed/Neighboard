@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/models/candidates_model.dart';
 
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/user_side/community_page/ui/announcement_page/announcement_page.dart';
@@ -40,9 +41,11 @@ class LandingPageDesktop extends StatefulWidget {
     required this.bgImage,
     required this.aboutImage,
     required this.subdName,
+    required this.officers,
   });
 
   final String subdName, header, subHeader, about, bgImage, aboutImage;
+  final List<CandidateModel> officers;
 
   @override
   State<LandingPageDesktop> createState() => _LandingPageDesktopState();
@@ -70,6 +73,59 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
             ));
   }
 
+  CandidateModel? presModel,
+      vpModel,
+      secModel,
+      astSecModel,
+      tresModel,
+      audModel,
+      astAudModel;
+  List<CandidateModel> bodModels = [];
+
+  void getOfficers() {
+    if (widget.officers.isNotEmpty) {
+      presModel = widget.officers
+          .where((element) => element.position == "PRESIDENT")
+          .take(1)
+          .toList()[0];
+      vpModel = widget.officers
+          .where((element) => element.position == "VICE PRESIDENT")
+          .take(1)
+          .toList()[0];
+      secModel = widget.officers
+          .where((element) => element.position == "SECRETARY")
+          .take(1)
+          .toList()[0];
+      astSecModel = widget.officers
+          .where((element) => element.position == "ASSISTANT SECRETARY")
+          .take(1)
+          .toList()[0];
+      tresModel = widget.officers
+          .where((element) => element.position == "TREASURER")
+          .take(1)
+          .toList()[0];
+      audModel = widget.officers
+          .where((element) => element.position == "AUDITOR")
+          .take(1)
+          .toList()[0];
+      astAudModel = widget.officers
+          .where((element) => element.position == "ASSISTANT AUDITOR")
+          .take(1)
+          .toList()[0];
+      bodModels = widget.officers
+          .where((element) => element.position == "BOARD OF DIRECTORS")
+          .take(8)
+          .toList();
+    }
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getOfficers();
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -87,21 +143,38 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
             return; // Check if it's not already animating
           }
           if (_controller.page! + 1 < _controller.position.maxScrollExtent) {
+            //PageView nextPage
             _controller.nextPage(
                 duration: const Duration(milliseconds: 1000),
                 curve: Curves.ease);
-            if (_controller.page!.round() == 3) {
+            //check if nextpage has officers or not in lastpage
+            if (_controller.page!.round() ==
+                (widget.officers.isNotEmpty ? 3 : 2)) {
               isLastPage = true;
-              if (!_scrollController.position.isScrollingNotifier.value &&
-                  _officerScrollController.position.atEdge &&
-                  !(_officerScrollController.position.pixels == 0)) {
-                isOnFooter = true;
-                setState(() {});
-                _scrollController.animateTo(
-                  _scrollController.position.maxScrollExtent,
-                  duration: const Duration(milliseconds: 1000),
-                  curve: Curves.ease,
-                );
+              if (!_scrollController.position.isScrollingNotifier.value) {
+                //if there is officers
+                if (_officerScrollController.hasClients) {
+                  //checks if officer is at the edge of scrolling
+                  if (_officerScrollController.position.atEdge &&
+                      !(_officerScrollController.position.pixels == 0)) {
+                    isOnFooter = true;
+                    setState(() {});
+                    _scrollController.animateTo(
+                      _scrollController.position.maxScrollExtent,
+                      duration: const Duration(milliseconds: 1000),
+                      curve: Curves.ease,
+                    );
+                  }
+                  //if there is no officers
+                } else {
+                  isOnFooter = true;
+                  setState(() {});
+                  _scrollController.animateTo(
+                    _scrollController.position.maxScrollExtent,
+                    duration: const Duration(milliseconds: 1000),
+                    curve: Curves.ease,
+                  );
+                }
               }
             }
           }
@@ -111,6 +184,7 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
           }
           if (_controller.page! - 1 >= _controller.position.minScrollExtent) {
             if (_scrollController.position.pixels != 0 && isLastPage) {
+              //closes footer
               // _scrollController.jumpTo(0.0);
               isOnFooter = false;
               setState(() {});
@@ -120,19 +194,32 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                 curve: Curves.ease,
               );
             } else {
+              //scrollup while footer is not shown
               if (!_scrollController.position.isScrollingNotifier.value &&
                   !_officerScrollController.hasClients) {
+                //scroll up while officer tab is not showing
                 _controller.previousPage(
                   duration: const Duration(milliseconds: 1000),
                   curve: Curves.ease,
                 );
               } else {
-                if (_officerScrollController.position.atEdge &&
-                    _officerScrollController.position.pixels == 0) {
-                  _controller.previousPage(
-                    duration: const Duration(milliseconds: 1000),
-                    curve: Curves.ease,
-                  );
+                if (_officerScrollController.hasClients) {
+                  //on footer with officers
+                  if (_officerScrollController.position.atEdge &&
+                      _officerScrollController.position.pixels == 0) {
+                    _controller.previousPage(
+                      duration: const Duration(milliseconds: 1000),
+                      curve: Curves.ease,
+                    );
+                  }
+                } else {
+                  //on footer without officers
+                  if (!_scrollController.position.isScrollingNotifier.value) {
+                    _controller.previousPage(
+                      duration: const Duration(milliseconds: 1000),
+                      curve: Curves.ease,
+                    );
+                  }
                 }
               }
             }
@@ -165,10 +252,19 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
                     subHeader: widget.about,
                     aboutImage: widget.aboutImage,
                   ),
-                  MyOfficers(
-                    isOnFooter: isOnFooter,
-                    officerScrollController: _officerScrollController,
-                  ),
+                  if (widget.officers.isNotEmpty)
+                    MyOfficers(
+                      pres: presModel!,
+                      vp: vpModel!,
+                      sec: secModel!,
+                      astSec: astSecModel!,
+                      tres: tresModel!,
+                      aud: audModel!,
+                      astAud: astAudModel!,
+                      bodModels: bodModels,
+                      isOnFooter: isOnFooter,
+                      officerScrollController: _officerScrollController,
+                    ),
                 ],
               ),
             ),
@@ -186,9 +282,19 @@ class MyOfficers extends StatelessWidget {
   const MyOfficers(
       {super.key,
       required this.officerScrollController,
-      required this.isOnFooter});
+      required this.isOnFooter,
+      required this.pres,
+      required this.vp,
+      required this.sec,
+      required this.astSec,
+      required this.tres,
+      required this.aud,
+      required this.astAud,
+      required this.bodModels});
   final ScrollController officerScrollController;
   final bool isOnFooter;
+  final CandidateModel pres, vp, sec, astSec, tres, aud, astAud;
+  final List<CandidateModel> bodModels;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -223,83 +329,82 @@ class MyOfficers extends StatelessWidget {
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
               ),
-              children: const [
+              children: [
                 OfficerAvatar(
-                  name: "Redentor Reyes",
+                  image: pres.profilePicture,
+                  name: "${pres.firstName} ${pres.lastName}",
                   position: "President",
-                  image:
-                      "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FPresident.png?alt=media&token=353b7b9f-d648-4468-86a8-848d8e53c175",
                 ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FVice%20President.png?alt=media&token=c41b0ee9-de63-4efa-86c9-3a449d09a9f1",
-                    name: "Armino Ipapo",
-                    position: "Vice President"),
+                  image: vp.profilePicture,
+                  name: "${vp.firstName} ${vp.lastName}",
+                  position: "Vice President",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FSecretary.png?alt=media&token=e3987afb-e491-4e1b-aab9-f032ad8562a1",
-                    name: "Pamela Bueno",
-                    position: "Secretary"),
+                  image: sec.profilePicture,
+                  name: "${sec.firstName} ${sec.lastName}",
+                  position: "Secretary",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAssistant%20Sec.png?alt=media&token=05f0b6d4-2596-4a70-b8e0-5d0c2cb1bbd0",
-                    name: "Ravinia Garcia",
-                    position: "Assistant Secretary"),
+                  image: astSec.profilePicture,
+                  name: "${astSec.firstName} ${astSec.lastName}",
+                  position: "Assistant Secretary",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FTreasurer.png?alt=media&token=be7fcaec-8f32-4f7b-bbc7-5a8b68b75b23",
-                    name: "Mila Prado",
-                    position: "Treasurer"),
+                  image: tres.profilePicture,
+                  name: "${tres.firstName} ${tres.lastName}",
+                  position: "Treasurer",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAuditor.png?alt=media&token=b9ea5d4d-4e7f-44c0-bf25-2d566e815aa2",
-                    name: "Josephine Abad",
-                    position: "Auditor"),
+                  image: aud.profilePicture,
+                  name: "${aud.firstName} ${aud.lastName}",
+                  position: "Auditor",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAssistant%20Aud.png?alt=media&token=638919ec-099b-4293-a07a-aabae2fe2fba",
-                    name: "Revelyn Villegas",
-                    position: "Assistant Auditor"),
+                  image: astAud.profilePicture,
+                  name: "${astAud.firstName} ${astAud.lastName}",
+                  position: "Assistant Auditor",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FLilian%20Rose.png?alt=media&token=2dff7783-5393-4b96-a2bd-140ad43dfb85",
-                    name: "Lilian Rose Cruz",
-                    position: "Board of Director"),
+                  image: bodModels[0].profilePicture,
+                  name: "${bodModels[0].firstName} ${bodModels[0].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FAnnabel.png?alt=media&token=8b0122f7-906e-4f6b-9d2b-37bb33ae6038",
-                    name: "Annabel Sulleza",
-                    position: "Board of Director"),
+                  image: bodModels[1].profilePicture,
+                  name: "${bodModels[1].firstName} ${bodModels[1].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FRowena.png?alt=media&token=bd27155d-07c0-4e3b-bced-3c040733442f",
-                    name: "Rowena Dizon",
-                    position: "Board of Director"),
+                  image: bodModels[2].profilePicture,
+                  name: "${bodModels[2].firstName} ${bodModels[2].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FRey.png?alt=media&token=2c865c07-a2ee-4c44-899f-4e05084c4917",
-                    name: "Rey Del Rosario",
-                    position: "Board of Director"),
+                  image: bodModels[3].profilePicture,
+                  name: "${bodModels[3].firstName} ${bodModels[3].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FYolando.png?alt=media&token=c32e6306-72e4-420e-a62a-8060fcf862af",
-                    name: "Yolando Gatus",
-                    position: "Board of Director"),
+                  image: bodModels[4].profilePicture,
+                  name: "${bodModels[4].firstName} ${bodModels[4].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FGabriel.png?alt=media&token=12e3fea7-6552-42df-86ea-3c687feb339f",
-                    name: "Gabriel Pilongo",
-                    position: "Board of Director"),
+                  image: bodModels[5].profilePicture,
+                  name: "${bodModels[5].firstName} ${bodModels[5].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FVic.png?alt=media&token=70ec415f-416d-41b3-a29d-29d4853b77fe",
-                    name: "Vic Lesiguez",
-                    position: "Board of Director"),
+                  image: bodModels[6].profilePicture,
+                  name: "${bodModels[6].firstName} ${bodModels[6].lastName}",
+                  position: "Board of Director",
+                ),
                 OfficerAvatar(
-                    image:
-                        "https://firebasestorage.googleapis.com/v0/b/project-neighboard.appspot.com/o/images%2FKeith.png?alt=media&token=8c4fe44e-e6a5-460b-93e4-9f803efda6fb",
-                    name: "Keith Vista",
-                    position: "Board of Director"),
+                  image: bodModels[7].profilePicture,
+                  name: "${bodModels[7].firstName} ${bodModels[7].lastName}",
+                  position: "Board of Director",
+                ),
               ],
             ),
           ),
@@ -611,9 +716,10 @@ class OffersPage extends StatelessWidget {
         child: Column(
           children: [
             CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).colorScheme.primary,
               radius: 15.w,
-              child: Icon(icon, size: 20.w, color: Colors.white),
+              child: Icon(icon,
+                  size: 20.w, color: Theme.of(context).colorScheme.background),
             ),
             const SizedBox(
               height: 20,

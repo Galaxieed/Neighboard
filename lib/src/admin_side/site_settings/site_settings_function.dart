@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/site_model.dart';
 import 'package:universal_io/io.dart';
 
@@ -83,6 +84,170 @@ class SiteSettingsFunction {
       return downloadUrl;
     } catch (e) {
       return null;
+    }
+  }
+
+  static Future<void> setOfficers({
+    required String adminId,
+    required CandidateModel pres,
+    required CandidateModel vp,
+    required CandidateModel sec,
+    required CandidateModel astSec,
+    required CandidateModel tres,
+    required CandidateModel aud,
+    required CandidateModel astAud,
+    required List<CandidateModel> bod,
+  }) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("president")
+          .set(pres.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("vice_president")
+          .set(vp.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("secretary")
+          .set(sec.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("assistant_secretary")
+          .set(astSec.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("treasurer")
+          .set(tres.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("auditor")
+          .set(aud.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("assistant_auditor")
+          .set(astAud.toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_1")
+          .set(bod[0].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_2")
+          .set(bod[1].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_3")
+          .set(bod[2].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_4")
+          .set(bod[3].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_5")
+          .set(bod[4].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_6")
+          .set(bod[5].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_7")
+          .set(bod[6].toJson());
+      await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .doc("bod_8")
+          .set(bod[7].toJson());
+    } catch (e) {
+      print(e);
+      return;
+    }
+  }
+
+  static Future<void> updateOfficers(
+      String doc,
+      Map<String, dynamic> officerDetails,
+      String electionId,
+      String candidateId) async {
+    try {
+      await _firestore
+          .collection("election")
+          .doc(electionId)
+          .collection("candidates")
+          .doc(candidateId)
+          .update(officerDetails);
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("officers")
+          .doc(doc)
+          .update(officerDetails);
+    } catch (e) {
+      return;
+    }
+  }
+
+  static Future<List<CandidateModel>?> getOfficers(String adminId) async {
+    try {
+      final result = await _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers")
+          .get();
+      List<CandidateModel> officersModel = [];
+      officersModel =
+          result.docs.map((e) => CandidateModel.fromJson(e.data())).toList();
+      return officersModel;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<void> deleteOfficers(String adminId) async {
+    try {
+      final officersRef = _firestore
+          .collection("site_settings")
+          .doc(adminId)
+          .collection("officers");
+
+      final snapshots = await officersRef.get();
+      for (var doc in snapshots.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print(e);
+      return;
     }
   }
 }

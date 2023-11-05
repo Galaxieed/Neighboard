@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/search_page/search_function.dart';
 import 'package:neighboard/widgets/post/post_modal.dart';
@@ -62,7 +63,9 @@ class SearchScreenUI extends SearchDelegate {
                   );
           },
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(postModels[index].profilePicture),
+            backgroundImage: postModels[index].asAnonymous
+                ? const AssetImage(guestIcon) as ImageProvider
+                : NetworkImage(postModels[index].profilePicture),
           ),
           title: Text(
             postModels[index].title,
@@ -106,7 +109,9 @@ class SearchScreenUI extends SearchDelegate {
                   );
           },
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(postModels[index].profilePicture),
+            backgroundImage: postModels[index].asAnonymous
+                ? const AssetImage(guestIcon) as ImageProvider
+                : NetworkImage(postModels[index].profilePicture),
           ),
           title: Center(
             child: Row(

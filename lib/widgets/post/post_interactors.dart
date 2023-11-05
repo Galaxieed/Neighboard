@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -41,50 +42,49 @@ class _PostInteractorsState extends State<PostInteractors> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      elevation: 4,
-      child: SizedBox(
-        width: 720,
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text(
-              "${widget.postModel.authorName}'s ${widget.collection.toLowerCase()}",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
-            centerTitle: true,
+    return SizedBox(
+      width: 720,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.postModel.asAnonymous
+                ? "Anonymous' ${widget.collection.toLowerCase()}"
+                : "${widget.postModel.authorName}'s ${widget.collection.toLowerCase()}",
+            style: Theme.of(context)
+                .textTheme
+                .titleMedium!
+                .copyWith(fontWeight: FontWeight.bold),
           ),
-          body: isLoading
-              ? const LoadingScreen()
-              : Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: userModels.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              onTap: () {},
-                              leading: userModels[index].profilePicture == ""
-                                  ? const CircleAvatar()
-                                  : CircleAvatar(
-                                      backgroundImage: NetworkImage(
+          centerTitle: true,
+        ),
+        body: isLoading
+            ? const LoadingScreen()
+            : Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: userModels.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage:
+                                  userModels[index].profilePicture == ""
+                                      ? const AssetImage(guestIcon)
+                                          as ImageProvider
+                                      : NetworkImage(
                                           userModels[index].profilePicture),
-                                    ),
-                              title: Text(userModels[index].username),
-                            );
-                          },
-                        )
-                      ],
-                    ),
+                            ),
+                            title: Text(userModels[index].username),
+                          );
+                        },
+                      )
+                    ],
                   ),
                 ),
-        ),
+              ),
       ),
     );
   }

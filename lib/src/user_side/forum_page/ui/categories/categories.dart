@@ -635,13 +635,28 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
             children: [
               IconButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => PostInteractors(
-                      postModel: widget.post,
-                      collection: "views",
-                    ),
-                  );
+                  widget.deviceScreenType == DeviceScreenType.mobile
+                      ? showModalBottomSheet(
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          context: context,
+                          builder: (BuildContext context) => PostInteractors(
+                            postModel: widget.post,
+                            collection: "views",
+                          ),
+                        )
+                      : showDialog(
+                          context: context,
+                          builder: (BuildContext context) => Dialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0)),
+                            elevation: 4,
+                            child: PostInteractors(
+                              postModel: widget.post,
+                              collection: "views",
+                            ),
+                          ),
+                        );
                 },
                 icon: const Icon(Icons.remove_red_eye_outlined),
               ),
@@ -661,13 +676,25 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
               ),
               IconButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => PostInteractors(
-                      postModel: widget.post,
-                      collection: "upvotes",
-                    ),
-                  );
+                  widget.deviceScreenType == DeviceScreenType.mobile
+                      ? showModalBottomSheet(
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          context: context,
+                          builder: (BuildContext context) => PostInteractors(
+                            postModel: widget.post,
+                            collection: "upvotes",
+                          ),
+                        )
+                      : showDialog(
+                          context: context,
+                          builder: (BuildContext context) => Dialog(
+                            child: PostInteractors(
+                              postModel: widget.post,
+                              collection: "upvotes",
+                            ),
+                          ),
+                        );
                 },
                 icon: const Icon(Icons.arrow_upward),
               ),

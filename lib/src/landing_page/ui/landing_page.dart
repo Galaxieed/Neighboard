@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
+import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_desktop.dart';
 import 'package:neighboard/src/landing_page/ui/landing_page_mobile.dart';
+import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_page_ui.dart';
 import 'package:neighboard/widgets/chat/chat.dart';
@@ -28,16 +31,33 @@ class _LandingPageState extends State<LandingPage> {
   String about = "";
   String backgroundImage = "";
   String aboutImage = "";
+  List<CandidateModel> officers = [];
+  bool isLoading = true;
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  void siteDataInitialization() {
+  siteDataInitialization() async {
+    setState(() {
+      isLoading = true;
+    });
     subdName = siteModel?.siteSubdName ?? 'Sample Subd Name';
     header = siteModel?.siteHeader ?? 'Sample Header';
     subHeader = siteModel?.siteSubheader ?? 'Sample Subheader';
     about = siteModel?.siteAbout ?? 'Sample About';
     backgroundImage = siteModel?.siteHomepageImage ?? '';
     aboutImage = siteModel?.siteAboutImage ?? '';
+    await getOfficers();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  getOfficers() async {
+    officers = await SiteSettingsFunction.getOfficers(
+            "O8dElItKmsUJ5cvZg9FA1eTfi0q2") ??
+        [];
+
+    officers.sort((a, b) => a.candidateId.compareTo(b.candidateId));
   }
 
   void openNotification() {
@@ -75,7 +95,6 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     checkIfLoggedIn();
     siteDataInitialization();
@@ -83,129 +102,136 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveBuilder(builder: (context, sizingInformation) {
-      if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
-        return Scaffold(
-          key: scaffoldKey,
-          appBar: AppBar(
-            actions: [
-              //TODO: Chat count
-              if (isLoggedIn)
-                NavBarBadges(
-                  count: null,
-                  icon: const Icon(Icons.chat_outlined),
-                  callback: _openChat,
-                ),
-              if (isLoggedIn)
-                const SizedBox(
-                  width: 10,
-                ),
-              if (isLoggedIn)
-                NavBarBadges(
-                  count: notificationModels
-                      .where((element) => !element.isRead)
-                      .toList()
-                      .length
-                      .toString(),
-                  icon: const Icon(Icons.notifications_outlined),
-                  callback: openNotification,
-                )
-              else
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(PageTransition(
-                        duration: const Duration(milliseconds: 500),
-                        child: const LoginPage(),
-                        type: PageTransitionType.fade));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: Theme.of(context).colorScheme.onBackground,
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+    return isLoading
+        ? const LoadingScreen()
+        : ResponsiveBuilder(builder: (context, sizingInformation) {
+            if (sizingInformation.deviceScreenType == DeviceScreenType.mobile) {
+              return Scaffold(
+                key: scaffoldKey,
+                appBar: AppBar(
+                  actions: [
+                    //TODO: Chat count
+                    if (isLoggedIn)
+                      NavBarBadges(
+                        count: null,
+                        icon: const Icon(Icons.chat_outlined),
+                        callback: _openChat,
+                      ),
+                    if (isLoggedIn)
+                      const SizedBox(
+                        width: 10,
+                      ),
+                    if (isLoggedIn)
+                      NavBarBadges(
+                        count: notificationModels
+                            .where((element) => !element.isRead)
+                            .toList()
+                            .length
+                            .toString(),
+                        icon: const Icon(Icons.notifications_outlined),
+                        callback: openNotification,
+                      )
+                    else
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(PageTransition(
+                              duration: const Duration(milliseconds: 500),
+                              child: const LoginPage(),
+                              type: PageTransitionType.fade));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onBackground,
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            letterSpacing: 1,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
 
-              const SizedBox(
-                width: 10,
-              ),
-              if (isLoggedIn)
-                NavBarCircularImageDropDownButton(
-                  callback: Routes().navigate,
-                  isAdmin: false,
-                )
-              else
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(PageTransition(
-                        duration: const Duration(milliseconds: 500),
-                        child: const RegisterPage(),
-                        type: PageTransitionType.fade));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.inversePrimary,
-                    foregroundColor: Theme.of(context).colorScheme.onBackground,
-                  ),
-                  child: const Text(
-                    "Register",
-                    style: TextStyle(
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(
+                      width: 10,
                     ),
-                  ),
-                ),
+                    if (isLoggedIn)
+                      NavBarCircularImageDropDownButton(
+                        callback: Routes().navigate,
+                        isAdmin: false,
+                      )
+                    else
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(PageTransition(
+                              duration: const Duration(milliseconds: 500),
+                              child: const RegisterPage(),
+                              type: PageTransitionType.fade));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.inversePrimary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onBackground,
+                        ),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(
+                            letterSpacing: 1,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
 
-              const SizedBox(
-                width: 10,
-              ),
-            ],
-          ),
-          drawer: sizingInformation.deviceScreenType == DeviceScreenType.mobile
-              ? const NavDrawer()
-              : null,
-          endDrawer: NotificationDrawer(
-            deviceScreenType: sizingInformation.deviceScreenType,
-            stateSetter: setState,
-          ),
-          body: LandingPageMobile(
-            subdName: subdName,
-            header: header,
-            subHeader: subHeader,
-            about: about,
-            bgImage: backgroundImage,
-            aboutImage: aboutImage,
-          ),
-        );
-      } else {
-        return Scaffold(
-          key: scaffoldKey,
-          appBar: NavBar(
-            openNotification: openNotification,
-            openChat: openChat,
-            currentPage: "Home",
-          ),
-          endDrawer: NotificationDrawer(
-            deviceScreenType: sizingInformation.deviceScreenType,
-            stateSetter: setState,
-          ),
-          body: LandingPageDesktop(
-            subdName: subdName,
-            header: header,
-            subHeader: subHeader,
-            about: about,
-            bgImage: backgroundImage,
-            aboutImage: aboutImage,
-          ),
-        );
-      }
-    });
+                    const SizedBox(
+                      width: 10,
+                    ),
+                  ],
+                ),
+                drawer: sizingInformation.deviceScreenType ==
+                        DeviceScreenType.mobile
+                    ? const NavDrawer()
+                    : null,
+                endDrawer: NotificationDrawer(
+                  deviceScreenType: sizingInformation.deviceScreenType,
+                  stateSetter: setState,
+                ),
+                body: LandingPageMobile(
+                  subdName: subdName,
+                  header: header,
+                  subHeader: subHeader,
+                  about: about,
+                  bgImage: backgroundImage,
+                  aboutImage: aboutImage,
+                  officers: officers,
+                ),
+              );
+            } else {
+              return Scaffold(
+                key: scaffoldKey,
+                appBar: NavBar(
+                  openNotification: openNotification,
+                  openChat: openChat,
+                  currentPage: "Home",
+                ),
+                endDrawer: NotificationDrawer(
+                  deviceScreenType: sizingInformation.deviceScreenType,
+                  stateSetter: setState,
+                ),
+                body: LandingPageDesktop(
+                  subdName: subdName,
+                  header: header,
+                  subHeader: subHeader,
+                  about: about,
+                  bgImage: backgroundImage,
+                  aboutImage: aboutImage,
+                  officers: officers,
+                ),
+              );
+            }
+          });
   }
 }
