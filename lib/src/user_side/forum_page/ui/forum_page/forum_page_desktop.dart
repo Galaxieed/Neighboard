@@ -471,98 +471,94 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
 Widget otherLinks(context, List<PostModel> postModels, stateSetter) => Center(
       child: Align(
         alignment: Alignment.topCenter,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.remove_red_eye_outlined,
-                    weight: 3,
-                  ),
-                  SizedBox(
-                    width: 2.w,
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Most Viewed Posts',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(
-                color: ccForumDividerColor,
-              ),
-              SizedBox(
-                height: 5.h,
-              ),
-              //dito
-              if (postModels.isNotEmpty)
-                ListView.builder(
-                  itemCount: postModels.length > 3 ? 3 : postModels.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    postModels
-                        .sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
-                    return TheLinks(
-                        postModel: postModels[index], stateSetter: stateSetter);
-                  },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.remove_red_eye_outlined,
+                  weight: 3,
                 ),
-              SizedBox(
-                height: 10.h,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.arrow_upward_outlined,
-                    weight: 3,
-                  ),
-                  SizedBox(
-                    width: 2.w,
-                  ),
-                  Expanded(
-                    child: Text(
-                      'Most Upvoted Posts',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium!
-                          .copyWith(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const Divider(
-                color: ccForumDividerColor,
-              ),
-              SizedBox(
-                height: 5.h,
-              ),
-              if (postModels.isNotEmpty)
-                ListView.builder(
-                  itemCount: postModels.length > 3 ? 3 : postModels.length,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    postModels
-                        .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-                    return TheLinks(
-                        postModel: postModels[index], stateSetter: stateSetter);
-                  },
+                SizedBox(
+                  width: 2.w,
                 ),
-              //dito
-            ],
-          ),
+                Expanded(
+                  child: Text(
+                    'Most Viewed Posts',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(
+              color: ccForumDividerColor,
+            ),
+            SizedBox(
+              height: 5.h,
+            ),
+            //dito
+            if (postModels.isNotEmpty)
+              ListView.builder(
+                itemCount: postModels.length > 3 ? 3 : postModels.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  postModels.sort((a, b) => b.noOfViews.compareTo(a.noOfViews));
+                  return TheLinks(
+                      postModel: postModels[index], stateSetter: stateSetter);
+                },
+              ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.arrow_upward_outlined,
+                  weight: 3,
+                ),
+                SizedBox(
+                  width: 2.w,
+                ),
+                Expanded(
+                  child: Text(
+                    'Most Upvoted Posts',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium!
+                        .copyWith(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(
+              color: ccForumDividerColor,
+            ),
+            SizedBox(
+              height: 5.h,
+            ),
+            if (postModels.isNotEmpty)
+              ListView.builder(
+                itemCount: postModels.length > 3 ? 3 : postModels.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  postModels
+                      .sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
+                  return TheLinks(
+                      postModel: postModels[index], stateSetter: stateSetter);
+                },
+              ),
+            //dito
+            const Spacer(),
+          ],
         ),
       ),
     );

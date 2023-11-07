@@ -60,6 +60,9 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
   bool isOnFooter = false;
 
   goToPage(page) {
+    setState(() {
+      isOnFooter = false;
+    });
     _scrollController
         .animateTo(
           0.0,
@@ -298,35 +301,53 @@ class MyOfficers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 40.h, left: 15.w, right: 15.w),
+      padding: EdgeInsets.only(
+        top: 40.h,
+      ),
       child: Column(
         children: [
           Text(
-            "MEET THE OFFICERS",
+            "HOA Officers",
             style: TextStyle(
               fontSize: 10.sp,
+              letterSpacing: 1,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.inversePrimary,
+              shadows: [
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+              ],
             ),
           ),
           Text(
             "The responsible officers who keeps our environment safe and reputable.",
             style: TextStyle(
-              fontSize: 4.sp,
+              fontSize: 5.sp,
             ),
-          ),
-          const SizedBox(
-            height: 10,
           ),
           Expanded(
             child: GridView(
+              padding:
+                  EdgeInsets.only(top: 50, bottom: 50, left: 15.w, right: 15.w),
               physics: isOnFooter ? const NeverScrollableScrollPhysics() : null,
               controller: officerScrollController,
               shrinkWrap: true,
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 350,
                 childAspectRatio: 250 / 250,
-                mainAxisSpacing: 10,
+                mainAxisSpacing: 75,
                 crossAxisSpacing: 10,
               ),
               children: [
@@ -609,8 +630,8 @@ class MyFooter extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(
-            height: 8,
+          SizedBox(
+            height: 8.w,
           ),
           Divider(
             color: Theme.of(context).colorScheme.onBackground,
@@ -639,13 +660,28 @@ class OffersPage extends StatelessWidget {
           "Quality of Living",
           style: TextStyle(
             fontSize: 8.sp,
+            letterSpacing: 2,
             fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.inversePrimary,
+            shadows: [
+              Shadow(
+                offset: const Offset(1.0, 1.0),
+                blurRadius: 1.0,
+                color: isDarkMode
+                    ? const Color.fromARGB(50, 255, 255, 255)
+                    : const Color.fromARGB(90, 0, 0, 0),
+              ),
+              Shadow(
+                offset: const Offset(1.0, 1.0),
+                blurRadius: 1.0,
+                color: isDarkMode
+                    ? const Color.fromARGB(50, 255, 255, 255)
+                    : const Color.fromARGB(90, 0, 0, 0),
+              ),
+            ],
           ),
         ),
         const Spacer(),
-        // const SizedBox(
-        //   height: 20,
-        // ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.max,
@@ -706,12 +742,8 @@ class OffersPage extends StatelessWidget {
   ) {
     return Container(
       height: 90.w,
-      width: 80.w,
-      padding: const EdgeInsets.all(32),
-      // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(30),
-      //   color: Theme.of(context).colorScheme.inversePrimary,
-      // ),
+      width: 90.w,
+      padding: const EdgeInsets.only(left: 32, right: 32, bottom: 32),
       child: SingleChildScrollView(
         child: Column(
           children: [
@@ -736,7 +768,7 @@ class OffersPage extends StatelessWidget {
             Text(
               details,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 4.sp),
+              style: TextStyle(fontSize: 5.sp),
               overflow: TextOverflow.fade,
             ),
           ],
@@ -773,11 +805,34 @@ class AboutPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      header.toUpperCase(),
+                      "ABOUT",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineLarge!
+                          .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      header,
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.inversePrimary,
+                        shadows: [
+                          Shadow(
+                            offset: const Offset(1.0, 1.0),
+                            blurRadius: 1.0,
+                            color: isDarkMode
+                                ? const Color.fromARGB(50, 255, 255, 255)
+                                : const Color.fromARGB(90, 0, 0, 0),
+                          ),
+                          Shadow(
+                            offset: const Offset(1.0, 1.0),
+                            blurRadius: 1.0,
+                            color: isDarkMode
+                                ? const Color.fromARGB(50, 255, 255, 255)
+                                : const Color.fromARGB(90, 0, 0, 0),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(
@@ -963,23 +1018,37 @@ class LandPageHeader extends StatelessWidget {
           wordSpacing: 10,
           fontWeight: FontWeight.w800,
           fontFamily: "Lexend Deca",
-          shadows: const [
+          shadows: [
+            // Shadow(
+            //     // bottomLeft
+            //     offset: Offset(-1.5, -1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // bottomRight
+            //     offset: Offset(1.5, -1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // topRight
+            //     offset: Offset(1.5, 1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // topLeft
+            //     offset: Offset(-1.5, 1.5),
+            //     color: Colors.white),
             Shadow(
-                // bottomLeft
-                offset: Offset(-1.5, -1.5),
-                color: Colors.white),
+              offset: const Offset(5.0, 5.0),
+              blurRadius: 3.0,
+              color: isDarkMode
+                  ? const Color.fromARGB(50, 255, 255, 255)
+                  : const Color.fromARGB(90, 0, 0, 0),
+            ),
             Shadow(
-                // bottomRight
-                offset: Offset(1.5, -1.5),
-                color: Colors.white),
-            Shadow(
-                // topRight
-                offset: Offset(1.5, 1.5),
-                color: Colors.white),
-            Shadow(
-                // topLeft
-                offset: Offset(-1.5, 1.5),
-                color: Colors.white),
+              offset: const Offset(5.0, 5.0),
+              blurRadius: 3.0,
+              color: isDarkMode
+                  ? const Color.fromARGB(50, 255, 255, 255)
+                  : const Color.fromARGB(90, 0, 0, 0),
+            ),
           ]),
       softWrap: true,
     );

@@ -114,6 +114,7 @@ class _AllPostsState extends State<AllPosts> {
         : postModels.isEmpty
             ? noPostMessage()
             : ListView.builder(
+                shrinkWrap: true,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
@@ -432,14 +433,14 @@ class _SinglePostState extends State<SinglePost> {
                                             children: [
                                               const Icon(
                                                 Icons.add,
-                                                size: 75,
-                                                weight: 75,
+                                                size: 30,
+                                                weight: 30,
                                                 color: Colors.white,
                                               ),
                                               Text(
                                                 extraPics.toString(),
                                                 style: const TextStyle(
-                                                    fontSize: 75,
+                                                    fontSize: 30,
                                                     fontWeight: FontWeight.bold,
                                                     color: Colors.white),
                                               )

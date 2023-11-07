@@ -221,10 +221,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     alignment: Alignment.topCenter,
                     child: Text(
                       "MY PROFILE",
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge!
-                          .copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                          ),
                     ),
                   ),
                   profilePanel1(context),

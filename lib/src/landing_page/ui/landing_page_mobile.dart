@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/routes/routes.dart';
 
@@ -131,11 +132,27 @@ class MyOfficers extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            "MEET THE OFFICERS",
-            style: TextStyle(
-              fontSize: 20.sp,
+            "HOA Officers",
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
               fontWeight: FontWeight.bold,
+              letterSpacing: 1,
               color: Theme.of(context).colorScheme.inversePrimary,
+              shadows: [
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+              ],
             ),
           ),
           Text(
@@ -327,10 +344,27 @@ class OffersPage extends StatelessWidget {
           const Spacer(),
           Text(
             "Quality of Living",
-            style: Theme.of(context)
-                .textTheme
-                .headlineMedium!
-                .copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+              color: Theme.of(context).colorScheme.inversePrimary,
+              shadows: [
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+                Shadow(
+                  offset: const Offset(1.0, 1.0),
+                  blurRadius: 1.0,
+                  color: isDarkMode
+                      ? const Color.fromARGB(50, 255, 255, 255)
+                      : const Color.fromARGB(90, 0, 0, 0),
+                ),
+              ],
+            ),
           ),
           const Spacer(),
           SingleChildScrollView(
@@ -537,7 +571,30 @@ class AboutPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  LandPageHeader(header: header),
+                  Text(
+                    header,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineLarge!.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(1.0, 1.0),
+                          blurRadius: 1.0,
+                          color: isDarkMode
+                              ? const Color.fromARGB(50, 255, 255, 255)
+                              : const Color.fromARGB(90, 0, 0, 0),
+                        ),
+                        Shadow(
+                          offset: const Offset(1.0, 1.0),
+                          blurRadius: 1.0,
+                          color: isDarkMode
+                              ? const Color.fromARGB(50, 255, 255, 255)
+                              : const Color.fromARGB(90, 0, 0, 0),
+                        ),
+                      ],
+                    ),
+                  ),
                   LandPageHeaderSmall(
                     header: subHeader,
                     color: Theme.of(context).colorScheme.onBackground,
@@ -640,23 +697,37 @@ class LandPageHeader extends StatelessWidget {
           wordSpacing: 1,
           fontWeight: FontWeight.w800,
           fontFamily: "Lexend Deca",
-          shadows: const [
+          shadows: [
+            // Shadow(
+            //     // bottomLeft
+            //     offset: Offset(-1.5, -1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // bottomRight
+            //     offset: Offset(1.5, -1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // topRight
+            //     offset: Offset(1.5, 1.5),
+            //     color: Colors.white),
+            // Shadow(
+            //     // topLeft
+            //     offset: Offset(-1.5, 1.5),
+            //     color: Colors.white),
             Shadow(
-                // bottomLeft
-                offset: Offset(-1.5, -1.5),
-                color: Colors.white),
+              offset: const Offset(3.0, 3.0),
+              blurRadius: 3.0,
+              color: isDarkMode
+                  ? const Color.fromARGB(50, 255, 255, 255)
+                  : const Color.fromARGB(90, 0, 0, 0),
+            ),
             Shadow(
-                // bottomRight
-                offset: Offset(1.5, -1.5),
-                color: Colors.white),
-            Shadow(
-                // topRight
-                offset: Offset(1.5, 1.5),
-                color: Colors.white),
-            Shadow(
-                // topLeft
-                offset: Offset(-1.5, 1.5),
-                color: Colors.white),
+              offset: const Offset(3.0, 3.0),
+              blurRadius: 3.0,
+              color: isDarkMode
+                  ? const Color.fromARGB(50, 255, 255, 255)
+                  : const Color.fromARGB(90, 0, 0, 0),
+            ),
           ]),
       textAlign: TextAlign.center,
       softWrap: true,

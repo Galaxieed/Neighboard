@@ -766,14 +766,14 @@ class _SingleMyPostState extends State<SingleMyPost> {
                                           children: [
                                             const Icon(
                                               Icons.add,
-                                              size: 75,
-                                              weight: 75,
+                                              size: 30,
+                                              weight: 30,
                                               color: Colors.white,
                                             ),
                                             Text(
                                               extraPics.toString(),
                                               style: const TextStyle(
-                                                  fontSize: 75,
+                                                  fontSize: 30,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white),
                                             )

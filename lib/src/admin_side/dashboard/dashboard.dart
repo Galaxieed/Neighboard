@@ -79,7 +79,9 @@ class Dashboard extends StatelessWidget {
                   context,
                   Colors.blueAccent.withAlpha(150),
                   Icons.map_outlined,
-                  "Community Map",
+                  deviceScreenType == DeviceScreenType.mobile
+                      ? "Map"
+                      : "Community Map",
                   () {
                     callback(4);
                   },

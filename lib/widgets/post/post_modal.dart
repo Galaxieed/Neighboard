@@ -307,6 +307,8 @@ class _PostModalState extends State<PostModal> {
     // getAllComments();
   }
 
+  CarouselController carouselController = CarouselController();
+
   @override
   void dispose() {
     _ctrlComment.dispose();
@@ -444,26 +446,94 @@ class _PostModalState extends State<PostModal> {
 
                     //Image
                     if (widget.postModel.images.isNotEmpty)
-                      CarouselSlider(
-                        options: CarouselOptions(height: 400.0, autoPlay: true),
-                        items: widget.postModel.images.map((i) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 5.0),
-                                  decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary),
-                                  child: Image.network(
-                                    i,
-                                    fit: BoxFit.cover,
-                                  ));
-                            },
-                          );
-                        }).toList(),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CarouselSlider(
+                            carouselController: carouselController,
+                            options: CarouselOptions(
+                              height: 400.0,
+                              autoPlay: true,
+                              enableInfiniteScroll: true,
+                              viewportFraction: 1,
+                            ),
+                            items: widget.postModel.images.map((i) {
+                              return Builder(
+                                builder: (BuildContext context) {
+                                  return GestureDetector(
+                                    onTap: () => Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                            builder: (ctx) => Scaffold(
+                                                  appBar: AppBar(
+                                                    automaticallyImplyLeading:
+                                                        false,
+                                                    leading: IconButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                      icon: const Icon(
+                                                          Icons.close),
+                                                    ),
+                                                    title: Text(
+                                                        "${widget.postModel.authorName}'s Post"),
+                                                  ),
+                                                  body: Center(
+                                                      child: Hero(
+                                                    tag: i,
+                                                    child: Image.network(i),
+                                                  )),
+                                                ))),
+                                    child: Hero(
+                                      tag: i,
+                                      child: Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 5.0),
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .inversePrimary),
+                                          child: Image.network(
+                                            i,
+                                            fit: BoxFit.cover,
+                                          )),
+                                    ),
+                                  );
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          Positioned(
+                            left: 5,
+                            child: IconButton(
+                              onPressed: () {
+                                carouselController.previousPage();
+                              },
+                              constraints: const BoxConstraints(
+                                minHeight: 400,
+                              ),
+                              style: IconButton.styleFrom(
+                                  shape: const BeveledRectangleBorder()),
+                              icon: const Icon(Icons.keyboard_arrow_left),
+                            ),
+                          ),
+                          Positioned(
+                            right: 5,
+                            child: IconButton(
+                              onPressed: () {
+                                carouselController.nextPage();
+                              },
+                              style: IconButton.styleFrom(
+                                  shape: const BeveledRectangleBorder()),
+                              constraints: const BoxConstraints(
+                                minHeight: 400,
+                              ),
+                              icon: const Icon(Icons.keyboard_arrow_right),
+                            ),
+                          ),
+                        ],
                       ),
 
                     const Divider(),

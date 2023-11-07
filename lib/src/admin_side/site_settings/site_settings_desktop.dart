@@ -898,6 +898,9 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
                             context: context,
                             builder: (context) {
                               return Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 child: thisOfficerModal(widget.officerModel),
                               );
                             });
@@ -915,105 +918,113 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter mySetState) => Container(
         padding: const EdgeInsets.all(8.0),
-        width: 700,
+        width: widget.deviceScreenType == DeviceScreenType.mobile
+            ? double.infinity
+            : 350,
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "Edit Officer",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundImage:
-                          profileImage != null || profileImageByte != null
-                              ? kIsWeb
-                                  ? MemoryImage(profileImageByte!.bytes!)
-                                  : FileImage(profileImage!) as ImageProvider
-                              : officer.profilePicture == ""
-                                  ? const AssetImage(guestIcon) as ImageProvider
-                                  : NetworkImage(officer.profilePicture),
-                    ),
-                    Positioned(
-                      bottom: 5,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        child: IconButton(
-                          onPressed: () {
-                            //update picture
-                            pickImage(mySetState);
-                          },
-                          icon: const Icon(Icons.camera_alt),
-                          color: Colors.white,
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Edit Officer",
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge!
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 80,
+                        backgroundImage: profileImage != null ||
+                                profileImageByte != null
+                            ? kIsWeb
+                                ? MemoryImage(profileImageByte!.bytes!)
+                                : FileImage(profileImage!) as ImageProvider
+                            : officer.profilePicture == ""
+                                ? const AssetImage(guestIcon) as ImageProvider
+                                : NetworkImage(officer.profilePicture),
                       ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(_fNameController, "First Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(_lNameController, "Last Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        mySetState(() {
-                          onClearForm();
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                      Positioned(
+                        bottom: 5,
+                        right: 8,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey,
+                          child: IconButton(
+                            onPressed: () {
+                              //update picture
+                              pickImage(mySetState);
+                            },
+                            icon: const Icon(Icons.camera_alt),
+                            color: Colors.white,
+                          ),
                         ),
-                        foregroundColor: Colors.red,
-                      ),
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text("Discard"),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          editOfficer();
-                          Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  myTextFormField(_fNameController, "First Name"),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  myTextFormField(_lNameController, "Last Name"),
+                  const SizedBox(
+                    height: 60,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          mySetState(() {
+                            onClearForm();
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          foregroundColor: Colors.red,
                         ),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.inversePrimary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onBackground,
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text("Discard"),
                       ),
-                      icon: const Icon(Icons.save),
-                      label: const Text("Save"),
-                    ),
-                  ],
-                )
-              ],
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            editOfficer();
+                            Navigator.pop(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor:
+                              Theme.of(context).colorScheme.inversePrimary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onBackground,
+                        ),
+                        icon: const Icon(Icons.save),
+                        label: const Text("Save"),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

@@ -206,6 +206,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     );
   }
 
+  bool hasInputError = false;
+
   @override
   Widget build(BuildContext context) {
     return userModel == null || isLoading
@@ -228,20 +230,37 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  Align(
-                    alignment: Alignment.topLeft,
+                  Center(
                     child: Text(
-                      "My Profile",
+                      "MY PROFILE",
                       style: Theme.of(context)
                           .textTheme
-                          .headlineLarge!
-                          .copyWith(fontWeight: FontWeight.bold),
+                          .headlineMedium!
+                          .copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.inversePrimary,
+                          ),
                     ),
                   ),
-                  profilePanel1(context),
+                  Center(
+                    child: SizedBox(
+                      width: 900,
+                      child: profilePanel1(context),
+                    ),
+                  ),
                   isEditing
-                      ? editProfilePanel2(context)
-                      : profilePanel2(context),
+                      ? Center(
+                          child: SizedBox(
+                            width: 900,
+                            child: editProfilePanel2(context),
+                          ),
+                        )
+                      : Center(
+                          child: SizedBox(
+                            width: 900,
+                            child: profilePanel2(context),
+                          ),
+                        ),
                 ],
               ),
             ),
@@ -266,7 +285,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   "Personal Information",
                   style: Theme.of(context)
                       .textTheme
-                      .headlineMedium!
+                      .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 const Spacer(),
@@ -274,6 +293,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   onPressed: () {
                     setState(() {
                       isEditing = false;
+                      hasInputError = false;
                     });
                   },
                   icon: const Icon(Icons.cancel),
@@ -286,6 +306,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       try {
+                        hasInputError = false;
                         onSavingDetails();
                       } catch (e) {
                         errorMessage(
@@ -293,6 +314,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             desc: e.toString(),
                             context: context);
                       }
+                    } else {
+                      hasInputError = true;
+                      setState(() {});
                     }
                   },
                   icon: const Icon(Icons.save),
@@ -315,10 +339,10 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     key: _formKey,
                     child: GridView(
                       shrinkWrap: true,
-                      gridDelegate:
-                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                         maxCrossAxisExtent: 400,
-                        childAspectRatio: 400 / 200,
+                        childAspectRatio:
+                            !hasInputError ? 400 / 120 : 400 / 170,
                         crossAxisSpacing: 10,
                       ),
                       children: [
@@ -541,7 +565,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   "Personal Information",
                   style: Theme.of(context)
                       .textTheme
-                      .headlineMedium!
+                      .titleLarge!
                       .copyWith(fontWeight: FontWeight.bold),
                 ),
                 isCurrentUser
@@ -566,10 +590,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                 Expanded(
                   child: GridView(
                     shrinkWrap: true,
-                    gridDelegate:
-                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                       maxCrossAxisExtent: 400,
-                      childAspectRatio: 400 / 200,
+                      childAspectRatio: !hasInputError ? 400 / 90 : 400 / 170,
                       crossAxisSpacing: 10,
                     ),
                     children: [
@@ -646,7 +669,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       title,
       style: Theme.of(context)
           .textTheme
-          .titleLarge!
+          .titleMedium!
           .copyWith(color: ccProfileInfoTextColor),
     );
   }
@@ -666,11 +689,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
               children: [
                 userModel!.profilePicture.isEmpty
                     ? CircleAvatar(
-                        radius: 80,
+                        radius: 60,
                         child: Image.asset(guestIcon),
                       )
                     : CircleAvatar(
-                        radius: 80,
+                        radius: 60,
                         backgroundImage:
                             profileImage != null || profileImageByte != null
                                 ? kIsWeb
@@ -679,8 +702,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                 : NetworkImage(userModel!.profilePicture),
                       ),
                 Positioned(
-                  bottom: 5,
-                  right: 8,
+                  bottom: 0,
+                  right: 0,
                   child: CircleAvatar(
                     backgroundColor: Colors.grey,
                     child: IconButton(
@@ -713,7 +736,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   "${userModel!.firstName} ${userModel!.lastName}",
                   style: Theme.of(context)
                       .textTheme
-                      .titleLarge!
+                      .titleMedium!
                       .copyWith(fontWeight: FontWeight.w900, letterSpacing: 3),
                 ),
                 SizedBox(
@@ -721,7 +744,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                 ),
                 Text(
                   userModel!.username,
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       letterSpacing: 3,
                       fontWeight: FontWeight.w700,
                       color: ccProfileUserNameTextColor),
