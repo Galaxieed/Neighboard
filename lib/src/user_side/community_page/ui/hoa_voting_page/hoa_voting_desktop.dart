@@ -7,6 +7,7 @@ import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/models/voter_model.dart';
+import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -190,6 +191,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   void _openChat() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return const MyChat();
       },
@@ -205,7 +207,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
   @override
   void dispose() {
     super.dispose();
-    controller(context).dispose();
+    //controller(context).dispose();
   }
 
   @override
@@ -233,7 +235,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                     height: 15,
                   ),
                   Text(
-                    'Board of Directors Election',
+                    'HOA Election',
                     style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                         fontFamily: "Montserrat", fontWeight: FontWeight.bold),
                   ),
@@ -250,7 +252,21 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                                   height: 300,
                                   width: 300,
                                 ),
-                                const Text("Login First"),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Routes().navigate("Login", context);
+                                      },
+                                      child: const Text(
+                                        "Login",
+                                        style: TextStyle(color: Colors.blue),
+                                      ),
+                                    ),
+                                    const Text(" First"),
+                                  ],
+                                ),
                               ],
                             ),
                           ),

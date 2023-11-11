@@ -202,6 +202,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                   ),
                                   TextFormField(
                                     controller: firstName,
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        onCreateAccount(context);
+                                      }
+                                    },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "First name is required";
@@ -222,6 +227,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                   ),
                                   TextFormField(
                                     controller: lastName,
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        onCreateAccount(context);
+                                      }
+                                    },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "Last name is required";
@@ -246,6 +256,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                       border: OutlineInputBorder(),
                                       labelText: 'Email',
                                     ),
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        onCreateAccount(context);
+                                      }
+                                    },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return 'Email is required';
@@ -263,6 +278,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                   ),
                                   TextFormField(
                                     controller: username,
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        onCreateAccount(context);
+                                      }
+                                    },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "Username is required";
@@ -295,6 +315,11 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                                             : Icons.visibility_off),
                                       ),
                                     ),
+                                    onFieldSubmitted: (value) {
+                                      if (_formKey.currentState!.validate()) {
+                                        onCreateAccount(context);
+                                      }
+                                    },
                                     validator: (value) {
                                       if (value == null || value.isEmpty) {
                                         return "Password is required";

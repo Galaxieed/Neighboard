@@ -324,6 +324,9 @@ class _PostModalCommentState extends State<PostModalComment> {
                             isEditing
                                 ? TextField(
                                     controller: _controller,
+                                    onSubmitted: (value) {
+                                      updateComment();
+                                    },
                                     maxLines: 3,
                                     decoration: InputDecoration(
                                         suffixIcon: Row(
@@ -640,6 +643,9 @@ class _ReplyItselfState extends State<ReplyItself> {
                       isEditing
                           ? TextField(
                               controller: _controller,
+                              onSubmitted: (value) {
+                                updateReply();
+                              },
                               maxLines: 3,
                               decoration: InputDecoration(
                                   suffixIcon: Row(
@@ -815,8 +821,7 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
       );
 
       await NotificationFunction.addNotification(
-              notificationModel, otherUser!.userId)
-          .then((value) => controller.clear());
+          notificationModel, otherUser!.userId);
     }
   }
 
@@ -846,6 +851,24 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
               onChanged: (value) {
                 setState(() {});
               },
+              onSubmitted: (value) {
+                if (controller.text.isNotEmpty) {
+                  ReplyModel newReply = ReplyModel(
+                    replyId: DateTime.now().toIso8601String(),
+                    senderId: widget.currentUser.userId,
+                    senderName: widget.currentUser.username,
+                    recipientId: widget.recipientId,
+                    recipientName: widget.recipientName,
+                    replyMessage: controller.text,
+                  );
+                  widget.addReply(reply: newReply);
+                  //send notification to the recipient of this reply (from desktop)
+                  sendNotification(widget.recipientId);
+                  setState(() {
+                    controller.clear();
+                  });
+                }
+              },
               controller: controller,
               autofocus: true,
               decoration: InputDecoration(
@@ -871,9 +894,11 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
                     replyMessage: controller.text,
                   );
                   widget.addReply(reply: newReply);
-
                   //send notification to the recipient of this reply (from desktop)
                   sendNotification(widget.recipientId);
+                  setState(() {
+                    controller.clear();
+                  });
                 },
           icon: const Icon(Icons.send),
         ),

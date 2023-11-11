@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -36,7 +37,8 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
   final TextEditingController tcLname = TextEditingController();
   final TextEditingController tcUsername = TextEditingController();
   final TextEditingController tcEmail = TextEditingController();
-  final TextEditingController tcAddress = TextEditingController();
+  final TextEditingController tcBlock = TextEditingController();
+  final TextEditingController tcLot = TextEditingController();
   final TextEditingController tcCNo = TextEditingController();
   final TextEditingController tcPass = TextEditingController();
   final TextEditingController tcConfirmPass = TextEditingController();
@@ -45,7 +47,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
   bool passToggle1 = true;
   File? profileImage;
   PlatformFile? profileImageByte;
-  String profileImageUrl = "";
+  String profileImageUrl = "", street = "";
 
   UserModel? userModel;
   bool isEditing = false;
@@ -144,7 +146,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
       'last_name': tcLname.text,
       'username': tcUsername.text,
       'email': tcEmail.text,
-      'address': tcAddress.text,
+      'address': "Blk ${tcBlock.text} Lot ${tcLot.text}, $street",
       'contact_no': tcCNo.text,
     };
     await ProfileFunction.updateUserProfile(userDetails);
@@ -171,8 +173,17 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
   }
 
   controllerInitialization() async {
-    tcAddress.text = userModel!.address;
-    tcCNo.text = userModel!.contactNo;
+    try {
+      tcBlock.text = userModel!.address.split(' ')[1];
+      tcLot.text =
+          userModel!.address.split(' ')[3].replaceFirst(RegExp(r','), '');
+      street = userModel!.address.split(', ')[1];
+    } catch (e) {
+      print(e);
+    }
+    tcCNo.text = userModel!.contactNo.isNotEmpty
+        ? int.parse(userModel!.contactNo).toString()
+        : "";
     tcEmail.text = userModel!.email;
     tcFname.text = userModel!.firstName;
     tcLname.text = userModel!.lastName;
@@ -182,7 +193,8 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
 
   @override
   void dispose() {
-    tcAddress.dispose();
+    tcBlock.dispose();
+    tcLot.dispose();
     tcCNo.dispose();
     tcEmail.dispose();
     tcFname.dispose();
@@ -223,7 +235,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                       "MY PROFILE",
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.inversePrimary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                     ),
                   ),
@@ -290,8 +302,8 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.inversePrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                   icon: const Icon(Icons.save),
                   tooltip: "Save",
@@ -378,8 +390,75 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             infoTitle(context, "Address"),
-                            TextFormField(
-                              controller: tcAddress,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                const Text("Block"),
+                                const SizedBox(width: 5),
+                                TextFormField(
+                                  controller: tcBlock,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d{0,2}$'),
+                                    ),
+                                  ],
+                                  textAlign: TextAlign.center,
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                    constraints: BoxConstraints(
+                                      maxWidth: 50,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                const Text("Lot"),
+                                const SizedBox(width: 5),
+                                TextFormField(
+                                  controller: tcLot,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                      RegExp(r'^\d{0,2}$'),
+                                    ),
+                                  ],
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                    constraints: BoxConstraints(
+                                      maxWidth: 50,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                                Expanded(
+                                  child: DropdownButtonFormField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        street = value.toString();
+                                      });
+                                    },
+                                    items: siteModel == null
+                                        ? []
+                                        : siteModel!.siteStreets
+                                            .map((String e) {
+                                            return DropdownMenuItem<String>(
+                                              value: e,
+                                              child: Text(e),
+                                            );
+                                          }).toList(),
+                                    //value: street,
+                                    hint: const Text('Street'),
+                                    value: street.isEmpty ? null : street,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -393,37 +472,19 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d{0,11}$')),
+                                  RegExp(r'^\d{0,10}$'),
+                                ),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return null;
-                                } else if (value.length != 11) {
-                                  return 'Please enter exactly 11 digits';
+                                } else if (value.length != 10) {
+                                  return 'Please enter exactly 10 digits';
                                 }
                                 return null;
                               },
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Email Address"),
-                            TextFormField(
-                              controller: tcEmail,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                String pattern = r'\w+@\w+\.\w+';
-                                RegExp regex = RegExp(pattern);
-                                if (!regex.hasMatch(value)) {
-                                  return 'Invalid Email format';
-                                }
-                                return null;
-                              },
+                              decoration:
+                                  const InputDecoration(prefix: Text("+63")),
                             ),
                           ],
                         ),
@@ -477,7 +538,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                       passToggle1 = !passToggle1;
                                     });
                                   },
-                                  child: Icon(passToggle
+                                  child: Icon(passToggle1
                                       ? Icons.visibility
                                       : Icons.visibility_off),
                                 ),
@@ -602,7 +663,11 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           infoTitle(context, "Contact Number"),
-                          actualInfo(context, userModel!.contactNo),
+                          actualInfo(
+                              context,
+                              userModel!.contactNo.isEmpty
+                                  ? "+63"
+                                  : "+63${int.parse(userModel!.contactNo).toString()}"),
                         ],
                       ),
                       Column(
@@ -830,6 +895,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
             ),
             Text(
               "${userModel!.firstName} ${userModel!.lastName}",
+              textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge!

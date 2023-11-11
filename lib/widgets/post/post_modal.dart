@@ -11,6 +11,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -20,6 +21,7 @@ import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/post/post_interactors_function.dart';
 import 'package:neighboard/widgets/post/post_modal_comment.dart';
+import 'package:neighboard/widgets/post/post_page.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class PostModal extends StatefulWidget {
@@ -370,6 +372,9 @@ class _PostModalState extends State<PostModal> {
                     isEditing
                         ? TextField(
                             controller: _titleController,
+                            onSubmitted: (value) {
+                              updatePost();
+                            },
                             decoration: InputDecoration(
                                 suffixIcon: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -409,6 +414,9 @@ class _PostModalState extends State<PostModal> {
                     isEditing
                         ? TextField(
                             controller: _contentController,
+                            onSubmitted: (value) {
+                              updatePost();
+                            },
                             maxLines: 3,
                             decoration: InputDecoration(
                                 suffixIcon: Row(
@@ -463,43 +471,21 @@ class _PostModalState extends State<PostModal> {
                                   return GestureDetector(
                                     onTap: () => Navigator.of(context)
                                         .push(MaterialPageRoute(
-                                            builder: (ctx) => Scaffold(
-                                                  appBar: AppBar(
-                                                    automaticallyImplyLeading:
-                                                        false,
-                                                    leading: IconButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                      icon: const Icon(
-                                                          Icons.close),
-                                                    ),
-                                                    title: Text(
-                                                        "${widget.postModel.authorName}'s Post"),
-                                                  ),
-                                                  body: Center(
-                                                      child: Hero(
-                                                    tag: i,
-                                                    child: Image.network(i),
-                                                  )),
-                                                ))),
-                                    child: Hero(
-                                      tag: i,
-                                      child: Container(
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 5.0),
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .inversePrimary),
-                                          child: Image.network(
-                                            i,
-                                            fit: BoxFit.cover,
-                                          )),
-                                    ),
+                                      builder: (ctx) => PostPage(
+                                        postModel: widget.postModel,
+                                        deviceScreenType:
+                                            widget.deviceScreenType,
+                                      ),
+                                    )),
+                                    child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 5.0),
+                                        child: Image.network(
+                                          i,
+                                          fit: BoxFit.cover,
+                                        )),
                                   );
                                 },
                               );
@@ -539,7 +525,23 @@ class _PostModalState extends State<PostModal> {
                     const Divider(),
                     isLoggedIn
                         ? postActions()
-                        : const Center(child: Text("Login First")),
+                        : Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InkWell(
+                                  onTap: () {
+                                    Routes().navigate("Login", context);
+                                  },
+                                  child: const Text(
+                                    "Login",
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                ),
+                                const Text(" First"),
+                              ],
+                            ),
+                          ),
                     const Divider(),
                     //postComments(),
                     StreamBuilder(
@@ -715,6 +717,12 @@ class _ReplyCommentBoxState extends State<ReplyCommentBox> {
         child: TextField(
           onChanged: (a) {
             setState(() {});
+          },
+          onSubmitted: (value) {
+            if (widget.ctrlComment.text.isNotEmpty) {
+              widget.addComment();
+              widget.ctrlComment.clear();
+            }
           },
           controller: widget.ctrlComment,
           focusNode: widget.focusComment,

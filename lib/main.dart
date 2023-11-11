@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
@@ -83,8 +84,7 @@ bool isDarkMode = false;
 Future<void> getTheme() async {
   isDarkMode = await SharedPrefHelper.loadThemeMode();
   //TODO: change this id based on admin id
-  siteModel = await SiteSettingsFunction.getSiteSettings(
-      'O8dElItKmsUJ5cvZg9FA1eTfi0q2');
+  siteModel = await SiteSettingsFunction.getSiteSettings(siteAdminId);
   if (siteModel != null) {
     currentThemeColor = Color(siteModel!.siteThemeColor);
     await initializeOfficers();
@@ -179,7 +179,7 @@ setOfficers() async {
       .toList();
   //place as officers
   await SiteSettingsFunction.setOfficers(
-      adminId: "O8dElItKmsUJ5cvZg9FA1eTfi0q2",
+      adminId: siteAdminId,
       pres: pres,
       vp: vp,
       sec: sec,
@@ -194,7 +194,7 @@ setOfficers() async {
 
 //if ongoing, empty the officers variable
 deleteOfficers() async {
-  await SiteSettingsFunction.deleteOfficers("O8dElItKmsUJ5cvZg9FA1eTfi0q2");
+  await SiteSettingsFunction.deleteOfficers(siteAdminId);
 }
 
 //if there is no atleast one election happened, empty the officers variable.

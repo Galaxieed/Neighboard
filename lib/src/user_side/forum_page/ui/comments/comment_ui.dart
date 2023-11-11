@@ -689,6 +689,19 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
               child: TextField(
                 controller: replyController,
                 autofocus: true,
+                onSubmitted: (value) {
+                  final ReplyModel thisReply = ReplyModel(
+                    replyId: DateTime.now().toIso8601String(),
+                    senderId: _auth.currentUser!.uid,
+                    senderName: userModel!.username,
+                    recipientId: widget.recipientId,
+                    recipientName: widget.recipientName,
+                    replyMessage: replyController.text,
+                  );
+                  widget.addReply(reply: thisReply);
+                  replyController.clear();
+                  widget.setVisibility!(false);
+                },
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(15))),

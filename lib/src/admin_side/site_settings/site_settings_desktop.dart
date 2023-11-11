@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
@@ -43,7 +44,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   final TextEditingController tcSubdName = TextEditingController();
   final TextEditingController tcSubHeader = TextEditingController();
   final TextEditingController tcAbout = TextEditingController();
-
+  final TextEditingController tcOfficeAddress = TextEditingController();
   SiteModel? siteModel;
 
   File? homeImg, aboutImg, logoImg, logoImgDark;
@@ -160,6 +161,9 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         siteHeader: tcHeader.text,
         siteSubheader: tcSubHeader.text,
         siteAbout: tcAbout.text,
+        siteOfficeAddress: tcOfficeAddress.text,
+        siteContactNo: contactNumbers,
+        siteStreets: streets,
         siteThemeColor: currentThemeColor.value,
         siteLogo: logoImgUrl,
         siteLogoDark: logoImgUrlDark,
@@ -170,11 +174,18 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
-        await sendNotifToAll();
         successMessage(
             title: "Success!",
             desc: "Site settings successfully added",
             context: context);
+        setState(() {
+          isLoading = false;
+        });
+        await sendNotifToAll();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
       return;
     } else {
@@ -184,6 +195,9 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         'site_subd_name': tcSubdName.text,
         'site_subheader': tcSubHeader.text,
         'site_about': tcAbout.text,
+        'site_office_address': tcOfficeAddress.text,
+        'site_contact_no': contactNumbers,
+        'site_streets': streets,
         'site_theme_color': currentThemeColor.value,
         'site_logo': logoImgUrl,
         'site_logo_dark': logoImgUrlDark,
@@ -192,17 +206,31 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       };
       await SiteSettingsFunction.updateSiteSettings(siteDetails);
       await getSiteSettings();
-      await sendNotifToAll();
-      // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!",
           desc: "Site settings successfully updated",
           context: context);
+      setState(() {
+        isLoading = false;
+      });
+      //await sendNotifToAll();
     }
+  }
 
-    setState(() {
-      isLoading = false;
-    });
+  List<TextEditingController> tcContactNo = [];
+  List<String> contactNumbers = [];
+
+  void addContactNo([String? initialData]) {
+    tcContactNo.add(TextEditingController(text: initialData));
+    setState(() {});
+  }
+
+  List<TextEditingController> tcSteets = [];
+  List<String> streets = [];
+
+  void addStreets([String? initialData]) {
+    tcSteets.add(TextEditingController(text: initialData));
+    setState(() {});
   }
 
   getSiteSettings() async {
@@ -212,11 +240,21 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     tcSubdName.text = siteModel?.siteSubdName ?? "";
     tcSubHeader.text = siteModel?.siteSubheader ?? "";
     tcAbout.text = siteModel?.siteAbout ?? "";
+    tcOfficeAddress.text = siteModel?.siteOfficeAddress ?? "";
+    tcContactNo.clear();
+    contactNumbers = siteModel?.siteContactNo ?? [];
+    for (String i in contactNumbers) {
+      tcContactNo.add(TextEditingController(text: i));
+    }
+    tcSteets.clear();
+    streets = siteModel?.siteStreets ?? [];
+    for (String i in streets) {
+      tcSteets.add(TextEditingController(text: i));
+    }
     homeImgUrl = siteModel?.siteHomepageImage ?? "";
     aboutImgUrl = siteModel?.siteAboutImage ?? "";
     logoImgUrl = siteModel?.siteLogo ?? "";
     logoImgUrlDark = siteModel?.siteLogoDark ?? "";
-
     setState(() {
       isLoading = false;
     });
@@ -326,6 +364,8 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     tcSubdName.dispose();
     tcSubHeader.dispose();
     tcAbout.dispose();
+    tcOfficeAddress.dispose();
+
     super.dispose();
   }
 
@@ -385,8 +425,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                                     homeImgByte!.bytes!)
                                                 : FileImage(homeImg!)
                                                     as ImageProvider
-                                            : siteModel?.siteHomepageImage ==
-                                                    null
+                                            : siteModel?.siteHomepageImage == ""
                                                 ? const AssetImage(noImage)
                                                     as ImageProvider
                                                 : NetworkImage(siteModel
@@ -421,7 +460,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                                     aboutImgByte!.bytes!)
                                                 : FileImage(aboutImg!)
                                                     as ImageProvider
-                                            : siteModel?.siteAboutImage == null
+                                            : siteModel?.siteAboutImage == ""
                                                 ? const AssetImage(noImage)
                                                     as ImageProvider
                                                 : NetworkImage(
@@ -510,6 +549,138 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                 height: 20,
                               ),
                               TextFormField(
+                                controller: tcOfficeAddress,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: "Office Address",
+                                  alignLabelWithHint: true,
+                                ),
+                                maxLines: 5,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              //generate textformField
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: ElevatedButton.icon(
+                                  onPressed: addContactNo,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Contact Number'),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ...tcContactNo.map((e) {
+                                final index = tcContactNo.indexOf(e);
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: TextFormField(
+                                    controller: tcContactNo[index],
+                                    keyboardType: TextInputType.phone,
+                                    inputFormatters: <TextInputFormatter>[
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(11),
+                                    ],
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return "Enter contact number";
+                                      }
+                                      if (value.length != 11) {
+                                        return "Enter 11-digit number";
+                                      }
+                                      return null;
+                                    },
+                                    onSaved: (value) => {
+                                      if (!contactNumbers.contains(value))
+                                        {
+                                          contactNumbers.add(value!),
+                                        }
+                                    },
+                                    decoration: InputDecoration(
+                                      border: const OutlineInputBorder(),
+                                      labelText: "Contact Number",
+                                      alignLabelWithHint: true,
+                                      suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            try {
+                                              contactNumbers.removeAt(index);
+                                            } catch (e) {
+                                              print(e);
+                                            }
+                                            tcContactNo[index].dispose();
+                                            tcContactNo.removeAt(index);
+                                          });
+                                        },
+                                        icon: const Icon(Icons.delete_forever),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              const SizedBox(
+                                height: 20,
+                              ),
+
+                              //generate streets
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: ElevatedButton.icon(
+                                  onPressed: addStreets,
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add Street'),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ...tcSteets.map((e) {
+                                final index = tcSteets.indexOf(e);
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: TextFormField(
+                                    controller: tcSteets[index],
+                                    validator: (value) {
+                                      if (value == null) {
+                                        return "Enter a Street";
+                                      }
+                                      return null;
+                                    },
+                                    onSaved: (value) => {
+                                      if (!streets.contains(value))
+                                        {
+                                          streets.add(value!),
+                                        }
+                                    },
+                                    decoration: InputDecoration(
+                                      border: const OutlineInputBorder(),
+                                      labelText: "Streets",
+                                      alignLabelWithHint: true,
+                                      suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            try {
+                                              streets.removeAt(index);
+                                            } catch (e) {
+                                              print(e);
+                                            }
+                                            tcSteets[index].dispose();
+                                            tcSteets.removeAt(index);
+                                          });
+                                        },
+                                        icon: const Icon(Icons.delete_forever),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              const SizedBox(
+                                height: 20,
+                              ),
+
+                              TextFormField(
                                 controller: tcHeader,
                                 decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
@@ -564,7 +735,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                   ),
                                   ElevatedButton.icon(
                                       onPressed: () {
-                                        onSavingSettings(context);
+                                        if (_formKey.currentState!.validate()) {
+                                          _formKey.currentState!.save();
+                                          onSavingSettings(context);
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         shape: RoundedRectangleBorder(
@@ -593,13 +767,23 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                               if (officersModel.isNotEmpty)
+                                const SizedBox(
+                                  height: 30,
+                                ),
+                              if (officersModel.isNotEmpty)
                                 GridView(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                      const SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: 350,
-                                    childAspectRatio: 250 / 250,
+                                      SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: 320,
+                                    childAspectRatio: widget.deviceScreenType ==
+                                            DeviceScreenType.mobile
+                                        ? MediaQuery.of(context).size.width <=
+                                                360
+                                            ? 250 / 180
+                                            : 250 / 340
+                                        : 250 / 250,
                                     mainAxisSpacing: 10,
                                     crossAxisSpacing: 10,
                                   ),
@@ -844,16 +1028,13 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
         ),
         Text(
           "${widget.officerModel.firstName} ${widget.officerModel.lastName}",
-          style: Theme.of(context).textTheme.titleLarge!.copyWith(
+          style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
         Text(
           widget.position,
-          style: Theme.of(context).textTheme.titleMedium!,
+          style: Theme.of(context).textTheme.titleSmall!,
         ),
       ],
     );
@@ -861,7 +1042,7 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
 
   CircleAvatar officerAvatar(BuildContext context) {
     return CircleAvatar(
-      radius: 100,
+      radius: 80,
       backgroundColor:
           _isHovering ? Theme.of(context).colorScheme.inversePrimary : null,
       child: ClipOval(
@@ -869,7 +1050,7 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
           alignment: Alignment.center,
           children: [
             CircleAvatar(
-              radius: 95,
+              radius: 75,
               child: widget.officerModel.profilePicture == ""
                   ? Image.asset(guestIcon)
                   : FadeInImage.assetNetwork(
@@ -878,7 +1059,7 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
             ),
             if (_isHovering)
               CircleAvatar(
-                radius: 95,
+                radius: 75,
                 backgroundColor: Theme.of(context).primaryColor.withOpacity(.3),
                 child: ElevatedButton(
                   onPressed: () {

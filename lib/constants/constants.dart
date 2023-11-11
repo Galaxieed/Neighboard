@@ -14,6 +14,8 @@ const String loginFirstImg = 'assets/login_first.png';
 const String noElectionImg = 'assets/no_election.png';
 const String notificationImg = 'assets/notifications.png';
 
+const String siteAdminId = "sJuGAwN3Ena76LVIdJIdudfPSmh2";
+
 //LandPage Styles
 double ccLandPageBGOpacity = 1;
 

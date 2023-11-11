@@ -315,7 +315,7 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
                   SizedBox(
                     width: double.infinity,
                     child: Text(
-                      'HOA VOTING',
+                      'HOA ELECTION',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.titleLarge!.copyWith(
                             fontWeight: FontWeight.bold,

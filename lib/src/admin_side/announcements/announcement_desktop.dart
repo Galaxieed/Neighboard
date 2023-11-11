@@ -49,8 +49,14 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
       isLoading = true;
     });
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
+    //check announcment schedule
+    announcementModels = announcementModels
+        .where((element) =>
+            DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+        .toList();
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+    allAnnouncementModels = announcementModels;
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -73,8 +79,9 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
       announcementId: DateTime.now().toIso8601String(),
       title: _postTitle,
       details: _postContent,
-      timeStamp: formattedDate(),
-      datePosted: formattedDate(),
+      timeStamp:
+          dateSet == null ? DateTime.now().toString() : dateSet.toString(),
+      datePosted: formattedDate(dateSet),
       image: profileImageUrl,
     );
 
@@ -83,6 +90,11 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
 
     if (isSuccessful) {
       announcementModels.add(announcementModel);
+      //check announcment schedule
+      announcementModels = announcementModels
+          .where((element) =>
+              DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+          .toList();
       announcementModels
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
       await sendNotifToAll();
@@ -173,8 +185,8 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   Future<void> sendNotificaton(UserModel user) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
-      "New Announcement: ",
-      _ctrlTitle.text,
+      "New Announcement",
+      'to this date: ${formattedDate(dateSet)}',
     );
 
     //ADD sa notification TAB
@@ -194,6 +206,32 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   //send notif to all at once
   sendNotifToAll() async {
     await Future.forEach(allUsers, sendNotificaton);
+  }
+
+  String searchedText = "";
+  List<AnnouncementModel> allAnnouncementModels = [];
+  void searchAnnouncement(String text) {
+    text = text.toLowerCase();
+    announcementModels = allAnnouncementModels;
+    if (text.isNotEmpty) {
+      announcementModels = announcementModels
+          .where((announcement) =>
+              announcement.title.toLowerCase().contains(text) ||
+              announcement.datePosted.toLowerCase().contains(text) ||
+              announcement.details.toLowerCase().contains(text))
+          .toList();
+    }
+  }
+
+  DateTime? dateSet;
+  int nextYear = DateTime.parse(DateTime.now().toString()).year + 1;
+  int thisMonth = DateTime.parse(DateTime.now().toString()).month;
+  int thisDay = DateTime.parse(DateTime.now().toString()).day;
+
+  setDate(date) {
+    setState(() {
+      dateSet = date;
+    });
   }
 
   @override
@@ -229,6 +267,23 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      SizedBox(
+                        width: 300,
+                        child: SearchBar(
+                          leading: const Icon(Icons.search),
+                          hintText: 'Search...',
+                          constraints: const BoxConstraints(
+                            minWidth: double.infinity,
+                            minHeight: 40,
+                          ),
+                          onChanged: (String searchText) {
+                            setState(() {
+                              searchAnnouncement(searchText);
+                            });
+                          },
+                        ),
+                      ),
+                      const Spacer(),
                       ElevatedButton.icon(
                         onPressed: () {
                           showDialog(
@@ -238,6 +293,9 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                 builder: (BuildContext context,
                                     StateSetter stateSetter) {
                                   return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
                                     title: Text(
                                       "New Announcement",
                                       style: Theme.of(context)
@@ -320,7 +378,7 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          10)),
+                                                                          4)),
                                                       backgroundColor:
                                                           Colors.indigo[900],
                                                       foregroundColor:
@@ -333,16 +391,71 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                                   const SizedBox(
                                                     width: 10,
                                                   ),
+                                                  //this is not profileImage, this is announcementImage
                                                   profileImage != null ||
                                                           profileImageByte !=
                                                               null
                                                       ? kIsWeb
-                                                          ? Text(
-                                                              profileImageByte!
-                                                                  .name)
-                                                          : Text(profileImage!
-                                                              .path)
+                                                          ? Expanded(
+                                                              child: Text(
+                                                                profileImageByte!
+                                                                    .name,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            )
+                                                          : Expanded(
+                                                              child: Text(
+                                                                profileImage!
+                                                                    .path,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            )
                                                       : Container(),
+                                                  ElevatedButton.icon(
+                                                    onPressed: () {
+                                                      showDatePicker(
+                                                        context: context,
+                                                        initialDate:
+                                                            DateTime.now(),
+                                                        firstDate:
+                                                            DateTime.now(),
+                                                        lastDate: DateTime(
+                                                            nextYear,
+                                                            thisMonth,
+                                                            thisDay),
+                                                      ).then((value) {
+                                                        if (value != null) {
+                                                          stateSetter(() {
+                                                            setDate(value);
+                                                          });
+                                                        }
+                                                      });
+                                                    },
+                                                    icon: const Icon(Icons
+                                                        .date_range_outlined),
+                                                    style: ElevatedButton.styleFrom(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4))),
+                                                    label:
+                                                        const Text("Set Date"),
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  if (dateSet != null)
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: Text(
+                                                        formattedDate(dateSet),
+                                                      ),
+                                                    ),
                                                 ],
                                               )
                                             ],
@@ -355,13 +468,13 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                         style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(10)),
+                                                  BorderRadius.circular(4)),
                                           backgroundColor: Theme.of(context)
                                               .colorScheme
-                                              .inversePrimary,
+                                              .primary,
                                           foregroundColor: Theme.of(context)
                                               .colorScheme
-                                              .onBackground,
+                                              .onPrimary,
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 50, vertical: 2.h),
                                         ),
@@ -379,7 +492,11 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                               .textTheme
                                               .bodyLarge!
                                               .copyWith(
-                                                  fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary,
+                                              ),
                                         ),
                                       )
                                     ],

@@ -31,7 +31,13 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
 
   void getAllAnnouncements() async {
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
+    //check announcment schedule
+    announcementModels = announcementModels
+        .where((element) =>
+            DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+        .toList();
     announcementModels.sort((a, b) => b.datePosted.compareTo(a.datePosted));
+    allAnnouncementModels = announcementModels;
     _mainAnnouncementWidget();
     if (mounted) {
       setState(() {
@@ -79,14 +85,14 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
       value: "title",
       child: ListTile(
         leading: Icon(Icons.sort_by_alpha),
-        title: Text("Sort by Title"),
+        title: Text("View by Title"),
       ),
     ),
     const PopupMenuItem(
       value: "date",
       child: ListTile(
         leading: Icon(Icons.date_range),
-        title: Text("Sort by Date"),
+        title: Text("View by Date"),
       ),
     ),
   ];
@@ -112,6 +118,21 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
   checkIfLoggedIn() {
     if (_auth.currentUser != null) {
       isLoggedIn = true;
+    }
+  }
+
+  String searchedText = "";
+  List<AnnouncementModel> allAnnouncementModels = [];
+  void searchAnnouncement(String text) {
+    text = text.toLowerCase();
+    announcementModels = allAnnouncementModels;
+    if (text.isNotEmpty) {
+      announcementModels = announcementModels
+          .where((announcement) =>
+              announcement.title.toLowerCase().contains(text) ||
+              announcement.datePosted.toLowerCase().contains(text) ||
+              announcement.details.toLowerCase().contains(text))
+          .toList();
     }
   }
 
@@ -245,6 +266,32 @@ class _AnnouncementMobileState extends State<AnnouncementMobile> {
             const SizedBox(
               height: 10,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: SearchBar(
+                  leading: const Icon(Icons.search),
+                  hintText: 'Search...',
+                  constraints: const BoxConstraints(
+                    minWidth: double.infinity,
+                    minHeight: 40,
+                  ),
+                  onChanged: (String searchText) {
+                    setState(() {
+                      searchAnnouncement(searchText);
+                    });
+                  },
+                  onTap: () {
+                    // showSearch(
+                    //     context: context, delegate: SearchScreenUI());
+                  },
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             announcementModels.isEmpty
                 ? Center(
                     child: Column(
@@ -366,7 +413,7 @@ class MainAnnouncement extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        announcementModel.timeStamp,
+                        announcementModel.datePosted,
                         style: Theme.of(context).textTheme.titleSmall,
                         overflow: TextOverflow.ellipsis,
                       )
@@ -500,7 +547,7 @@ class OtherAnnouncement extends StatelessWidget {
       // ignore: use_build_context_synchronously
       errorMessage(
           title: "Something went wrong!",
-          desc: "This announcement isn't deleted!",
+          desc: "This announcement isn't archived!",
           context: context);
     }
   }
@@ -580,7 +627,7 @@ class OtherAnnouncement extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            announcementModel.timeStamp,
+                            announcementModel.datePosted,
                             style: Theme.of(context).textTheme.titleSmall,
                             overflow: TextOverflow.ellipsis,
                           )
@@ -778,7 +825,7 @@ class OtherAnnouncement extends StatelessWidget {
                                                                     context) {
                                                               return AlertDialog(
                                                                 title: const Text(
-                                                                    "Confirm Delete?"),
+                                                                    "Confirm?"),
                                                                 content: const Text(
                                                                     "Would you like to continue removing this announcement?"),
                                                                 actions: [
@@ -823,7 +870,7 @@ class OtherAnnouncement extends StatelessWidget {
                                                           ),
                                                         ),
                                                         child: const Text(
-                                                            "Remove")),
+                                                            "Archive")),
                                                     const SizedBox(
                                                       width: 10,
                                                     ),

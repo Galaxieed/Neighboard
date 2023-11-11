@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -36,7 +37,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   final TextEditingController tcLname = TextEditingController();
   final TextEditingController tcUsername = TextEditingController();
   final TextEditingController tcEmail = TextEditingController();
-  final TextEditingController tcAddress = TextEditingController();
+  final TextEditingController tcBlock = TextEditingController();
+  final TextEditingController tcLot = TextEditingController();
   final TextEditingController tcCNo = TextEditingController();
   final TextEditingController tcPass = TextEditingController();
   final TextEditingController tcConfirmPass = TextEditingController();
@@ -45,7 +47,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   bool passToggle1 = true;
   File? profileImage;
   PlatformFile? profileImageByte;
-  String profileImageUrl = "";
+  String profileImageUrl = "", street = "";
 
   UserModel? userModel;
   bool isEditing = false;
@@ -143,7 +145,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       'last_name': tcLname.text,
       'username': tcUsername.text,
       'email': tcEmail.text,
-      'address': tcAddress.text,
+      'address': "Blk ${tcBlock.text} Lot ${tcLot.text}, $street",
       'contact_no': tcCNo.text,
     };
     await ProfileFunction.updateUserProfile(userDetails);
@@ -171,8 +173,17 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   }
 
   controllerInitialization() async {
-    tcAddress.text = userModel!.address;
-    tcCNo.text = userModel!.contactNo;
+    try {
+      tcBlock.text = userModel!.address.split(' ')[1];
+      tcLot.text =
+          userModel!.address.split(' ')[3].replaceFirst(RegExp(r','), '');
+      street = userModel!.address.split(', ')[1];
+    } catch (e) {
+      print(e);
+    }
+    tcCNo.text = userModel!.contactNo.isNotEmpty
+        ? int.parse(userModel!.contactNo).toString()
+        : "";
     tcEmail.text = userModel!.email;
     tcFname.text = userModel!.firstName;
     tcLname.text = userModel!.lastName;
@@ -182,7 +193,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
 
   @override
   void dispose() {
-    tcAddress.dispose();
+    tcBlock.dispose();
+    tcLot.dispose();
     tcCNo.dispose();
     tcEmail.dispose();
     tcFname.dispose();
@@ -200,6 +212,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   void _openChat() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return const MyChat();
       },
@@ -231,15 +244,34 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                 shrinkWrap: true,
                 children: [
                   Center(
-                    child: Text(
-                      "MY PROFILE",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.inversePrimary,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 900,
+                          child: Text(
+                            "MY PROFILE",
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                           ),
+                        ),
+                        if (!widget.isAdmin)
+                          Positioned(
+                            left: 1,
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: const Icon(Icons.arrow_back),
+                            ),
+                          )
+                      ],
                     ),
                   ),
                   Center(
@@ -322,8 +354,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   icon: const Icon(Icons.save),
                   label: const Text("Save"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.inversePrimary,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   ),
                 )
               ],
@@ -408,8 +440,76 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               infoTitle(context, "Address"),
-                              TextFormField(
-                                controller: tcAddress,
+                              //TODO: block, Lot, Street
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text("Block"),
+                                  const SizedBox(width: 5),
+                                  TextFormField(
+                                    controller: tcBlock,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d{0,2}$'),
+                                      ),
+                                    ],
+                                    textAlign: TextAlign.center,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      constraints: BoxConstraints(
+                                        maxWidth: 50,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  const Text("Lot"),
+                                  const SizedBox(width: 5),
+                                  TextFormField(
+                                    controller: tcLot,
+                                    keyboardType: TextInputType.number,
+                                    textAlign: TextAlign.center,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d{0,2}$'),
+                                      ),
+                                    ],
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      constraints: BoxConstraints(
+                                        maxWidth: 50,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: DropdownButtonFormField(
+                                      onChanged: (value) {
+                                        setState(() {
+                                          street = value.toString();
+                                        });
+                                      },
+                                      items: siteModel == null
+                                          ? []
+                                          : siteModel!.siteStreets
+                                              .map((String e) {
+                                              return DropdownMenuItem<String>(
+                                                value: e,
+                                                child: Text(e),
+                                              );
+                                            }).toList(),
+                                      //value: street,
+                                      hint: const Text('Street'),
+                                      value: street.isEmpty ? null : street,
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -424,41 +524,22 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d{0,11}$')),
+                                    RegExp(r'^\d{0,10}$'),
+                                  ),
                                 ],
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return null;
-                                  } else if (value.length != 11) {
-                                    return 'Please enter exactly 11 digits';
+                                  } else if (value.length != 10) {
+                                    return 'Please enter exactly 10 digits';
                                   }
                                   return null;
                                 },
+                                decoration:
+                                    const InputDecoration(prefix: Text("+63")),
                               ),
                             ],
                           ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Email Address"),
-                            TextFormField(
-                              controller: tcEmail,
-                              readOnly: true,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                String pattern = r'\w+@\w+\.\w+';
-                                RegExp regex = RegExp(pattern);
-                                if (!regex.hasMatch(value)) {
-                                  return 'Invalid Email format';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -510,7 +591,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                       passToggle1 = !passToggle1;
                                     });
                                   },
-                                  child: Icon(passToggle
+                                  child: Icon(passToggle1
                                       ? Icons.visibility
                                       : Icons.visibility_off),
                                 ),
@@ -635,7 +716,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             infoTitle(context, "Contact Number"),
-                            actualInfo(context, userModel!.contactNo),
+                            actualInfo(
+                                context,
+                                userModel!.contactNo.isEmpty
+                                    ? "+63"
+                                    : "+63${int.parse(userModel!.contactNo).toString()}"),
                           ],
                         ),
                       Column(

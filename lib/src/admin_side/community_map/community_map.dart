@@ -73,7 +73,6 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       _moveMap();
     } catch (e) {
       // ignore: use_build_context_synchronously
-      print(e);
       //errorMessage(title: "Error!", desc: e.toString(), context: context);
     }
     if (mounted) {
@@ -110,6 +109,9 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
         siteHeader: '',
         siteSubheader: '',
         siteAbout: '',
+        siteOfficeAddress: '',
+        siteContactNo: [],
+        siteStreets: [],
         siteThemeColor: currentThemeColor.value,
         siteLogo: '',
         siteLogoDark: '',
@@ -196,7 +198,6 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     mapController.dispose();
     controller.dispose();
@@ -204,38 +205,42 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              leading: const Icon(Icons.search_rounded),
-              title: TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  hintText: "Search location..",
-                ),
-              ),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    kIsWeb
-                        ? _getLatLngFromAddressWeb(controller.text)
-                        : _getLatLngFromAddress(controller.text);
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: TextField(
+          controller: controller,
+          onSubmitted: (value) {
+            kIsWeb
+                ? _getLatLngFromAddressWeb(controller.text)
+                : _getLatLngFromAddress(controller.text);
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
             ),
-            body: FlutterMap(
+            hintText: "Search location..",
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              kIsWeb
+                  ? _getLatLngFromAddressWeb(controller.text)
+                  : _getLatLngFromAddress(controller.text);
+            },
+            icon: const Icon(Icons.search),
+          ),
+          const SizedBox(
+            width: 10,
+          ),
+        ],
+      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : FlutterMap(
               mapController: mapController,
               options: MapOptions(
                 center: currentCenter,
@@ -265,11 +270,11 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
                 ),
               ],
             ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: _moveMap,
-              tooltip: 'Move Map',
-              child: const Icon(Icons.my_location_outlined),
-            ),
-          );
+      floatingActionButton: FloatingActionButton(
+        onPressed: _moveMap,
+        tooltip: 'Move Map',
+        child: const Icon(Icons.my_location_outlined),
+      ),
+    );
   }
 }

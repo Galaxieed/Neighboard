@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/routes/routes.dart';
@@ -110,6 +111,8 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
     Navigator.pop(context);
   }
 
+  var focusNode = FocusNode();
+
   @override
   void dispose() {
     email.dispose();
@@ -211,6 +214,13 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                 ),
                                 TextFormField(
                                   controller: email,
+                                  onFieldSubmitted: (value) {
+                                    _emailError = null;
+                                    _passwordError = null;
+                                    if (_formKey.currentState!.validate()) {
+                                      onLogin();
+                                    }
+                                  },
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'Email is required';
@@ -250,6 +260,13 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                 ),
                                 TextFormField(
                                   controller: password,
+                                  onFieldSubmitted: (value) {
+                                    _emailError = null;
+                                    _passwordError = null;
+                                    if (_formKey.currentState!.validate()) {
+                                      onLogin();
+                                    }
+                                  },
                                   obscureText: passToggle,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -341,27 +358,40 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                     onPressed: () {
                                       showDialog(
                                         context: context,
-                                        builder: (_) => AlertDialog(
-                                          title: const Text("Reset Password"),
-                                          content: SizedBox(
-                                            width: 500,
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                const Text("Enter your email"),
-                                                TextField(
-                                                  controller: email,
-                                                ),
-                                              ],
+                                        builder: (_) => RawKeyboardListener(
+                                          focusNode: focusNode,
+                                          onKey: (event) {
+                                            if (event.isKeyPressed(
+                                                LogicalKeyboardKey.enter)) {
+                                              sendResetPassword();
+                                            }
+                                          },
+                                          child: AlertDialog(
+                                            title: const Text("Reset Password"),
+                                            content: SizedBox(
+                                              width: 500,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Text(
+                                                      "Enter your email"),
+                                                  TextField(
+                                                    onSubmitted: (value) {
+                                                      sendResetPassword();
+                                                    },
+                                                    controller: email,
+                                                  ),
+                                                ],
+                                              ),
                                             ),
+                                            actions: [
+                                              ElevatedButton.icon(
+                                                onPressed: sendResetPassword,
+                                                icon: const Icon(Icons.send),
+                                                label: const Text("Send"),
+                                              )
+                                            ],
                                           ),
-                                          actions: [
-                                            ElevatedButton.icon(
-                                              onPressed: sendResetPassword,
-                                              icon: const Icon(Icons.send),
-                                              label: const Text("Send"),
-                                            )
-                                          ],
                                         ),
                                       );
                                     },

@@ -518,11 +518,10 @@ class _StoresMobileState extends State<StoresMobile> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
                                 foregroundColor:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onPrimary,
                               ),
                               onPressed: onPublishNewStore,
                               icon: const Icon(Icons.send_outlined),
@@ -686,7 +685,7 @@ class StoresCards extends StatelessWidget {
       // ignore: use_build_context_synchronously
       errorMessage(
           title: "Something went wrong!",
-          desc: "This store isn't deleted!",
+          desc: "This store isn't archived!",
           context: context);
     }
   }
@@ -792,7 +791,7 @@ class StoresCards extends StatelessWidget {
                                         Icons.save,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .inversePrimary,
+                                            .primary,
                                       ),
                                     )
                                   ],
@@ -835,7 +834,7 @@ class StoresCards extends StatelessWidget {
                                         Icons.save,
                                         color: Theme.of(context)
                                             .colorScheme
-                                            .inversePrimary,
+                                            .primary,
                                       ),
                                     )
                                   ],
@@ -880,7 +879,7 @@ class StoresCards extends StatelessWidget {
                                             Icons.save,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .inversePrimary,
+                                                .primary,
                                           ),
                                         )
                                       ],
@@ -917,7 +916,7 @@ class StoresCards extends StatelessWidget {
                                             Icons.save,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .inversePrimary,
+                                                .primary,
                                           ),
                                         )
                                       ],
@@ -951,8 +950,7 @@ class StoresCards extends StatelessWidget {
                                         context: context,
                                         builder: (BuildContext context) {
                                           return AlertDialog(
-                                            title:
-                                                const Text("Confirm Delete?"),
+                                            title: const Text("Confirm?"),
                                             content: const Text(
                                                 "Would you like to continue removing this store?"),
                                             actions: [
@@ -982,7 +980,7 @@ class StoresCards extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                     ),
-                                    child: const Text("Remove")),
+                                    child: const Text("Archive")),
                                 const SizedBox(
                                   width: 10,
                                 ),

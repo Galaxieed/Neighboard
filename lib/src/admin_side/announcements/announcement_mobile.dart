@@ -45,8 +45,14 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
 
   void getAllAnnouncements() async {
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
+    //check announcment schedule
+    announcementModels = announcementModels
+        .where((element) =>
+            DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+        .toList();
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+    allAnnouncementModels = announcementModels;
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -69,8 +75,9 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
       announcementId: DateTime.now().toIso8601String(),
       title: _postTitle,
       details: _postContent,
-      timeStamp: formattedDate(),
-      datePosted: formattedDate(),
+      timeStamp:
+          dateSet == null ? DateTime.now().toString() : dateSet.toString(),
+      datePosted: formattedDate(dateSet),
       image: profileImageUrl,
     );
 
@@ -79,6 +86,11 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
 
     if (isSuccessful) {
       announcementModels.add(announcementModel);
+      //check announcment schedule
+      announcementModels = announcementModels
+          .where((element) =>
+              DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+          .toList();
       announcementModels
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
       await sendNotifToAll();
@@ -170,7 +182,7 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Announcement: ",
-      _ctrlTitle.text,
+      'to this date: ${formattedDate(dateSet)}',
     );
 
     //ADD sa notification TAB
@@ -190,6 +202,32 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
   //send notif to all at once
   sendNotifToAll() async {
     await Future.forEach(allUsers, sendNotificaton);
+  }
+
+  String searchedText = "";
+  List<AnnouncementModel> allAnnouncementModels = [];
+  void searchAnnouncement(String text) {
+    text = text.toLowerCase();
+    announcementModels = allAnnouncementModels;
+    if (text.isNotEmpty) {
+      announcementModels = announcementModels
+          .where((announcement) =>
+              announcement.title.toLowerCase().contains(text) ||
+              announcement.datePosted.toLowerCase().contains(text) ||
+              announcement.details.toLowerCase().contains(text))
+          .toList();
+    }
+  }
+
+  DateTime? dateSet;
+  int nextYear = DateTime.parse(DateTime.now().toString()).year + 1;
+  int thisMonth = DateTime.parse(DateTime.now().toString()).month;
+  int thisDay = DateTime.parse(DateTime.now().toString()).day;
+
+  setDate(date) {
+    setState(() {
+      dateSet = date;
+    });
   }
 
   @override
@@ -333,12 +371,71 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                                           profileImageByte !=
                                                               null
                                                       ? kIsWeb
-                                                          ? Text(
-                                                              profileImageByte!
-                                                                  .name)
-                                                          : Text(profileImage!
-                                                              .path)
+                                                          ? Expanded(
+                                                              child: Text(
+                                                                profileImageByte!
+                                                                    .name,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            )
+                                                          : Expanded(
+                                                              child: Text(
+                                                                profileImage!
+                                                                    .path,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            )
                                                       : Container(),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  ElevatedButton.icon(
+                                                    onPressed: () {
+                                                      showDatePicker(
+                                                        context: context,
+                                                        initialDate:
+                                                            DateTime.now(),
+                                                        firstDate:
+                                                            DateTime.now(),
+                                                        lastDate: DateTime(
+                                                            nextYear,
+                                                            thisMonth,
+                                                            thisDay),
+                                                      ).then((value) {
+                                                        if (value != null) {
+                                                          stateSetter(() {
+                                                            setDate(value);
+                                                          });
+                                                        }
+                                                      });
+                                                    },
+                                                    icon: const Icon(Icons
+                                                        .date_range_outlined),
+                                                    style: ElevatedButton.styleFrom(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        4))),
+                                                    label:
+                                                        const Text("Set Date"),
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  if (dateSet != null)
+                                                    Expanded(
+                                                      child: Text(
+                                                        formattedDate(dateSet),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ),
                                                 ],
                                               ),
                                               Align(
@@ -356,11 +453,11 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                                     backgroundColor:
                                                         Theme.of(context)
                                                             .colorScheme
-                                                            .inversePrimary,
+                                                            .primary,
                                                     foregroundColor:
                                                         Theme.of(context)
                                                             .colorScheme
-                                                            .onBackground,
+                                                            .onPrimary,
                                                     padding:
                                                         EdgeInsets.symmetric(
                                                             horizontal: 50,
@@ -381,9 +478,13 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                                         .textTheme
                                                         .bodyLarge!
                                                         .copyWith(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onPrimary,
+                                                        ),
                                                   ),
                                                 ),
                                               ),
@@ -419,6 +520,32 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                       itemBuilder: (BuildContext context) => _popUpMenuItem,
                     ),
                   ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: SearchBar(
+                      leading: const Icon(Icons.search),
+                      hintText: 'Search...',
+                      constraints: const BoxConstraints(
+                        minWidth: double.infinity,
+                        minHeight: 40,
+                      ),
+                      onChanged: (String searchText) {
+                        setState(() {
+                          searchAnnouncement(searchText);
+                        });
+                      },
+                      onTap: () {
+                        // showSearch(
+                        //     context: context, delegate: SearchScreenUI());
+                      },
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 15.h,
@@ -516,7 +643,7 @@ class MainAnnouncement extends StatelessWidget {
       // ignore: use_build_context_synchronously
       errorMessage(
           title: "Something went wrong!",
-          desc: "This announcement isn't deleted!",
+          desc: "This announcement isn't archived!",
           context: context);
     }
   }
@@ -643,7 +770,7 @@ class MainAnnouncement extends StatelessWidget {
                                                 Icons.save,
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .inversePrimary,
+                                                    .primary,
                                               ),
                                             )
                                           ],
@@ -689,7 +816,7 @@ class MainAnnouncement extends StatelessWidget {
                                                 Icons.save,
                                                 color: Theme.of(context)
                                                     .colorScheme
-                                                    .inversePrimary,
+                                                    .primary,
                                               ),
                                             )
                                           ],
@@ -725,8 +852,8 @@ class MainAnnouncement extends StatelessWidget {
                                                 builder:
                                                     (BuildContext context) {
                                                   return AlertDialog(
-                                                    title: const Text(
-                                                        "Confirm Delete?"),
+                                                    title:
+                                                        const Text("Confirm?"),
                                                     content: const Text(
                                                         "Would you like to continue removing this announcement?"),
                                                     actions: [
@@ -761,7 +888,7 @@ class MainAnnouncement extends StatelessWidget {
                                                     BorderRadius.circular(4),
                                               ),
                                             ),
-                                            child: const Text("Remove")),
+                                            child: const Text("Archive")),
                                         const SizedBox(
                                           width: 10,
                                         ),
@@ -820,7 +947,7 @@ class MainAnnouncement extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
-                          announcementModel.timeStamp,
+                          announcementModel.datePosted,
                           style: Theme.of(context).textTheme.titleSmall,
                           overflow: TextOverflow.ellipsis,
                         )

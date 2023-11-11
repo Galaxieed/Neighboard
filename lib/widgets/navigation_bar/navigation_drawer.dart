@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:share_plus/share_plus.dart';
@@ -88,7 +89,7 @@ class NavDrawer extends StatelessWidget {
                                         .copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    "Block 17 Lot 02, Abaño Street, Villa Roma Phase 5, Lias, Marilao, Bulacan, \n3019 Philippines",
+                                    officeAddress,
                                     style:
                                         Theme.of(context).textTheme.titleSmall!,
                                     textAlign: TextAlign.center,
@@ -102,7 +103,8 @@ class NavDrawer extends StatelessWidget {
                                         .copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   Text(
-                                    "(0906) 279-3960 | (0933) 694-2699",
+                                    siteContactNo.replaceAll(
+                                        RegExp(r'\|'), '\n'),
                                     style:
                                         Theme.of(context).textTheme.titleSmall!,
                                     textAlign: TextAlign.center,
@@ -237,15 +239,15 @@ class _ThemeColorPickerState extends State<ThemeColorPicker> {
               //   pickerColor: pickerColor,
               //   onColorChanged: changeColor,
               // ),
-              // child: MaterialPicker(
-              //   pickerColor: pickerColor,
-              //   onColorChanged: changeColor,
-              //   enableLabel: true, // only on portrait mode
-              // ),
-              child: BlockPicker(
-                pickerColor: currentThemeColor,
+              child: MaterialPicker(
+                pickerColor: pickerColor,
                 onColorChanged: changeColor,
+                enableLabel: true, // only on portrait mode
               ),
+              // child: BlockPicker(
+              //   pickerColor: currentThemeColor,
+              //   onColorChanged: changeColor,
+              // ),
             ),
             actions: <Widget>[
               ElevatedButton(

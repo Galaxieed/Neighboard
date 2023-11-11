@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -22,6 +23,9 @@ String myToken = '';
 List<NotificationModel> notificationModels = [];
 StreamSubscription<QuerySnapshot>? notifSubscription;
 StreamSubscription<QuerySnapshot>? chatSubscription;
+
+String siteContactNo = "";
+String officeAddress = "";
 
 class ScreenDirect extends StatefulWidget {
   const ScreenDirect({super.key});
@@ -191,11 +195,28 @@ class _ScreenDirectState extends State<ScreenDirect> {
     }
   }
 
+  //TODO: display the office address and contactNo.
+  List<String> contactNo = [];
+  void displayNo() {
+    officeAddress = siteModel?.siteOfficeAddress ?? "";
+    contactNo = siteModel?.siteContactNo ?? [];
+    if (contactNo.isNotEmpty) {
+      for (int i = 0; i < contactNo.length; i++) {
+        if (i == 0) {
+          siteContactNo = formatPhoneNumbers(contactNo[i]);
+        } else {
+          siteContactNo += " | ${formatPhoneNumbers(contactNo[i])}";
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     FirebaseMessaging.onMessage.listen(showFlutterNotification);
     FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
     super.initState();
+    displayNo();
     getToken();
     checkIfUserLoggedIn();
   }

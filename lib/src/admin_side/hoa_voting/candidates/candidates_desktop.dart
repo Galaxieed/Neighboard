@@ -165,6 +165,10 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     profileImageUrl = '';
   }
 
+  int nextYear = DateTime.parse(DateTime.now().toString()).year + 1;
+  int thisMonth = DateTime.parse(DateTime.now().toString()).month;
+  int thisDay = DateTime.parse(DateTime.now().toString()).day;
+
   checkIfElectionOngoing() async {
     electionModel = await CandidatesFunctions.getLatestElection();
     if (electionModel != null) {
@@ -485,14 +489,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {
-                            int nextYear =
-                                DateTime.parse(DateTime.now().toString()).year +
-                                    1;
-                            int thisMonth =
-                                DateTime.parse(DateTime.now().toString()).month;
-                            int thisDay =
-                                DateTime.parse(DateTime.now().toString()).day;
-
                             showDateRangePicker(
                               context: context,
                               firstDate: DateTime.now(),
@@ -504,19 +500,12 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                       start: DateTime.now(),
                                       end: DateTime.now());
                                   fromRange = value;
-                                  String startDate = DateFormat.yMMMd()
-                                      .format(fromRange.start);
-                                  String endDate =
-                                      DateFormat.yMMMd().format(fromRange.end);
+                                  // String startDate = DateFormat.yMMMd()
+                                  //     .format(fromRange.start);
+                                  // String endDate =
+                                  //     DateFormat.yMMMd().format(fromRange.end);
                                   setStartDate(fromRange.start.toString());
                                   setEndDate(fromRange.end.toString());
-
-                                  final String range = '$startDate - $endDate';
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(range),
-                                    ),
-                                  );
                                 }
                               },
                             );

@@ -201,6 +201,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
   void _openChat() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return const MyChat();
       },
@@ -403,11 +404,10 @@ class _StoresDesktopState extends State<StoresDesktop> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .inversePrimary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
                                 foregroundColor:
-                                    Theme.of(context).colorScheme.onBackground,
+                                    Theme.of(context).colorScheme.onPrimary,
                               ),
                               onPressed: onPublishNewStore,
                               icon: const Icon(Icons.send_outlined),
@@ -479,21 +479,16 @@ class _StoresDesktopState extends State<StoresDesktop> {
                                 searchStore(searchText);
                               });
                             },
-                            onTap: () {
-                              // showSearch(
-                              //     context: context, delegate: SearchScreenUI());
-                            },
                           ),
                         ),
                       )
                     ],
                   ),
                 ),
-          widget.isAdmin
-              ? Container()
-              : const SizedBox(
-                  height: 15,
-                ),
+          if (!widget.isAdmin)
+            const SizedBox(
+              height: 20,
+            ),
           if (widget.isAdmin)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -607,7 +602,7 @@ class StoresCards extends StatelessWidget {
       // ignore: use_build_context_synchronously
       errorMessage(
           title: "Something went wrong!",
-          desc: "This store isn't deleted!",
+          desc: "This store isn't archived!",
           context: context);
     }
   }
@@ -646,300 +641,323 @@ class StoresCards extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: StatefulBuilder(builder: (context, setState) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    width: 1000,
-                    height: 450,
-                    padding: const EdgeInsets.all(32),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Stack(
+              children: [
+                SizedBox(
+                  width: 550,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Flexible(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              isEditing
-                                  ? TextField(
-                                      controller: _nameController,
-                                      decoration: InputDecoration(
-                                          suffixIcon: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _nameController.text =
-                                                    storeModel.storeName;
-                                                isEditing = false;
-                                              });
-                                            },
-                                            icon: const Icon(
-                                              Icons.cancel_outlined,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              updateStore(context);
-                                              Navigator.pop(context);
-                                            },
-                                            icon: Icon(
-                                              Icons.save,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .inversePrimary,
-                                            ),
-                                          )
-                                        ],
-                                      )),
-                                    )
-                                  : Text(
-                                      storeModel.storeName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge!
-                                          .copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                        if (isAdmin)
+                          Container(
+                            height: 75,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color:
+                                  Theme.of(context).colorScheme.inversePrimary,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: const Text("Confirm?"),
+                                            content: const Text(
+                                                "Would you like to continue removing this store?"),
+                                            actions: [
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("NO"),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  removeStore(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text("YES"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onBackground,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
                                     ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              isEditing
-                                  ? TextField(
-                                      controller: _offersController,
-                                      decoration: InputDecoration(
-                                          suffixIcon: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _offersController.text =
-                                                    storeModel.storeOffers;
-                                                isEditing = false;
-                                              });
-                                            },
-                                            icon: const Icon(
-                                              Icons.cancel_outlined,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                          IconButton(
-                                            onPressed: () {
-                                              updateStore(context);
-                                              Navigator.pop(context);
-                                            },
-                                            icon: Icon(
-                                              Icons.save,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .inversePrimary,
-                                            ),
-                                          )
-                                        ],
-                                      )),
+                                    child: const Text("Archive")),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isEditing = !isEditing;
+                                      });
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    child: Text(isEditing ? "Cancel" : "Edit")),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          width: double.infinity,
+                          height: 400,
+                          decoration: storeModel.storeImage == ""
+                              ? BoxDecoration(
+                                  image: const DecorationImage(
+                                    image: AssetImage(noImage),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12))
+                              : BoxDecoration(
+                                  image: DecorationImage(
+                                    image: NetworkImage(storeModel.storeImage),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12)),
+                        ),
+                        const SizedBox(height: 16),
+                        isEditing
+                            ? TextField(
+                                controller: _nameController,
+                                decoration: InputDecoration(
+                                    suffixIcon: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _nameController.text =
+                                              storeModel.storeName;
+                                          isEditing = false;
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.cancel_outlined,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        updateStore(context);
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icon(
+                                        Icons.save,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
                                     )
-                                  : Text(
+                                  ],
+                                )),
+                              )
+                            : Text(
+                                storeModel.storeName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge!
+                                    .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        isEditing
+                            ? TextField(
+                                controller: _offersController,
+                                decoration: InputDecoration(
+                                  suffixIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _offersController.text =
+                                                storeModel.storeOffers;
+                                            isEditing = false;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.cancel_outlined,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          updateStore(context);
+                                          Navigator.pop(context);
+                                        },
+                                        icon: Icon(
+                                          Icons.save,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(width: 5),
+                                  const Icon(Icons.shopping_cart_rounded),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
                                       storeModel.storeOffers,
                                       style:
                                           Theme.of(context).textTheme.bodyLarge,
                                     ),
-                              const SizedBox(
-                                height: 20,
+                                  ),
+                                ],
                               ),
-                              isEditing
-                                  ? Column(
-                                      children: [
-                                        TextField(
-                                          controller: _houseNoController,
-                                          decoration: InputDecoration(
-                                              suffixIcon: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _houseNoController.text =
-                                                        storeModel
-                                                            .storeHouseNumber;
-                                                    isEditing = false;
-                                                  });
-                                                },
-                                                icon: const Icon(
-                                                  Icons.cancel_outlined,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  updateStore(context);
-                                                  Navigator.pop(context);
-                                                },
-                                                icon: Icon(
-                                                  Icons.save,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .inversePrimary,
-                                                ),
-                                              )
-                                            ],
-                                          )),
-                                        ),
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                        TextField(
-                                          controller: _streetController,
-                                          decoration: InputDecoration(
-                                              suffixIcon: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _streetController.text =
-                                                        storeModel
-                                                            .storeStreetName;
-                                                    isEditing = false;
-                                                  });
-                                                },
-                                                icon: const Icon(
-                                                  Icons.cancel_outlined,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                              IconButton(
-                                                onPressed: () {
-                                                  updateStore(context);
-                                                  Navigator.pop(context);
-                                                },
-                                                icon: Icon(
-                                                  Icons.save,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .inversePrimary,
-                                                ),
-                                              )
-                                            ],
-                                          )),
-                                        ),
-                                      ],
-                                    )
-                                  : Text(
-                                      "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
-                                    ),
-                            ],
-                          ),
-                        ),
                         const SizedBox(
-                          width: 32,
+                          height: 20,
                         ),
-                        Flexible(
-                          child: Container(
-                            width: 400,
-                            height: 400,
-                            decoration: storeModel.storeImage == ""
-                                ? BoxDecoration(
-                                    image: const DecorationImage(
-                                      image: AssetImage(noImage),
-                                      fit: BoxFit.cover,
+                        isEditing
+                            ? Column(
+                                children: [
+                                  TextField(
+                                    controller: _houseNoController,
+                                    decoration: InputDecoration(
+                                      suffixIcon: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _houseNoController.text =
+                                                    storeModel.storeHouseNumber;
+                                                isEditing = false;
+                                              });
+                                            },
+                                            icon: const Icon(
+                                              Icons.cancel_outlined,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              updateStore(context);
+                                              Navigator.pop(context);
+                                            },
+                                            icon: Icon(
+                                              Icons.save,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(30))
-                                : BoxDecoration(
-                                    image: DecorationImage(
-                                      image:
-                                          NetworkImage(storeModel.storeImage),
-                                      fit: BoxFit.cover,
+                                  ),
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                  TextField(
+                                    controller: _streetController,
+                                    decoration: InputDecoration(
+                                      suffixIcon: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _streetController.text =
+                                                    storeModel.storeStreetName;
+                                                isEditing = false;
+                                              });
+                                            },
+                                            icon: const Icon(
+                                              Icons.cancel_outlined,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              updateStore(context);
+                                              Navigator.pop(context);
+                                            },
+                                            icon: Icon(
+                                              Icons.save,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(30)),
-                          ),
-                        )
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const SizedBox(width: 5),
+                                  const Icon(Icons.pin_drop),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
+                                    style:
+                                        Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                ],
+                              ),
+                        const SizedBox(
+                          height: 16,
+                        ),
                       ],
                     ),
                   ),
-                  if (isAdmin)
-                    Container(
-                      height: 100,
-                      width: 1000,
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                            bottomLeft: Radius.circular(30),
-                            bottomRight: Radius.circular(30)),
-                        color: Theme.of(context).colorScheme.inversePrimary,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text("Confirm Delete?"),
-                                      content: const Text(
-                                          "Would you like to continue removing this store?"),
-                                      actions: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("NO"),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            removeStore(context);
-                                            Navigator.pop(context);
-                                          },
-                                          child: const Text("YES"),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onBackground,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              child: const Text("Remove")),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          ElevatedButton(
-                              onPressed: () {
-                                setState(() {
-                                  isEditing = !isEditing;
-                                });
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.background,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              child: const Text("Edit")),
-                        ],
-                      ),
-                    )
-                ],
-              ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ),
+              ],
             );
           }),
         );

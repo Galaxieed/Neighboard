@@ -27,6 +27,7 @@ class _CommunityMapDesktopState extends State<CommunityMapDesktop> {
   void _openChat() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return const MyChat();
       },

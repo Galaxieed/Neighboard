@@ -49,6 +49,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
 
   void _openChat() {
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       builder: (context) {
         return const MyChat();
@@ -296,6 +297,11 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
                     changingButton('Clubhouse Fees and Rental');
                   },
                   child: const Text("Clubhouse Fees and Rental")),
+              PopupMenuItem(
+                  onTap: () {
+                    changingButton('Marketplace/Business');
+                  },
+                  child: const Text('Marketplace/Business')),
             ];
           },
           child: IgnorePointer(

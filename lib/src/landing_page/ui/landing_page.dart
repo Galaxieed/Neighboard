@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/routes/routes.dart';
@@ -44,8 +45,10 @@ class _LandingPageState extends State<LandingPage> {
     header = siteModel?.siteHeader ?? 'Sample Header';
     subHeader = siteModel?.siteSubheader ?? 'Sample Subheader';
     about = siteModel?.siteAbout ?? 'Sample About';
+
     backgroundImage = siteModel?.siteHomepageImage ?? '';
     aboutImage = siteModel?.siteAboutImage ?? '';
+
     await getOfficers();
     setState(() {
       isLoading = false;
@@ -53,9 +56,7 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   getOfficers() async {
-    officers = await SiteSettingsFunction.getOfficers(
-            "O8dElItKmsUJ5cvZg9FA1eTfi0q2") ??
-        [];
+    officers = await SiteSettingsFunction.getOfficers(siteAdminId) ?? [];
 
     officers.sort((a, b) => a.candidateId.compareTo(b.candidateId));
   }
@@ -67,6 +68,7 @@ class _LandingPageState extends State<LandingPage> {
   void openChat() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         return const MyChat();
       },
@@ -193,7 +195,10 @@ class _LandingPageState extends State<LandingPage> {
                 ),
                 drawer: sizingInformation.deviceScreenType ==
                         DeviceScreenType.mobile
-                    ? const NavDrawer()
+                    ? const NavDrawer(
+                        // officeAddress: officeAddress,
+                        // contactNo: siteContactNo,
+                        )
                     : null,
                 endDrawer: NotificationDrawer(
                   deviceScreenType: sizingInformation.deviceScreenType,
@@ -226,6 +231,8 @@ class _LandingPageState extends State<LandingPage> {
                   header: header,
                   subHeader: subHeader,
                   about: about,
+                  officeAddress: officeAddress,
+                  contactNo: siteContactNo,
                   bgImage: backgroundImage,
                   aboutImage: aboutImage,
                   officers: officers,

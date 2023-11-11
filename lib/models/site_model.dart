@@ -5,6 +5,9 @@ class SiteModel {
   late String siteHeader;
   late String siteSubheader;
   late String siteAbout;
+  late String siteOfficeAddress;
+  late List<String> siteContactNo;
+  late List<String> siteStreets;
   late int siteThemeColor;
   late String siteLogo;
   late String siteLogoDark;
@@ -18,6 +21,9 @@ class SiteModel {
     required this.siteHeader,
     required this.siteSubheader,
     required this.siteAbout,
+    required this.siteOfficeAddress,
+    required this.siteContactNo,
+    required this.siteStreets,
     required this.siteThemeColor,
     required this.siteLogo,
     required this.siteLogoDark,
@@ -32,6 +38,9 @@ class SiteModel {
     siteHeader = json['site_header'];
     siteSubheader = json['site_subheader'];
     siteAbout = json['site_about'];
+    siteOfficeAddress = json['site_office_address'];
+    siteContactNo = json['site_contact_no'].cast<String>();
+    siteStreets = json['site_streets'].cast<String>();
     siteThemeColor = json['site_theme_color'];
     siteLogo = json['site_logo'];
     siteLogoDark = json['site_logo_dark'];
@@ -47,6 +56,9 @@ class SiteModel {
     data['site_header'] = siteHeader;
     data['site_subheader'] = siteSubheader;
     data['site_about'] = siteAbout;
+    data['site_office_address'] = siteOfficeAddress;
+    data['site_contact_no'] = siteContactNo;
+    data['site_streets'] = siteStreets;
     data['site_theme_color'] = siteThemeColor;
     data['site_logo'] = siteLogo;
     data['site_logo_dark'] = siteLogoDark;

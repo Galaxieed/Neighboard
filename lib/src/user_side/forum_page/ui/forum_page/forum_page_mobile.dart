@@ -122,6 +122,11 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               categoryText = 'Clubhouse Fees and Rental';
             },
             child: const Text("Clubhouse Fees and Rental")),
+        PopupMenuItem(
+            onTap: () {
+              categoryText = 'Marketplace/Business';
+            },
+            child: const Text('Marketplace/Business')),
       ],
       elevation: 8.0,
     ).then((value) {

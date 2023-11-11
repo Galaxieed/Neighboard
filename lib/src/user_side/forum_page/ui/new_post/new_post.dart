@@ -211,11 +211,12 @@ class _NewPostState extends State<NewPost> {
                                 },
                                 items: [
                                   'General Discussion',
-                                  'Garbage Collection',
-                                  'Parking Space',
                                   'Water Billing',
+                                  'Parking Space',
                                   'Electric Billing',
+                                  'Garbage Collection',
                                   'Power Interruption',
+                                  'Marketplace/Business',
                                   'Clubhouse Fees and Rental',
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(

@@ -42,9 +42,18 @@ class LandingPageDesktop extends StatefulWidget {
     required this.aboutImage,
     required this.subdName,
     required this.officers,
+    required this.officeAddress,
+    required this.contactNo,
   });
 
-  final String subdName, header, subHeader, about, bgImage, aboutImage;
+  final String subdName,
+      header,
+      subHeader,
+      about,
+      bgImage,
+      aboutImage,
+      officeAddress,
+      contactNo;
   final List<CandidateModel> officers;
 
   @override
@@ -273,6 +282,8 @@ class _LandingPageDesktopState extends State<LandingPageDesktop> {
             ),
             MyFooter(
               goToPage: goToPage,
+              officeAddress: widget.officeAddress,
+              contactNo: widget.contactNo,
             ),
           ],
         ),
@@ -504,8 +515,11 @@ class MyFooter extends StatelessWidget {
   const MyFooter({
     super.key,
     required this.goToPage,
+    required this.officeAddress,
+    required this.contactNo,
   });
   final Function goToPage;
+  final String officeAddress, contactNo;
 
   shareNeighboard() async {
     Share.share(
@@ -537,7 +551,7 @@ class MyFooter extends StatelessWidget {
                       height: 10,
                     ),
                     Text(
-                      "Block 17 Lot 02, Abaño Street, Villa Roma Phase 5, Lias, Marilao, Bulacan, \n3019 Philippines",
+                      officeAddress,
                       style: TextStyle(fontSize: 4.sp),
                     ),
                     const SizedBox(
@@ -552,7 +566,7 @@ class MyFooter extends StatelessWidget {
                               fontWeight: FontWeight.bold, fontSize: 4.sp),
                         ),
                         Text(
-                          "(0906) 279-3960 | (0933) 694-2699",
+                          contactNo,
                           style: TextStyle(fontSize: 4.sp),
                         )
                       ],
@@ -659,7 +673,7 @@ class OffersPage extends StatelessWidget {
         Text(
           "Quality of Living",
           style: TextStyle(
-            fontSize: 8.sp,
+            fontSize: 10.sp,
             letterSpacing: 2,
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.inversePrimary,

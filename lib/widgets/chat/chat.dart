@@ -83,6 +83,7 @@ class _MyChatState extends State<MyChat> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: MediaQuery.of(context).size.height / 1.5,
       padding: EdgeInsets.only(
           top: 12,
           left: 12,
@@ -127,6 +128,8 @@ class _MyChatState extends State<MyChat> {
                                   ListView.builder(
                                     reverse: true,
                                     shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     itemCount: snapshot.data!.docs.length,
                                     itemBuilder: (context, index) {
                                       final result = snapshot.data!;
@@ -245,6 +248,9 @@ class _MyChatState extends State<MyChat> {
                     TextField(
                       onChanged: (a) {
                         setState(() {});
+                      },
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) sendChat();
                       },
                       autofocus: true,
                       controller: _globalChatController,

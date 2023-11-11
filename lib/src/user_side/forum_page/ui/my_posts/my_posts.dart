@@ -10,11 +10,11 @@ import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_ui.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
-import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
@@ -126,17 +126,14 @@ class _MyPostsState extends State<MyPosts> {
                       children: [
                         InkWell(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginPage()));
+                            Routes().navigate("Login", context);
                           },
                           child: const Text(
-                            "Login ",
+                            "Login",
                             style: TextStyle(color: Colors.blue),
                           ),
                         ),
-                        const Text("First"),
+                        const Text(" First"),
                       ],
                     ),
                   ],
