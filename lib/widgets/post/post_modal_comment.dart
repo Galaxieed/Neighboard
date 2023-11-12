@@ -351,7 +351,7 @@ class _PostModalCommentState extends State<PostModalComment> {
                                             Icons.save,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .inversePrimary,
+                                                .primary,
                                           ),
                                         )
                                       ],
@@ -668,9 +668,8 @@ class _ReplyItselfState extends State<ReplyItself> {
                                     onPressed: updateReply,
                                     icon: Icon(
                                       Icons.save,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   )
                                 ],

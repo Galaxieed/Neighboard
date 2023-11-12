@@ -122,11 +122,14 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
-        await sendNotifToAll();
         successMessage(
             title: "Success!",
             desc: "Site successfully updated",
             context: context);
+        setState(() {
+          // isLoading = false;
+        });
+        await sendNotifToAll();
       }
       return;
     } else {
@@ -134,16 +137,16 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
         'site_location': '$newLatitude|$newLongitude',
       };
       await SiteSettingsFunction.updateSiteSettings(siteDetails);
-      await sendNotifToAll();
+
       successMessage(
           title: "Success!",
           desc: "Map location successfully updated",
           context: context);
+      setState(() {
+        // isLoading = false;
+      });
+      await sendNotifToAll();
     }
-
-    setState(() {
-      // isLoading = false;
-    });
   }
 
   void _handleTap(point, context) {

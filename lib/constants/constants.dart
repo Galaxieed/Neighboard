@@ -20,10 +20,10 @@ const String siteAdminId = "sJuGAwN3Ena76LVIdJIdudfPSmh2";
 double ccLandPageBGOpacity = 1;
 
 Color ccExploreButtonBGColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary;
+    Theme.of(context).colorScheme.primary;
 
 Color ccExploreButtonFGColor(context) =>
-    Theme.of(context).colorScheme.onBackground;
+    Theme.of(context).colorScheme.inversePrimary;
 
 Color ccSubHeaderFGColor(context) => Theme.of(context).colorScheme.onBackground;
 
@@ -35,7 +35,8 @@ Color ccNavDrawerBGColor(context) =>
 
 const Color ccNavDrawerShadowColor = Colors.black12;
 
-Color ccNavDrawerHeaderColor([context]) => Theme.of(context).primaryColor;
+Color ccNavDrawerHeaderColor([context]) =>
+    Theme.of(context).colorScheme.primary;
 
 const Color ccNavDrawerWelcomeColor = Colors.white;
 
@@ -44,12 +45,12 @@ Color ccForumButtonBGColor(context) =>
     Theme.of(context).disabledColor.withOpacity(0.1);
 
 Color ccForumSelectedButtonBGColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary;
+    Theme.of(context).colorScheme.primary;
 
 Color ccForumButtonFGColor(context) => isDarkMode ? Colors.white : Colors.black;
 
 Color ccForumSelectedButtonFGColor(context) =>
-    isDarkMode ? Colors.white : Colors.black;
+    Theme.of(context).colorScheme.onPrimary;
 
 Color ccForumButtonBorderColor([context]) => Colors.transparent;
 
@@ -61,33 +62,29 @@ const Color ccForumLinksColor = Colors.blue;
 const Color ccForumDividerColor = Colors.black;
 
 //mypost styles
-Color? ccExpansionPostColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary;
 Color ccMyPostCommentButtonBGColor(context) =>
-    Theme.of(context).colorScheme.inversePrimary;
+    Theme.of(context).colorScheme.primary;
 Color ccMyPostCommentButtonFGColor(context) =>
-    Theme.of(context).colorScheme.onBackground;
+    Theme.of(context).colorScheme.onPrimary;
 
 Color ccMyPostUpVotedBGColor(context) => Theme.of(context).disabledColor;
-Color ccMyPostUpVoteBGColor(context) =>
-    Theme.of(context).colorScheme.inversePrimary;
+Color ccMyPostUpVoteBGColor(context) => Theme.of(context).colorScheme.primary;
 Color ccMyPostUpVotedFGColor(context) => Colors.white;
-Color ccMyPostUpVoteFGColor(context) =>
-    Theme.of(context).colorScheme.onBackground;
+Color ccMyPostUpVoteFGColor(context) => Theme.of(context).colorScheme.onPrimary;
 
 //announcements colors
 Color ccOtherAnnouncementBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.85);
+    Theme.of(context).colorScheme.primary.withOpacity(0.85);
 
 Color ccMainAnnouncementBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary;
+    Theme.of(context).colorScheme.primary;
 
 //community map styles
-Color ccMapPinColor([context]) => Colors.red;
+Color ccMapPinColor([context]) => Theme.of(context).colorScheme.primary;
 
 //stores styles
 Color ccStoresBannerColor([context]) =>
-    Theme.of(context).colorScheme.inversePrimary.withOpacity(0.85);
+    Theme.of(context).colorScheme.primary.withOpacity(0.85);
 
 //login and register styles
 Color ccLoginButtonBGColor(context) =>
@@ -105,10 +102,8 @@ Color ccRegisterLoginButtonFGColor(context) =>
     Theme.of(context).colorScheme.onBackground;
 
 //HOA Voting
-Color ccHOATitleBannerColor(context) =>
-    Theme.of(context).colorScheme.inversePrimary;
-Color ccHOANextButtonBGColor(context) =>
-    Theme.of(context).colorScheme.inversePrimary;
+Color ccHOATitleBannerColor(context) => Theme.of(context).colorScheme.primary;
+Color ccHOANextButtonBGColor(context) => Theme.of(context).colorScheme.primary;
 Color ccHOANextButtonFGColor(context) =>
     Theme.of(context).colorScheme.onBackground;
 
@@ -125,10 +120,10 @@ Container hoaTitleBanner(BuildContext context, String title) {
     color: ccHOATitleBannerColor(context),
     child: Text(
       title,
-      style: Theme.of(context)
-          .textTheme
-          .titleLarge!
-          .copyWith(fontWeight: FontWeight.w800),
+      style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).colorScheme.onPrimary,
+          ),
     ),
   );
 }

@@ -995,7 +995,7 @@ class StoresCards extends StatelessWidget {
                                           Theme.of(context).colorScheme.primary,
                                       foregroundColor: Theme.of(context)
                                           .colorScheme
-                                          .background,
+                                          .onPrimary,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(4),
                                       ),
@@ -1060,10 +1060,13 @@ class StoresCards extends StatelessWidget {
                       Expanded(
                         child: Text(
                           storeModel.storeName,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),

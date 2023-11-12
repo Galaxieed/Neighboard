@@ -403,7 +403,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                                 chosenAssistAuditor == null)
                         ? Theme.of(context).disabledColor
                         : ccHOANextButtonBGColor(context),
-                    foregroundColor: ccHOANextButtonFGColor(context),
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),

@@ -42,9 +42,15 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
   bool isLoading = true;
 
   List<AnnouncementModel> announcementModels = [];
-
+  List<AnnouncementModel> pendingAnnouncements = [];
+  bool isOnPending = false;
   void getAllAnnouncements() async {
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
+    //get pending announcment
+    pendingAnnouncements = announcementModels
+        .where((element) =>
+            DateTime.parse(element.timeStamp).isAfter(DateTime.now()))
+        .toList();
     //check announcment schedule
     announcementModels = announcementModels
         .where((element) =>
@@ -93,23 +99,35 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
           .toList();
       announcementModels
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
-      await sendNotifToAll();
+
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!",
           desc: "Announcement successfully posted",
           context: context);
+      setState(() {
+        _ctrlTitle.clear();
+        _ctrlContent.clear();
+        _postTitle = '';
+        _postContent = '';
+        profileImage = null;
+        profileImageByte = null;
+        profileImageUrl = "";
+        isLoading = false;
+      });
+      await sendNotifToAll();
+    } else {
+      setState(() {
+        _ctrlTitle.clear();
+        _ctrlContent.clear();
+        _postTitle = '';
+        _postContent = '';
+        profileImage = null;
+        profileImageByte = null;
+        profileImageUrl = "";
+        isLoading = false;
+      });
     }
-    setState(() {
-      _ctrlTitle.clear();
-      _ctrlContent.clear();
-      _postTitle = '';
-      _postContent = '';
-      profileImage = null;
-      profileImageByte = null;
-      profileImageUrl = "";
-      isLoading = false;
-    });
   }
 
   void pickImage(StateSetter modalStateSetter) async {
@@ -136,17 +154,25 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
       if (type == "title" && isTitleAsc) {
         announcementModels.sort(
             (a, b) => a.title.toUpperCase().compareTo(b.title.toUpperCase()));
+        pendingAnnouncements.sort(
+            (a, b) => a.title.toUpperCase().compareTo(b.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "title" && !isTitleAsc) {
         announcementModels.sort(
+            (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
+        pendingAnnouncements.sort(
             (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "date" && isDateAsc) {
         announcementModels
             .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+        pendingAnnouncements
+            .sort((a, b) => b.announcementId.compareTo(a.announcementId));
         isDateAsc = !isDateAsc;
       } else if (type == "date" && !isDateAsc) {
         announcementModels
+            .sort((a, b) => a.announcementId.compareTo(b.announcementId));
+        pendingAnnouncements
             .sort((a, b) => a.announcementId.compareTo(b.announcementId));
         isDateAsc = !isDateAsc;
       }
@@ -253,9 +279,52 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: SearchBar(
+                      leading: const Icon(Icons.search),
+                      hintText: 'Search...',
+                      constraints: const BoxConstraints(
+                        minWidth: double.infinity,
+                        minHeight: 40,
+                      ),
+                      onChanged: (String searchText) {
+                        setState(() {
+                          searchAnnouncement(searchText);
+                        });
+                      },
+                      onTap: () {
+                        // showSearch(
+                        //     context: context, delegate: SearchScreenUI());
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 15.h,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          isOnPending = !isOnPending;
+                        });
+                      },
+                      style: isOnPending
+                          ? ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                            )
+                          : null,
+                      child: const Text("Pending"),
+                    ),
+                    const Spacer(),
                     ElevatedButton.icon(
                       onPressed: () {
                         showModalBottomSheet(
@@ -501,17 +570,16 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                         );
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text("New Announcement"),
+                      label: const Text("Announcement"),
                     ),
                     SizedBox(width: 2.w),
                     PopupMenuButton(
                       position: PopupMenuPosition.under,
-                      tooltip: "Filter announcements",
+                      tooltip: "Filter",
                       child: AbsorbPointer(
-                        child: ElevatedButton.icon(
+                        child: IconButton(
                           onPressed: () {},
                           icon: const Icon(Icons.sort),
-                          label: const Text("Filter"),
                         ),
                       ),
                       onSelected: (value) {
@@ -524,33 +592,9 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                 const SizedBox(
                   height: 15,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: SearchBar(
-                      leading: const Icon(Icons.search),
-                      hintText: 'Search...',
-                      constraints: const BoxConstraints(
-                        minWidth: double.infinity,
-                        minHeight: 40,
-                      ),
-                      onChanged: (String searchText) {
-                        setState(() {
-                          searchAnnouncement(searchText);
-                        });
-                      },
-                      onTap: () {
-                        // showSearch(
-                        //     context: context, delegate: SearchScreenUI());
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 15.h,
-                ),
-                if (announcementModels.isNotEmpty)
+                if (isOnPending
+                    ? pendingAnnouncements.isNotEmpty
+                    : announcementModels.isNotEmpty)
                   Expanded(
                     child: Center(
                       child: SingleChildScrollView(
@@ -559,7 +603,9 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                             SizedBox(
                               height: 500,
                               child: MainAnnouncement(
-                                announcementModel: announcementModels[0],
+                                announcementModel: isOnPending
+                                    ? pendingAnnouncements[0]
+                                    : announcementModels[0],
                                 stateSetter: getAllAnnouncements,
                                 isAdmin: true,
                               ),
@@ -574,17 +620,32 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                             ListView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: announcementModels.length,
+                              itemCount: isOnPending
+                                  ? pendingAnnouncements.length
+                                  : announcementModels.length,
                               itemBuilder: (context, index) {
-                                var model = announcementModels[index];
-                                if (model != announcementModels[0]) {
-                                  return OtherAnnouncement(
-                                    announcementModel: model,
-                                    stateSetter: getAllAnnouncements,
-                                    isAdmin: true,
-                                  );
+                                if (isOnPending) {
+                                  var model = pendingAnnouncements[index];
+                                  if (model != pendingAnnouncements[0]) {
+                                    return OtherAnnouncement(
+                                      announcementModel: model,
+                                      stateSetter: getAllAnnouncements,
+                                      isAdmin: true,
+                                    );
+                                  } else {
+                                    return Container();
+                                  }
                                 } else {
-                                  return Container();
+                                  var model = announcementModels[index];
+                                  if (model != announcementModels[0]) {
+                                    return OtherAnnouncement(
+                                      announcementModel: model,
+                                      stateSetter: getAllAnnouncements,
+                                      isAdmin: true,
+                                    );
+                                  } else {
+                                    return Container();
+                                  }
                                 }
                               },
                             ),
@@ -904,7 +965,7 @@ class MainAnnouncement extends StatelessWidget {
                                                   .primary,
                                               foregroundColor: Theme.of(context)
                                                   .colorScheme
-                                                  .background,
+                                                  .onPrimary,
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(4),
@@ -943,12 +1004,20 @@ class MainAnnouncement extends StatelessWidget {
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium!
-                              .copyWith(fontWeight: FontWeight.bold),
+                              .copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         Text(
                           announcementModel.datePosted,
-                          style: Theme.of(context).textTheme.titleSmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                           overflow: TextOverflow.ellipsis,
                         )
                       ],
@@ -958,8 +1027,10 @@ class MainAnnouncement extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4))),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
                       child: Text(
                         'View Details',
                         style: Theme.of(context).textTheme.titleSmall,

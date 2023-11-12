@@ -8,6 +8,7 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post_function.dart';
@@ -18,8 +19,11 @@ import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
 class NewPost extends StatefulWidget {
-  const NewPost({Key? key, required this.deviceScreenType}) : super(key: key);
+  const NewPost(
+      {Key? key, required this.deviceScreenType, required this.isAdmin})
+      : super(key: key);
   final DeviceScreenType deviceScreenType;
+  final bool isAdmin;
 
   @override
   State<NewPost> createState() => _NewPostState();
@@ -86,25 +90,36 @@ class _NewPostState extends State<NewPost> {
         images: imageUrls,
         asAnonymous: asAnonymous,
       );
-      bool isPostPublished = await NewPostFunction.createNewPost(postModel);
 
-      if (isPostPublished) {
-        // ignore: use_build_context_synchronously
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ForumPage(),
-            ),
-            (route) => false);
-
-        _discardPost();
+      if (widget.isAdmin) {
+        await PendingPostFunction.approvePendingPost(postModel);
         // ignore: use_build_context_synchronously
         successMessage(
             title: "Success!",
-            desc:
-                'Post have been published!\nJust wait for the admin to approve your post.',
+            desc: 'Post have been published!',
             context: context);
+      } else {
+        bool isPostPublished = await NewPostFunction.createNewPost(postModel);
+        if (isPostPublished) {
+          // ignore: use_build_context_synchronously
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ForumPage(),
+              ),
+              (route) => false);
+
+          // ignore: use_build_context_synchronously
+          successMessage(
+              title: "Success!",
+              desc:
+                  'Post have been published!\nJust wait for the admin to approve your post.',
+              context: context);
+        }
       }
+
+      _discardPost();
+
       setState(() {
         isLoading = false;
       });

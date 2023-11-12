@@ -43,16 +43,23 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   bool isLoading = true;
 
   List<AnnouncementModel> announcementModels = [];
-
+  List<AnnouncementModel> pendingAnnouncements = [];
+  bool isOnPending = false;
   void getAllAnnouncements() async {
     setState(() {
       isLoading = true;
     });
     announcementModels = await AnnouncementFunction.getAllAnnouncements() ?? [];
+    //get pending announcment
+    pendingAnnouncements = announcementModels
+        .where((element) =>
+            DateTime.parse(element.timeStamp).isAfter(DateTime.now()))
+        .toList();
     //check announcment schedule
     announcementModels = announcementModels
         .where((element) =>
-            DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+            DateTime.parse(element.timeStamp).isBefore(DateTime.now()) ||
+            DateTime.parse(element.timeStamp).isAtSameMomentAs(DateTime.now()))
         .toList();
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
@@ -97,23 +104,36 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
           .toList();
       announcementModels
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
-      await sendNotifToAll();
+
       // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!",
           desc: "Announcement successfully posted",
           context: context);
+      setState(() {
+        _ctrlTitle.clear();
+        _ctrlContent.clear();
+        _postTitle = '';
+        _postContent = '';
+        profileImage = null;
+        profileImageByte = null;
+        profileImageUrl = "";
+        isLoading = false;
+      });
+
+      await sendNotifToAll();
+    } else {
+      setState(() {
+        _ctrlTitle.clear();
+        _ctrlContent.clear();
+        _postTitle = '';
+        _postContent = '';
+        profileImage = null;
+        profileImageByte = null;
+        profileImageUrl = "";
+        isLoading = false;
+      });
     }
-    setState(() {
-      _ctrlTitle.clear();
-      _ctrlContent.clear();
-      _postTitle = '';
-      _postContent = '';
-      profileImage = null;
-      profileImageByte = null;
-      profileImageUrl = "";
-      isLoading = false;
-    });
   }
 
   void pickImage(StateSetter modalStateSetter) async {
@@ -140,17 +160,25 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
       if (type == "title" && isTitleAsc) {
         announcementModels.sort(
             (a, b) => a.title.toUpperCase().compareTo(b.title.toUpperCase()));
+        pendingAnnouncements.sort(
+            (a, b) => a.title.toUpperCase().compareTo(b.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "title" && !isTitleAsc) {
         announcementModels.sort(
+            (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
+        pendingAnnouncements.sort(
             (a, b) => b.title.toUpperCase().compareTo(a.title.toUpperCase()));
         isTitleAsc = !isTitleAsc;
       } else if (type == "date" && isDateAsc) {
         announcementModels
             .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+        pendingAnnouncements
+            .sort((a, b) => b.announcementId.compareTo(a.announcementId));
         isDateAsc = !isDateAsc;
       } else if (type == "date" && !isDateAsc) {
         announcementModels
+            .sort((a, b) => a.announcementId.compareTo(b.announcementId));
+        pendingAnnouncements
             .sort((a, b) => a.announcementId.compareTo(b.announcementId));
         isDateAsc = !isDateAsc;
       }
@@ -258,30 +286,70 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
                   TabHeader(
                     title: "Announcements",
                     callback: () {
                       widget.drawer();
                     },
                   ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SearchBar(
+                    leading: const Icon(Icons.search),
+                    hintText: 'Search...',
+                    constraints: const BoxConstraints(
+                      minWidth: double.infinity,
+                      minHeight: 40,
+                    ),
+                    onChanged: (String searchText) {
+                      setState(() {
+                        searchAnnouncement(searchText);
+                      });
+                    },
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      SizedBox(
-                        width: 300,
-                        child: SearchBar(
-                          leading: const Icon(Icons.search),
-                          hintText: 'Search...',
-                          constraints: const BoxConstraints(
-                            minWidth: double.infinity,
-                            minHeight: 40,
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            isOnPending = !isOnPending;
+                          });
+                        },
+                        style: isOnPending
+                            ? ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
+                              )
+                            : null,
+                        icon: const Icon(Icons.timer_outlined),
+                        label: const Text("Pending"),
+                      ),
+                      SizedBox(width: 2.w),
+                      PopupMenuButton(
+                        position: PopupMenuPosition.under,
+                        tooltip: "Filter announcements",
+                        child: AbsorbPointer(
+                          child: ElevatedButton.icon(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(elevation: 5),
+                            icon: const Icon(Icons.sort),
+                            label: const Text("Filter"),
                           ),
-                          onChanged: (String searchText) {
-                            setState(() {
-                              searchAnnouncement(searchText);
-                            });
-                          },
                         ),
+                        onSelected: (value) {
+                          sortAnnouncement(value);
+                        },
+                        itemBuilder: (BuildContext context) => _popUpMenuItem,
                       ),
                       const Spacer(),
                       ElevatedButton.icon(
@@ -510,29 +578,14 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                         icon: const Icon(Icons.add),
                         label: const Text("New Announcement"),
                       ),
-                      SizedBox(width: 2.w),
-                      PopupMenuButton(
-                        position: PopupMenuPosition.under,
-                        tooltip: "Filter announcements",
-                        child: AbsorbPointer(
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(elevation: 5),
-                            icon: const Icon(Icons.sort),
-                            label: const Text("Filter"),
-                          ),
-                        ),
-                        onSelected: (value) {
-                          sortAnnouncement(value);
-                        },
-                        itemBuilder: (BuildContext context) => _popUpMenuItem,
-                      ),
                     ],
                   ),
                   const SizedBox(
                     height: 10,
                   ),
-                  if (announcementModels.isNotEmpty)
+                  if (isOnPending
+                      ? pendingAnnouncements.isNotEmpty
+                      : announcementModels.isNotEmpty)
                     Expanded(
                       child: Center(
                         child: SizedBox(
@@ -544,7 +597,9 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                   height: MediaQuery.of(context).size.height -
                                       200.h,
                                   child: MainAnnouncement(
-                                    announcementModel: announcementModels[0],
+                                    announcementModel: isOnPending
+                                        ? pendingAnnouncements[0]
+                                        : announcementModels[0],
                                     stateSetter: getAllAnnouncements,
                                     isAdmin: true,
                                   ),
@@ -559,17 +614,32 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                                 ListView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: announcementModels.length,
+                                  itemCount: isOnPending
+                                      ? pendingAnnouncements.length
+                                      : announcementModels.length,
                                   itemBuilder: (context, index) {
-                                    var model = announcementModels[index];
-                                    if (model != announcementModels[0]) {
-                                      return OtherAnnouncement(
-                                        announcementModel: model,
-                                        stateSetter: getAllAnnouncements,
-                                        isAdmin: true,
-                                      );
+                                    if (isOnPending) {
+                                      var model = pendingAnnouncements[index];
+                                      if (model != pendingAnnouncements[0]) {
+                                        return OtherAnnouncement(
+                                          announcementModel: model,
+                                          stateSetter: getAllAnnouncements,
+                                          isAdmin: true,
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
                                     } else {
-                                      return Container();
+                                      var model = announcementModels[index];
+                                      if (model != announcementModels[0]) {
+                                        return OtherAnnouncement(
+                                          announcementModel: model,
+                                          stateSetter: getAllAnnouncements,
+                                          isAdmin: true,
+                                        );
+                                      } else {
+                                        return Container();
+                                      }
                                     }
                                   },
                                 ),

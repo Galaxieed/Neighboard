@@ -323,7 +323,7 @@ class MyOfficers extends StatelessWidget {
               fontSize: 10.sp,
               letterSpacing: 1,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
               shadows: [
                 Shadow(
                   offset: const Offset(1.0, 1.0),
@@ -476,9 +476,8 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
           onExit: (_) => setState(() => _isHovering = false),
           child: CircleAvatar(
             radius: 100,
-            backgroundColor: _isHovering
-                ? Theme.of(context).colorScheme.inversePrimary
-                : null,
+            backgroundColor:
+                _isHovering ? Theme.of(context).colorScheme.primary : null,
             child: ClipOval(
               child: CircleAvatar(
                 radius: 95,
@@ -531,7 +530,7 @@ class MyFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 16.w, bottom: 8.w),
-      color: Theme.of(context).colorScheme.inversePrimary,
+      color: Theme.of(context).colorScheme.primary,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -545,14 +544,20 @@ class MyFooter extends StatelessWidget {
                     Text(
                       "OFFICE ADDRESS",
                       style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 5.sp),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 5.sp,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                     const SizedBox(
                       height: 10,
                     ),
                     Text(
                       officeAddress,
-                      style: TextStyle(fontSize: 4.sp),
+                      style: TextStyle(
+                        fontSize: 4.sp,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                     const SizedBox(
                       height: 10,
@@ -563,11 +568,17 @@ class MyFooter extends StatelessWidget {
                         Text(
                           "Mobile Phone Number: ",
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 4.sp),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 4.sp,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                         Text(
                           contactNo,
-                          style: TextStyle(fontSize: 4.sp),
+                          style: TextStyle(
+                            fontSize: 4.sp,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         )
                       ],
                     )
@@ -585,7 +596,10 @@ class MyFooter extends StatelessWidget {
                       },
                       child: Text(
                         "Home",
-                        style: TextStyle(fontSize: 4.sp),
+                        style: TextStyle(
+                          fontSize: 4.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                     TextButton(
@@ -594,7 +608,10 @@ class MyFooter extends StatelessWidget {
                       },
                       child: Text(
                         "About Us",
-                        style: TextStyle(fontSize: 4.sp),
+                        style: TextStyle(
+                          fontSize: 4.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -614,7 +631,10 @@ class MyFooter extends StatelessWidget {
                       },
                       child: Text(
                         "Forum",
-                        style: TextStyle(fontSize: 4.sp),
+                        style: TextStyle(
+                          fontSize: 4.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                     TextButton(
@@ -626,7 +646,10 @@ class MyFooter extends StatelessWidget {
                       },
                       child: Text(
                         "Announcements",
-                        style: TextStyle(fontSize: 4.sp),
+                        style: TextStyle(
+                          fontSize: 4.sp,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -637,10 +660,8 @@ class MyFooter extends StatelessWidget {
                 icon: const Icon(Icons.share),
                 label: const Text("Share"),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).colorScheme.inversePrimary,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onBackground),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary),
               ),
             ],
           ),
@@ -648,12 +669,17 @@ class MyFooter extends StatelessWidget {
             height: 8.w,
           ),
           Divider(
-            color: Theme.of(context).colorScheme.onBackground,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           SizedBox(
             height: 8.w,
           ),
-          const Text("Copyright © 2023 Neighboard. All rights reserved.")
+          Text(
+            "Copyright © 2023 Neighboard. All rights reserved.",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          )
         ],
       ),
     );
@@ -676,7 +702,7 @@ class OffersPage extends StatelessWidget {
             fontSize: 10.sp,
             letterSpacing: 2,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.inversePrimary,
+            color: Theme.of(context).colorScheme.primary,
             shadows: [
               Shadow(
                 offset: const Offset(1.0, 1.0),
@@ -765,7 +791,7 @@ class OffersPage extends StatelessWidget {
               backgroundColor: Theme.of(context).colorScheme.primary,
               radius: 15.w,
               child: Icon(icon,
-                  size: 20.w, color: Theme.of(context).colorScheme.background),
+                  size: 20.w, color: Theme.of(context).colorScheme.onPrimary),
             ),
             const SizedBox(
               height: 20,
@@ -830,7 +856,7 @@ class AboutPage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.inversePrimary,
+                        color: Theme.of(context).colorScheme.primary,
                         shadows: [
                           Shadow(
                             offset: const Offset(1.0, 1.0),
@@ -960,10 +986,7 @@ class LandPageButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            Theme.of(context).colorScheme.inversePrimary,
-            Colors.white24
-          ],
+          colors: [Theme.of(context).colorScheme.primary, Colors.white24],
         ),
         borderRadius: BorderRadius.circular(45),
       ),

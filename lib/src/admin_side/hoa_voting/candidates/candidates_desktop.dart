@@ -120,22 +120,28 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
           );
         }
         isElectionOngoing = true;
-        await sendNotifToAll();
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
         // ignore: use_build_context_synchronously
         successMessage(
             title: "Success!",
             desc: "Election successfully started",
             context: context);
+        await sendNotifToAll();
       } catch (e) {
         // ignore: use_build_context_synchronously
         errorMessage(
             title: "Error!", desc: "Something went wrong..", context: context);
       }
-    }
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
+    } else {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -389,8 +395,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
                                             ccHOANextButtonBGColor(context),
-                                        foregroundColor:
-                                            ccHOANextButtonFGColor(context),
+                                        foregroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimary,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(4),
@@ -436,7 +443,12 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                       context: context,
                       builder: (BuildContext context) {
                         return Dialog(
-                          child: addCandidateModal(title),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: addCandidateModal(title),
+                          ),
                         );
                       },
                     );
@@ -698,10 +710,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.inversePrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor:
-                            Theme.of(context).colorScheme.onBackground,
+                            Theme.of(context).colorScheme.onPrimary,
                       ),
                       icon: const Icon(Icons.add),
                       label: const Text("Add"),
@@ -737,83 +748,111 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   Widget candidatesCard(
       BuildContext context, CandidateModel candidate, int index) {
     return Card(
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          SizedBox(
-            height: 25.h,
-          ),
-          Expanded(
-            child: FittedBox(
-              child: CircleAvatar(
-                backgroundImage: (profileImages[index][1] != null ||
-                        profileImages[index][2] != null)
-                    ? kIsWeb
-                        ? MemoryImage(profileImages[index][2]!.bytes!)
-                        : FileImage(profileImages[index][1]!) as ImageProvider
-                    : const AssetImage(guestIcon),
+          Column(
+            children: [
+              SizedBox(
+                height: 25.h,
               ),
-            ),
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          Text(
-            "${candidate.firstName} ${candidate.lastName}",
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge!
-                .copyWith(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          Text(
-            candidate.address,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          SizedBox(
-            height: 5.h,
-          ),
-          ElevatedButton.icon(
-            onPressed: () {
-              tcFName.text = candidate.firstName;
-              tcLName.text = candidate.lastName;
-              tcAddress.text = candidate.address;
-              widget.deviceScreenType == DeviceScreenType.mobile
-                  ? showModalBottomSheet(
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      showDragHandle: true,
-                      context: context,
-                      builder: (context) {
-                        return Padding(
-                          padding: MediaQuery.of(context).viewInsets,
-                          child: editCandidateModal(index, candidate),
-                        );
-                      },
-                    )
-                  : showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Dialog(
-                          child: editCandidateModal(index, candidate),
-                        );
-                      },
-                    );
-            },
-            icon: const Icon(Icons.edit),
-            label: const Text("Edit"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              foregroundColor: Theme.of(context).colorScheme.onBackground,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
+              Expanded(
+                child: FittedBox(
+                  child: CircleAvatar(
+                    backgroundImage: (profileImages[index][1] != null ||
+                            profileImages[index][2] != null)
+                        ? kIsWeb
+                            ? MemoryImage(profileImages[index][2]!.bytes!)
+                            : FileImage(profileImages[index][1]!)
+                                as ImageProvider
+                        : const AssetImage(guestIcon),
+                  ),
+                ),
               ),
+              SizedBox(
+                height: 5.h,
+              ),
+              Text(
+                "${candidate.firstName} ${candidate.lastName}",
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(
+                height: 5.h,
+              ),
+              Text(
+                candidate.address,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              SizedBox(
+                height: 5.h,
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  tcFName.text = candidate.firstName;
+                  tcLName.text = candidate.lastName;
+                  tcAddress.text = candidate.address;
+                  widget.deviceScreenType == DeviceScreenType.mobile
+                      ? showModalBottomSheet(
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          showDragHandle: true,
+                          context: context,
+                          builder: (context) {
+                            return Padding(
+                              padding: MediaQuery.of(context).viewInsets,
+                              child: editCandidateModal(index, candidate),
+                            );
+                          },
+                        )
+                      : showDialog(
+                          context: context,
+                          builder: (context) {
+                            return Dialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: editCandidateModal(index, candidate),
+                              ),
+                            );
+                          },
+                        );
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text("Edit"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 25.h,
+              ),
+            ],
+          ),
+          Positioned(
+            top: 5,
+            right: 5,
+            child: IconButton(
+              onPressed: () {
+                //remove image from list of image
+                if (profileImages[index][1] != null ||
+                    profileImages[index][2] != null) {
+                  profileImages.removeAt(index);
+                } //remove candidate from list of candidates
+                candidateModels.removeWhere(
+                    (element) => element.candidateId == candidate.candidateId);
+                setState(() {});
+              },
+              icon: const Icon(Icons.close),
             ),
-          ),
-          SizedBox(
-            height: 25.h,
-          ),
+          )
         ],
       ),
     );
@@ -943,10 +982,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        backgroundColor:
-                            Theme.of(context).colorScheme.inversePrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor:
-                            Theme.of(context).colorScheme.onBackground,
+                            Theme.of(context).colorScheme.onPrimary,
                       ),
                       icon: const Icon(Icons.save),
                       label: const Text("Update"),

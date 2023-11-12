@@ -64,7 +64,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
     setState(() {
       isLoading = true;
     });
-    postModels = await AllPostsFunction.getAllPost() ?? [];
+    postModels = await AllPostsFunction.getTopPost() ?? [];
     setState(() {
       isLoading = false;
     });
@@ -162,6 +162,8 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                         padding: EdgeInsets.symmetric(
                                             horizontal: 15.w, vertical: 0),
                                         child: TabBarView(
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
                                           children: [
                                             Categories(
                                               searchedText: searchedText,
@@ -181,6 +183,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                             const NewPost(
                                               deviceScreenType:
                                                   DeviceScreenType.desktop,
+                                              isAdmin: false,
                                             ),
                                           ],
                                         ),
@@ -421,7 +424,7 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
         children: [
           Icon(
             Icons.lightbulb_sharp,
-            color: Theme.of(context).colorScheme.inversePrimary,
+            color: Theme.of(context).colorScheme.primary,
             size: 6.sp,
             weight: 2,
           ),
@@ -433,7 +436,7 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
             style: TextStyle(
               fontSize: 6.sp,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.inversePrimary,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ],
@@ -606,7 +609,7 @@ class _TheLinksState extends State<TheLinks> {
             widget.postModel.title,
             style: Theme.of(context).textTheme.titleMedium!.copyWith(
                 color: _isHovering
-                    ? Theme.of(context).colorScheme.inversePrimary
+                    ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.onBackground),
           ),
         ),

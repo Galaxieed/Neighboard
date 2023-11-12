@@ -337,6 +337,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
                   MyPosts(search: searchedText),
                   NewPost(
                     deviceScreenType: widget.screenType,
+                    isAdmin: false,
                   ),
                 ],
               ),

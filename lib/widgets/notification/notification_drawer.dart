@@ -135,6 +135,8 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      width: 404,
       child: isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -191,12 +193,11 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                               style: selectedVal != "All"
                                   ? null
                                   : ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
                                       foregroundColor: Theme.of(context)
                                           .colorScheme
-                                          .onBackground,
+                                          .onPrimary,
                                     ),
                               child: const Text("All"),
                             ),
@@ -212,12 +213,11 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                               style: selectedVal != "Unread"
                                   ? null
                                   : ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary,
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
                                       foregroundColor: Theme.of(context)
                                           .colorScheme
-                                          .onBackground,
+                                          .onPrimary,
                                     ),
                               child: const Text("Unread"),
                             ),

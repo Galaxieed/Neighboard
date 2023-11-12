@@ -275,9 +275,7 @@ class _CommentUIState extends State<CommentUI> {
                                 onPressed: updateComment,
                                 icon: Icon(
                                   Icons.save,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .inversePrimary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               )
                             ],
@@ -539,9 +537,8 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
                                     onPressed: updateReply,
                                     icon: Icon(
                                       Icons.save,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .inversePrimary,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   )
                                 ],

@@ -335,8 +335,7 @@ class _SinglePostState extends State<SinglePost> {
                             onPressed: updatePost,
                             icon: Icon(
                               Icons.save,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           )
                         ],
@@ -370,8 +369,7 @@ class _SinglePostState extends State<SinglePost> {
                             onPressed: updatePost,
                             icon: Icon(
                               Icons.save,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           )
                         ],

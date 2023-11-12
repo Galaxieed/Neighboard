@@ -180,7 +180,8 @@ class _VotingDesktopState extends State<VotingDesktop> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ccHOANextButtonBGColor(context),
-                          foregroundColor: ccHOANextButtonFGColor(context),
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -266,13 +267,12 @@ class _VotingDesktopState extends State<VotingDesktop> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(5),
-            color: Theme.of(context).colorScheme.inversePrimary,
+            color: Theme.of(context).colorScheme.primary,
             child: Text(
               "Votes: ${candidate.noOfVotes}",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium!
-                  .copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimary),
               textAlign: TextAlign.center,
             ),
           ),

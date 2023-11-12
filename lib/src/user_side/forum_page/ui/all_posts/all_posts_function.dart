@@ -18,6 +18,50 @@ class AllPostsFunction {
     }
   }
 
+  static Future<List<PostModel>?> getTopPost() async {
+    try {
+      //top 3 views
+      final viewsQuery = await _firebaseFirestore
+          .collection("posts")
+          .orderBy('no_of_views', descending: true)
+          .limit(3)
+          .get();
+      //top 3 upvotes
+      final upVotesQuery = await _firebaseFirestore
+          .collection("posts")
+          .orderBy('no_of_upVotes', descending: true)
+          .limit(3)
+          .get();
+      // Use a Set to keep track of unique post IDs
+      Set<String> uniquePostIds = Set<String>();
+
+      // Combine the results without duplicates
+      List<PostModel> topPosts = [];
+
+      // Add posts from viewsQuery
+      for (QueryDocumentSnapshot doc in viewsQuery.docs) {
+        String postId = doc['post_id'];
+        if (!uniquePostIds.contains(postId)) {
+          uniquePostIds.add(postId);
+          topPosts.add(PostModel.fromJson(doc.data() as Map<String, dynamic>));
+        }
+      }
+
+      // Add posts from upVotesQuery
+      for (QueryDocumentSnapshot doc in upVotesQuery.docs) {
+        String postId = doc['post_id'];
+        if (!uniquePostIds.contains(postId)) {
+          uniquePostIds.add(postId);
+          topPosts.add(PostModel.fromJson(doc.data() as Map<String, dynamic>));
+        }
+      }
+
+      return topPosts;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<List<PostModel>?> getAllPendingPost() async {
     try {
       final result = await _firebaseFirestore.collection("pending_posts").get();

@@ -271,8 +271,8 @@ class _MyDrawerState extends State<MyDrawer> {
                 changingButton("User");
               },
               selected: selectedSubButton == "User",
-              selectedColor: Theme.of(context).colorScheme.onBackground,
-              selectedTileColor: Theme.of(context).colorScheme.inversePrimary,
+              selectedColor: Theme.of(context).colorScheme.onPrimary,
+              selectedTileColor: Theme.of(context).colorScheme.primary,
             );
           }
 
@@ -395,8 +395,8 @@ class _MyDrawerState extends State<MyDrawer> {
         setState(() {});
       },
       selected: isSelected,
-      selectedColor: Theme.of(context).colorScheme.onBackground,
-      selectedTileColor: Theme.of(context).colorScheme.inversePrimary,
+      selectedColor: Theme.of(context).colorScheme.onPrimary,
+      selectedTileColor: Theme.of(context).colorScheme.primary,
     );
   }
 }

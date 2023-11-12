@@ -213,7 +213,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       setState(() {
         isLoading = false;
       });
-      //await sendNotifToAll();
+      await sendNotifToAll();
     }
   }
 
@@ -747,10 +747,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                         ),
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
-                                            .inversePrimary,
+                                            .primary,
                                         foregroundColor: Theme.of(context)
                                             .colorScheme
-                                            .onBackground,
+                                            .onPrimary,
                                       ),
                                       icon: const Icon(Icons.save_outlined),
                                       label: const Text("Save")),
@@ -1044,7 +1044,7 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
     return CircleAvatar(
       radius: 80,
       backgroundColor:
-          _isHovering ? Theme.of(context).colorScheme.inversePrimary : null,
+          _isHovering ? Theme.of(context).colorScheme.primary : null,
       child: ClipOval(
         child: Stack(
           alignment: Alignment.center,
@@ -1195,9 +1195,9 @@ class _OfficerAvatarState extends State<OfficerAvatar> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           backgroundColor:
-                              Theme.of(context).colorScheme.inversePrimary,
+                              Theme.of(context).colorScheme.primary,
                           foregroundColor:
-                              Theme.of(context).colorScheme.onBackground,
+                              Theme.of(context).colorScheme.onPrimary,
                         ),
                         icon: const Icon(Icons.save),
                         label: const Text("Save"),

@@ -139,9 +139,11 @@ class _VotersDesktopState extends State<VotersDesktop> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mycontroller(context).index == 0
-                        ? Theme.of(context).colorScheme.inversePrimary
+                        ? Theme.of(context).colorScheme.primary
                         : null,
-                    foregroundColor: Theme.of(context).colorScheme.onBackground,
+                    foregroundColor: mycontroller(context).index == 0
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
@@ -161,9 +163,11 @@ class _VotersDesktopState extends State<VotersDesktop> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: mycontroller(context).index == 1
-                        ? Theme.of(context).colorScheme.inversePrimary
+                        ? Theme.of(context).colorScheme.primary
                         : null,
-                    foregroundColor: Theme.of(context).colorScheme.onBackground,
+                    foregroundColor: mycontroller(context).index == 1
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),

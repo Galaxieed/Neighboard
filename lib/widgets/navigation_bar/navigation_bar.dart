@@ -229,7 +229,7 @@ class _NavBarTextButtonState extends State<NavBarTextButton> {
           border: _isHovering || widget.currentPage == widget.text
               ? Border(
                   bottom: BorderSide(
-                    color: Theme.of(context).colorScheme.inversePrimary,
+                    color: Theme.of(context).colorScheme.primary,
                     width: 2.0,
                   ),
                 )
@@ -257,7 +257,7 @@ class _NavBarTextButtonState extends State<NavBarTextButton> {
               fontWeight:
                   widget.currentPage == widget.text ? FontWeight.bold : null,
               color: _isHovering || widget.currentPage == widget.text
-                  ? Theme.of(context).colorScheme.inversePrimary
+                  ? Theme.of(context).colorScheme.primary
                   : isDarkMode
                       ? Colors.white
                       : Theme.of(context)
@@ -340,7 +340,7 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
             border: _isHovering || widget.currentPage == "Community"
                 ? Border(
                     bottom: BorderSide(
-                      color: Theme.of(context).colorScheme.inversePrimary,
+                      color: Theme.of(context).colorScheme.primary,
                       width: 2.0,
                     ),
                   )
@@ -366,7 +366,7 @@ class _NavBarDropDownButtonState extends State<NavBarDropDownButton> {
                         ? FontWeight.bold
                         : null,
                     color: _isHovering || widget.currentPage == "Community"
-                        ? Theme.of(context).colorScheme.inversePrimary
+                        ? Theme.of(context).colorScheme.primary
                         : isDarkMode
                             ? Colors.white
                             : Theme.of(context)

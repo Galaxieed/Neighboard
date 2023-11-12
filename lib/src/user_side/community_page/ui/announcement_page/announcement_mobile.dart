@@ -406,15 +406,20 @@ class MainAnnouncement extends StatelessWidget {
                     children: [
                       Text(
                         announcementModel.title.toUpperCase(),
-                        style:
-                            Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium!
+                            .copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         announcementModel.datePosted,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
                         overflow: TextOverflow.ellipsis,
                       )
                     ],
@@ -623,12 +628,20 @@ class OtherAnnouncement extends StatelessWidget {
                                 .titleMedium!
                                 .copyWith(
                                   fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
                             announcementModel.datePosted,
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall!
+                                .copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
                             overflow: TextOverflow.ellipsis,
                           )
                         ],
@@ -890,7 +903,7 @@ class OtherAnnouncement extends StatelessWidget {
                                                           foregroundColor:
                                                               Theme.of(context)
                                                                   .colorScheme
-                                                                  .background,
+                                                                  .onPrimary,
                                                           shape:
                                                               RoundedRectangleBorder(
                                                             borderRadius:

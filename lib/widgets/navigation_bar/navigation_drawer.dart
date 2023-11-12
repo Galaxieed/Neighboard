@@ -239,15 +239,15 @@ class _ThemeColorPickerState extends State<ThemeColorPicker> {
               //   pickerColor: pickerColor,
               //   onColorChanged: changeColor,
               // ),
-              child: MaterialPicker(
-                pickerColor: pickerColor,
-                onColorChanged: changeColor,
-                enableLabel: true, // only on portrait mode
-              ),
-              // child: BlockPicker(
-              //   pickerColor: currentThemeColor,
+              // child: MaterialPicker(
+              //   pickerColor: pickerColor,
               //   onColorChanged: changeColor,
+              //   enableLabel: true, // only on portrait mode
               // ),
+              child: BlockPicker(
+                pickerColor: currentThemeColor,
+                onColorChanged: changeColor,
+              ),
             ),
             actions: <Widget>[
               ElevatedButton(

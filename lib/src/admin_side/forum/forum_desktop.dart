@@ -70,6 +70,7 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                         padding:
                             EdgeInsets.symmetric(horizontal: 15.w, vertical: 0),
                         child: TabBarView(
+                          physics: const NeverScrollableScrollPhysics(),
                           children: [
                             Categories(
                               searchedText: searchedText,
@@ -86,6 +87,7 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                             MyPosts(search: searchedText),
                             const NewPost(
                               deviceScreenType: DeviceScreenType.desktop,
+                              isAdmin: true,
                             ),
                           ],
                         ),

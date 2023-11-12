@@ -432,8 +432,7 @@ class _SinglePostState extends State<SinglePost> {
                             onPressed: updatePost,
                             icon: Icon(
                               Icons.save,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           )
                         ],
@@ -467,8 +466,7 @@ class _SinglePostState extends State<SinglePost> {
                             onPressed: updatePost,
                             icon: Icon(
                               Icons.save,
-                              color:
-                                  Theme.of(context).colorScheme.inversePrimary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           )
                         ],
@@ -619,8 +617,8 @@ class _ActionBarPostsState extends State<ActionBarPosts> {
                   widget.approvePost(widget.post);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                  foregroundColor: Theme.of(context).colorScheme.onBackground,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
