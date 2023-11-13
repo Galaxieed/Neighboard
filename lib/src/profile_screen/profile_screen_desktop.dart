@@ -177,8 +177,17 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       tcBlock.text = userModel!.address.split(' ')[1];
       tcLot.text =
           userModel!.address.split(' ')[3].replaceFirst(RegExp(r','), '');
-      street = userModel!.address.split(', ')[1];
+      List<String> addressParts = userModel!.address.split(', ');
+      if (addressParts.length >= 2) {
+        street = addressParts[1];
+      } else {
+        // Handle the case where the split result doesn't have enough elements.
+        print('Error: userModel.address does not have enough parts');
+      }
     } catch (e) {
+      tcBlock.text = "";
+      tcLot.text = "";
+      street = "";
       print(e);
     }
     tcCNo.text = userModel!.contactNo.isNotEmpty
@@ -280,7 +289,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                       child: profilePanel1(context),
                     ),
                   ),
-                  isEditing
+                  !isEditing
                       ? Center(
                           child: SizedBox(
                             width: 900,

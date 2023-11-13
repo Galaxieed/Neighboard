@@ -177,7 +177,13 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
       tcBlock.text = userModel!.address.split(' ')[1];
       tcLot.text =
           userModel!.address.split(' ')[3].replaceFirst(RegExp(r','), '');
-      street = userModel!.address.split(', ')[1];
+      List<String> addressParts = userModel!.address.split(', ');
+      if (addressParts.length >= 2) {
+        street = addressParts[1];
+      } else {
+        // Handle the case where the split result doesn't have enough elements.
+        print('Error: userModel.address does not have enough parts');
+      }
     } catch (e) {
       print(e);
     }
