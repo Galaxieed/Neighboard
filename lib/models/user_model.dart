@@ -2,6 +2,8 @@ class UserModel {
   late String firstName;
   late String userId;
   late String lastName;
+  late String suffix;
+  late String gender;
   late String username;
   late String email;
   late String address;
@@ -17,6 +19,8 @@ class UserModel {
     required this.userId,
     required this.firstName,
     required this.lastName,
+    required this.suffix,
+    required this.gender,
     required this.username,
     required this.email,
     required this.address,
@@ -33,6 +37,8 @@ class UserModel {
     userId = json['userId'];
     firstName = json['first_name'];
     lastName = json['last_name'];
+    suffix = json['suffix'];
+    gender = json['gender'];
     username = json['username'];
     email = json['email'];
     address = json['address'];
@@ -50,6 +56,8 @@ class UserModel {
     data['userId'] = userId;
     data['first_name'] = firstName;
     data['last_name'] = lastName;
+    data['suffix'] = suffix;
+    data['gender'] = gender;
     data['username'] = username;
     data['email'] = email;
     data['address'] = address;

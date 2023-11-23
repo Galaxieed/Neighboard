@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/reply_model.dart';
@@ -129,7 +130,7 @@ class _CommentUIState extends State<CommentUI> {
       bool success = await CommentFunction.updateComment(
         postId: widget.post.postId,
         commentId: widget.comment.commentId,
-        commentMessage: _controller.text,
+        commentMessage: profanityFilter.censor(_controller.text),
       );
       if (success) {
         // ignore: use_build_context_synchronously
@@ -458,7 +459,7 @@ class _SingleReplyUIState extends State<SingleReplyUI> {
         postId: widget.postModel.postId,
         commentId: widget.commentModel.commentId,
         replyId: widget.replyModel.replyId,
-        replyMessage: _controller.text,
+        replyMessage: profanityFilter.censor(_controller.text),
       );
       if (isSuccess) {
         // ignore: use_build_context_synchronously
@@ -693,7 +694,7 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
                     senderName: userModel!.username,
                     recipientId: widget.recipientId,
                     recipientName: widget.recipientName,
-                    replyMessage: replyController.text,
+                    replyMessage: profanityFilter.censor(replyController.text),
                   );
                   widget.addReply(reply: thisReply);
                   replyController.clear();
@@ -718,7 +719,7 @@ class _ReplyTextFieldState extends State<ReplyTextField> {
                   senderName: userModel!.username,
                   recipientId: widget.recipientId,
                   recipientName: widget.recipientName,
-                  replyMessage: replyController.text,
+                  replyMessage: profanityFilter.censor(replyController.text),
                 );
                 widget.addReply(reply: thisReply);
                 replyController.clear();

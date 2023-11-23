@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/constants/foul_words.dart';
+import 'package:neighboard/constants/foul_words_tagalog.dart';
 import 'package:neighboard/firebase_options.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
@@ -12,6 +14,7 @@ import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
+import 'package:profanity_filter/profanity_filter.dart';
 
 AndroidNotificationChannel channel = const AndroidNotificationChannel(
   'high_importance_channel', // id
@@ -68,12 +71,15 @@ class MyApp extends StatelessWidget {
                     ),
               ),
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-              home: const ScreenDirect(),
+              home: const SelectionArea(child: ScreenDirect()),
             );
           });
     }));
   }
 }
+
+final List<String> foulWords = tagalogFoulWords + fbEnglishFoulWords;
+final profanityFilter = ProfanityFilter.filterAdditionally(foulWords);
 
 final ValueNotifier themeNotifier = ValueNotifier(ThemeMode.system);
 

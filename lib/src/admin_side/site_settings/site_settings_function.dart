@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/candidates_model.dart';
+import 'package:neighboard/models/hoa_model.dart';
 import 'package:neighboard/models/site_model.dart';
 import 'package:universal_io/io.dart';
 
@@ -82,6 +84,130 @@ class SiteSettingsFunction {
       String downloadUrl = await reference.getDownloadURL();
 
       return downloadUrl;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<List<HOAModel>?> getHOA() async {
+    try {
+      final result = await _firestore
+          .collection("site_settings")
+          .doc(siteAdminId)
+          .collection("hoa_list")
+          .get();
+
+      List<HOAModel> hoaModels = [];
+      hoaModels = result.docs.map((e) => HOAModel.fromJson(e.data())).toList();
+      return hoaModels;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<bool> setHOA({required HOAModel hoaModel}) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_list")
+          .doc(hoaModel.hoaId)
+          .set(hoaModel.toJson());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<void> registerHOA(String hoaId) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(siteAdminId)
+          .collection("hoa_list")
+          .doc(hoaId)
+          .update({"is_registered": true});
+    } catch (e) {
+      return;
+    }
+  }
+
+  static Future<bool> updateHOA({
+    required String hoaId,
+    required String firstName,
+    required String lastName,
+    required String suffix,
+    required String street,
+  }) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_list")
+          .doc(hoaId)
+          .update({
+        "first_name": firstName,
+        "last_name": lastName,
+        "suffix": suffix,
+        "street": street,
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> archiveHOA(HOAModel hoaModel) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_list")
+          .doc(hoaModel.hoaId)
+          .delete();
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_archived_list")
+          .doc(hoaModel.hoaId)
+          .set(hoaModel.toJson());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<bool> restoreArchiveHOA(HOAModel hoaModel) async {
+    try {
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_archived_list")
+          .doc(hoaModel.hoaId)
+          .delete();
+      await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_list")
+          .doc(hoaModel.hoaId)
+          .set(hoaModel.toJson());
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<HOAModel>?> getArchivedHOA() async {
+    try {
+      final result = await _firestore
+          .collection("site_settings")
+          .doc(_auth.currentUser!.uid)
+          .collection("hoa_archived_list")
+          .get();
+
+      List<HOAModel> hoaModels = [];
+      hoaModels = result.docs.map((e) => HOAModel.fromJson(e.data())).toList();
+      return hoaModels;
     } catch (e) {
       return null;
     }

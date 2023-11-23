@@ -17,6 +17,22 @@ class StoreFunction {
     }
   }
 
+  static Future<List<StoreModel>?> getStoresLocation() async {
+    try {
+      final result = await _firestore
+          .collection("stores")
+          .where("store_location", isNotEqualTo: "")
+          .get();
+      List<StoreModel> storeModel = [];
+      storeModel =
+          result.docs.map((e) => StoreModel.fromJson(e.data())).toList();
+
+      return storeModel;
+    } catch (e) {
+      return null;
+    }
+  }
+
   static Future<List<StoreModel>?> getAllStores() async {
     try {
       final result = await _firestore.collection("stores").get();

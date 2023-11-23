@@ -5,14 +5,17 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocode/geocode.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/site_model.dart';
+import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
+import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:responsive_builder/responsive_builder.dart';
@@ -33,7 +36,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   LatLng? currentCenter;
   double newLatitude = 14.852694046899718;
   double newLongitude = 120.81603489600447;
-  double currentZoom = 13.0;
+  double currentZoom = 16.0;
   bool isLoading = false;
 
   void _moveMap() {
@@ -86,13 +89,21 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
     if (_auth.currentUser != null) {
       siteModel =
           await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
+      await getStoresLocation();
       if (siteModel == null || siteModel?.siteLocation == "") return;
       newLatitude = double.parse(siteModel!.siteLocation.split('|')[0]);
       newLongitude = double.parse(siteModel!.siteLocation.split('|')[1]);
       currentCenter = LatLng(newLatitude, newLongitude);
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
       _moveMap();
     }
+  }
+
+  List<StoreModel> storeModels = [];
+  getStoresLocation() async {
+    storeModels = await StoreFunction.getStoresLocation() ?? [];
   }
 
   void onUpdateLocation(context) async {
@@ -269,6 +280,43 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
                         size: 50,
                       ),
                     ),
+                    ...storeModels
+                        .map(
+                          (e) => Marker(
+                            height: 30,
+                            width: 30,
+                            anchorPos: AnchorPos.align(AnchorAlign.center),
+                            point: LatLng(
+                                double.parse(e.storeLoc.split('|')[0]),
+                                double.parse(e.storeLoc.split('|')[1])),
+                            builder: (context) => GestureDetector(
+                              onTap: () {
+                                if (widget.deviceScreenType ==
+                                    DeviceScreenType.mobile) {
+                                  showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      context: context,
+                                      builder: (_) =>
+                                          StoreModal(storeModel: e));
+                                } else {
+                                  showDialog(
+                                      context: context,
+                                      builder: (_) => Dialog(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12)),
+                                          child: StoreModal(storeModel: e)));
+                                }
+                              },
+                              child: Icon(
+                                Icons.store,
+                                color: Theme.of(context).colorScheme.primary,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ],
                 ),
               ],
@@ -279,5 +327,102 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
         child: const Icon(Icons.my_location_outlined),
       ),
     );
+  }
+}
+
+class StoreModal extends StatelessWidget {
+  const StoreModal({super.key, required this.storeModel});
+
+  final StoreModel storeModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return StatefulBuilder(builder: (context, setState) {
+      return Stack(
+        children: [
+          SizedBox(
+            width: 550,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 400,
+                    decoration: storeModel.storeImage == ""
+                        ? BoxDecoration(
+                            image: const DecorationImage(
+                              image: AssetImage(noImage),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(12))
+                        : BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(storeModel.storeImage),
+                              fit: BoxFit.cover,
+                            ),
+                            borderRadius: BorderRadius.circular(12)),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    storeModel.storeName,
+                    style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(width: 5),
+                      const Icon(Icons.shopping_cart_rounded),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          storeModel.storeOffers,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(width: 5),
+                      const Icon(Icons.pin_drop),
+                      const SizedBox(width: 5),
+                      Text(
+                        "${storeModel.storeHouseNumber}, ${storeModel.storeStreetName}",
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.close),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }

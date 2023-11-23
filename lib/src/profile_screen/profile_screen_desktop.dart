@@ -35,6 +35,7 @@ class ProfileScreenDesktop extends StatefulWidget {
 class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   final TextEditingController tcFname = TextEditingController();
   final TextEditingController tcLname = TextEditingController();
+  final TextEditingController tcSuffix = TextEditingController();
   final TextEditingController tcUsername = TextEditingController();
   final TextEditingController tcEmail = TextEditingController();
   final TextEditingController tcBlock = TextEditingController();
@@ -42,12 +43,13 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
   final TextEditingController tcCNo = TextEditingController();
   final TextEditingController tcPass = TextEditingController();
   final TextEditingController tcConfirmPass = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   bool passToggle = true;
   bool passToggle1 = true;
   File? profileImage;
   PlatformFile? profileImageByte;
-  String profileImageUrl = "", street = "";
+  String profileImageUrl = "", street = "", gender = "";
 
   UserModel? userModel;
   bool isEditing = false;
@@ -104,6 +106,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
 
   String? currentUsername;
   void onSavingDetails() async {
+    _formKey.currentState!.save();
     setState(() {
       isLoading = true;
     });
@@ -143,8 +146,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     Map<String, dynamic> userDetails = {
       'first_name': tcFname.text,
       'last_name': tcLname.text,
+      'suffix': tcSuffix.text,
       'username': tcUsername.text,
-      'email': tcEmail.text,
+      'gender': gender,
       'address': "Blk ${tcBlock.text} Lot ${tcLot.text}, $street",
       'contact_no': tcCNo.text,
     };
@@ -180,6 +184,9 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       List<String> addressParts = userModel!.address.split(', ');
       if (addressParts.length >= 2) {
         street = addressParts[1];
+        if (!street.contains('St.')) {
+          street = "$street St.";
+        }
       } else {
         // Handle the case where the split result doesn't have enough elements.
         print('Error: userModel.address does not have enough parts');
@@ -196,8 +203,10 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     tcEmail.text = userModel!.email;
     tcFname.text = userModel!.firstName;
     tcLname.text = userModel!.lastName;
+    tcSuffix.text = userModel!.suffix;
     tcUsername.text = userModel!.username;
     currentUsername = userModel!.username;
+    gender = userModel!.gender;
   }
 
   @override
@@ -208,6 +217,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     tcEmail.dispose();
     tcFname.dispose();
     tcLname.dispose();
+    tcSuffix.dispose();
     tcUsername.dispose();
     super.dispose();
   }
@@ -222,6 +232,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) {
         return const MyChat();
       },
@@ -257,7 +268,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                       alignment: Alignment.center,
                       children: [
                         SizedBox(
-                          width: 900,
+                          width: 1000,
                           child: Text(
                             "MY PROFILE",
                             textAlign: TextAlign.center,
@@ -285,20 +296,20 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   ),
                   Center(
                     child: SizedBox(
-                      width: 900,
+                      width: 1000,
                       child: profilePanel1(context),
                     ),
                   ),
-                  !isEditing
+                  isEditing
                       ? Center(
                           child: SizedBox(
-                            width: 900,
+                            width: 1000,
                             child: editProfilePanel2(context),
                           ),
                         )
                       : Center(
                           child: SizedBox(
-                            width: 900,
+                            width: 1000,
                             child: profilePanel2(context),
                           ),
                         ),
@@ -336,7 +347,18 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                       isEditing = false;
                       hasInputError = false;
                     });
+                    infoMessage(
+                        title: "Canceled",
+                        desc: "Editing info canceled",
+                        context: context);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
                   icon: const Icon(Icons.cancel),
                   label: const Text("Cancel"),
                 ),
@@ -363,8 +385,11 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                   icon: const Icon(Icons.save),
                   label: const Text("Save"),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: colorFromHex("#29C948"),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 )
               ],
@@ -394,39 +419,167 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             infoTitle(context, "First Name"),
                             TextFormField(
                               controller: tcFname,
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(),
+                                hintText: 'First Name',
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "First name is required";
                                 }
                                 final alpha = RegExp(r'^[a-zA-Z ]+$');
                                 if (!alpha.hasMatch(value)) {
-                                  return "Symbols and Numbers are not allowed.\nFor suffixes like 2nd or 3rd, use Roman Numeral letters";
+                                  return "Symbols and Numbers are not allowed.";
                                 }
                                 return null;
                               },
                             ),
                           ],
                         ),
-                        Column(
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            infoTitle(context, "Last Name"),
-                            TextFormField(
-                              controller: tcLname,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Last name is required";
-                                }
-                                final alpha = RegExp(r'^[a-zA-Z]+$');
-                                if (!alpha.hasMatch(value)) {
-                                  return "Symbols and Numbers are not allowed.\nFor suffixes like 2nd or 3rd, use Roman Numeral letters";
-                                }
-                                return null;
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  infoTitle(context, "Last Name"),
+                                  TextFormField(
+                                    controller: tcLname,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Last Name',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Last name is required";
+                                      }
+                                      final alpha = RegExp(r'^[a-zA-Z ]+$');
+                                      if (!alpha.hasMatch(value)) {
+                                        return "Symbols and Numbers are not allowed.";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  infoTitle(context, "Suffix"),
+                                  TextFormField(
+                                    controller: tcSuffix,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Suffix',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return null;
+                                      }
+                                      final alpha = RegExp(r'^[a-zA-Z 1-9]+$');
+                                      if (!alpha.hasMatch(value)) {
+                                        return "Symbols are not allowed.";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Gender"),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: ["Male", "Female", "Others"]
+                                    .map(
+                                      (e) => Row(
+                                        children: [
+                                          Radio(
+                                            value: e == "Others"
+                                                ? gender == "Male" ||
+                                                        gender == "Female"
+                                                    ? e
+                                                    : gender
+                                                : e,
+                                            groupValue: gender,
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() {
+                                                  gender = val;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  gender = e;
+                                                });
+                                              },
+                                              child: Text(e)),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        if (gender != "Male" &&
+                            gender != "Female" &&
+                            !widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Other Gender"),
+                              TextFormField(
+                                controller: gender != "Others"
+                                    ? null
+                                    : TextEditingController(
+                                        text: gender == "Others" ? "" : gender),
+                                onSaved: (newValue) {
+                                  gender = newValue ?? "";
+                                },
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Please specify...',
+                                ),
+                                validator: (value) {
+                                  if ((value == null || value.isEmpty) &&
+                                      (gender != "Male" &&
+                                          gender != "Female")) {
+                                    return "Specify gender";
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -434,9 +587,17 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             infoTitle(context, "Username"),
                             TextFormField(
                               controller: tcUsername,
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(),
+                                hintText: 'Username',
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "Username is required";
+                                }
+                                if (profanityFilter.hasProfanity(value)) {
+                                  return "Don't use bad words";
                                 }
                                 return null;
                               },
@@ -514,6 +675,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                       hint: const Text('Street'),
                                       value: street.isEmpty ? null : street,
                                       decoration: const InputDecoration(
+                                        isDense: true,
                                         border: OutlineInputBorder(),
                                       ),
                                     ),
@@ -544,8 +706,12 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                                   }
                                   return null;
                                 },
-                                decoration:
-                                    const InputDecoration(prefix: Text("+63")),
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Contact No',
+                                  prefix: Text("+63"),
+                                ),
                               ),
                             ],
                           ),
@@ -558,7 +724,10 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                               controller: tcPass,
                               obscureText: passToggle,
                               decoration: InputDecoration(
-                                suffix: InkWell(
+                                isDense: true,
+                                border: const OutlineInputBorder(),
+                                hintText: 'New Password',
+                                suffixIcon: InkWell(
                                   onTap: () {
                                     setState(() {
                                       passToggle = !passToggle;
@@ -594,7 +763,10 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                               controller: tcConfirmPass,
                               obscureText: passToggle1,
                               decoration: InputDecoration(
-                                suffix: InkWell(
+                                isDense: true,
+                                border: const OutlineInputBorder(),
+                                hintText: 'Retype Password',
+                                suffixIcon: InkWell(
                                   onTap: () {
                                     setState(() {
                                       passToggle1 = !passToggle1;
@@ -665,6 +837,13 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                             isEditing = true;
                           });
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
                         icon: const Icon(Icons.edit),
                         label: const Text("Edit"),
                       )
@@ -694,12 +873,32 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           actualInfo(context, userModel!.firstName),
                         ],
                       ),
-                      Column(
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          infoTitle(context, "Last Name"),
-                          actualInfo(context, userModel!.lastName),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                infoTitle(context, "Last Name"),
+                                actualInfo(context, userModel!.lastName),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                infoTitle(context, "Suffix"),
+                                actualInfo(context, userModel!.suffix),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       Column(
@@ -710,6 +909,15 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                           actualInfo(context, userModel!.username),
                         ],
                       ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Gender"),
+                            actualInfo(context, userModel!.gender),
+                          ],
+                        ),
                       if (!widget.isAdmin)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,7 +1035,7 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${userModel!.firstName} ${userModel!.lastName}",
+                  "${userModel!.firstName} ${userModel!.lastName} ${userModel!.suffix}",
                   style: Theme.of(context)
                       .textTheme
                       .titleMedium!
@@ -918,13 +1126,17 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     profileImageByte = null;
                     profileImageUrl = "";
                     checker = false;
+                    infoMessage(
+                        title: "Canceled",
+                        desc: "Changing profile pic canceled",
+                        context: context);
                   },
                   style: ElevatedButton.styleFrom(
                     fixedSize: const Size.fromWidth(150),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    backgroundColor: Colors.red[800],
+                    backgroundColor: Colors.grey,
                     foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.cancel),
@@ -965,8 +1177,8 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: colorFromHex("#29C948"),
+                    foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.save),
                   label: const Text("Save"),

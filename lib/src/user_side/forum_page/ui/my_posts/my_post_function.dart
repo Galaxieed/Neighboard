@@ -53,7 +53,7 @@ class MyPostFunction {
     }
   }
 
-  static Future<bool> isAlreadyUpvoted({required String postId}) async {
+  static Future<String> isAlreadyUpvoted({required String postId}) async {
     try {
       final result = await _firebaseFirestore
           .collection("posts")
@@ -62,14 +62,16 @@ class MyPostFunction {
           .doc(_auth.currentUser!.uid)
           .get();
 
-      return result.exists;
+      return result.data()?['reaction'] ?? "";
     } catch (e) {
-      return false;
+      return "";
     }
   }
 
   static Future<void> onUpvoteAndUnUpvote(
-      {required String postId, required bool isUpvoted}) async {
+      {required String postId,
+      required String isUpvoted,
+      required String react}) async {
     try {
       final postReference = _firebaseFirestore.collection("posts").doc(postId);
 
@@ -81,17 +83,27 @@ class MyPostFunction {
 
         int noOfUpVotes = upvotes.data()!['no_of_upVotes'];
 
-        if (isUpvoted) {
-          transaction.update(postReference, {"no_of_upVotes": noOfUpVotes + 1});
-          transaction
-              .set(postUpvoteReference, {"user_id": _auth.currentUser!.uid});
+        if (isUpvoted.isNotEmpty) {
+          if (isUpvoted == "new") {
+            transaction
+                .update(postReference, {"no_of_upVotes": noOfUpVotes + 1});
+            transaction.set(postUpvoteReference, {
+              "user_id": _auth.currentUser!.uid,
+              "reaction": react,
+            });
+          } else {
+            transaction.set(postUpvoteReference, {
+              "user_id": _auth.currentUser!.uid,
+              "reaction": react,
+            });
+          }
         } else {
           transaction.update(postReference, {"no_of_upVotes": noOfUpVotes - 1});
           transaction.delete(postUpvoteReference);
         }
       });
 
-      if (isUpvoted) {
+      if (isUpvoted == "new") {
         //updates the rank of the user
         final userReference =
             _firebaseFirestore.collection("users").doc(_auth.currentUser!.uid);

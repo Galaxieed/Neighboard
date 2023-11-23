@@ -2,6 +2,8 @@ class CandidateModel {
   late String candidateId;
   late String firstName;
   late String lastName;
+  late String username;
+  late String gender;
   late String profilePicture;
   late String address;
   late String position;
@@ -11,6 +13,8 @@ class CandidateModel {
     required this.candidateId,
     required this.firstName,
     required this.lastName,
+    required this.username,
+    required this.gender,
     required this.profilePicture,
     required this.address,
     required this.position,
@@ -21,6 +25,8 @@ class CandidateModel {
     candidateId = json['candidate_id'];
     firstName = json['first_name'];
     lastName = json['last_name'];
+    username = json['username'];
+    gender = json['gender'];
     profilePicture = json['profile_picture'];
     address = json['address'];
     position = json['position'];
@@ -32,6 +38,8 @@ class CandidateModel {
     data['candidate_id'] = candidateId;
     data['first_name'] = firstName;
     data['last_name'] = lastName;
+    data['username'] = username;
+    data['gender'] = gender;
     data['profile_picture'] = profilePicture;
     data['address'] = address;
     data['position'] = position;

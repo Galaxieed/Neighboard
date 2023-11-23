@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/chatmessage_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -49,7 +50,7 @@ class _MyChatState extends State<MyChat> {
         chatId: DateTime.now().toIso8601String(),
         senderId: currentUser!.userId,
         senderName: currentUser!.username,
-        message: _globalChatController.text,
+        message: profanityFilter.censor(_globalChatController.text),
         timestamp: formattedDate(),
       );
       await ChatFunction.sendChat(chatModel);
@@ -85,7 +86,6 @@ class _MyChatState extends State<MyChat> {
     return Container(
       height: MediaQuery.of(context).size.height / 1.5,
       padding: EdgeInsets.only(
-          top: 12,
           left: 12,
           right: 12,
           bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -105,6 +105,9 @@ class _MyChatState extends State<MyChat> {
                           .textTheme
                           .titleLarge!
                           .copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(
+                      height: 12,
                     ),
                     Expanded(
                       child: StreamBuilder(

@@ -7,14 +7,24 @@ class PostInteractorsFunctions {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static Future<List<UserModel>?> getPostInteractorsData(
-      String postId, String collection) async {
+  static Future getPostInteractorsData(
+      String postId, String collection, String reaction) async {
     try {
-      final result = await _firestore
-          .collection("posts")
-          .doc(postId)
-          .collection(collection)
-          .get();
+      QuerySnapshot<Map<String, dynamic>> result;
+      if (collection.toLowerCase() == "upvotes" && reaction != "All") {
+        result = await _firestore
+            .collection("posts")
+            .doc(postId)
+            .collection(collection)
+            .where("reaction", isEqualTo: reaction)
+            .get();
+      } else {
+        result = await _firestore
+            .collection("posts")
+            .doc(postId)
+            .collection(collection)
+            .get();
+      }
 
       List<UserModel> userModels = [];
       for (var doc in result.docs) {
@@ -36,22 +46,28 @@ class PostInteractorsFunctions {
 
   static Future<bool> removePost({
     required PostModel postModel,
+    String? collection,
   }) async {
     try {
       //remove comment
-      await _firestore.collection("posts").doc(postModel.postId).delete();
+      await _firestore
+          .collection(collection ?? "posts")
+          .doc(postModel.postId)
+          .delete();
 
-      //updates the number of posts in a user
-      final userReference =
-          _firestore.collection("users").doc(postModel.authorId);
+      if (collection == null) {
+        //updates the number of posts in a user
+        final userReference =
+            _firestore.collection("users").doc(postModel.authorId);
 
-      await _firestore.runTransaction((transaction) async {
-        final user = await transaction.get(userReference);
+        await _firestore.runTransaction((transaction) async {
+          final user = await transaction.get(userReference);
 
-        int postCount = user.data()!['posts'];
+          int postCount = user.data()!['posts'];
 
-        transaction.update(userReference, {"posts": postCount - 1});
-      });
+          transaction.update(userReference, {"posts": postCount - 1});
+        });
+      }
 
       return true;
     } catch (e) {
@@ -63,11 +79,12 @@ class PostInteractorsFunctions {
     required String postId,
     required String postTitle,
     required String postContent,
+    String? collection,
   }) async {
     try {
       //updates the comment
       await _firestore
-          .collection("posts")
+          .collection(collection ?? "posts")
           .doc(postId)
           .update({"title": postTitle, "content": postContent});
 

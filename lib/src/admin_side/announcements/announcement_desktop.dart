@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -84,8 +85,8 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
     }
     AnnouncementModel announcementModel = AnnouncementModel(
       announcementId: DateTime.now().toIso8601String(),
-      title: _postTitle,
-      details: _postContent,
+      title: profanityFilter.censor(_postTitle),
+      details: profanityFilter.censor(_postContent),
       timeStamp:
           dateSet == null ? DateTime.now().toString() : dateSet.toString(),
       datePosted: formattedDate(dateSet),
@@ -96,14 +97,23 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
         await AnnouncementFunction.addAnnouncement(announcementModel);
 
     if (isSuccessful) {
-      announcementModels.add(announcementModel);
+      announcementModels =
+          await AnnouncementFunction.getAllAnnouncements() ?? [];
+      //get pending announcment
+      pendingAnnouncements = announcementModels
+          .where((element) =>
+              DateTime.parse(element.timeStamp).isAfter(DateTime.now()))
+          .toList();
       //check announcment schedule
       announcementModels = announcementModels
           .where((element) =>
-              DateTime.parse(element.timeStamp).isBefore(DateTime.now()))
+              DateTime.parse(element.timeStamp).isBefore(DateTime.now()) ||
+              DateTime.parse(element.timeStamp)
+                  .isAtSameMomentAs(DateTime.now()))
           .toList();
       announcementModels
           .sort((a, b) => b.announcementId.compareTo(a.announcementId));
+      allAnnouncementModels = announcementModels;
 
       // ignore: use_build_context_synchronously
       successMessage(

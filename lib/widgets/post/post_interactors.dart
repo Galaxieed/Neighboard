@@ -26,13 +26,15 @@ class _PostInteractorsState extends State<PostInteractors> {
 
   void getData() async {
     userModels = await PostInteractorsFunctions.getPostInteractorsData(
-            widget.postModel.postId, widget.collection) ??
+            widget.postModel.postId, widget.collection, reaction) ??
         [];
 
     setState(() {
       isLoading = false;
     });
   }
+
+  String reaction = "All";
 
   @override
   void initState() {
@@ -59,32 +61,118 @@ class _PostInteractorsState extends State<PostInteractors> {
         ),
         body: isLoading
             ? const LoadingScreen()
-            : Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: userModels.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundImage:
-                                  userModels[index].profilePicture == ""
-                                      ? const AssetImage(guestIcon)
-                                          as ImageProvider
-                                      : NetworkImage(
-                                          userModels[index].profilePicture),
-                            ),
-                            title: Text(userModels[index].username),
-                          );
-                        },
-                      )
-                    ],
+            : widget.collection.toLowerCase() == "upvotes"
+                ? Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  reaction = "All";
+                                  getData();
+                                },
+                                child: const Text("All"),
+                              ),
+                              if (reaction == "All")
+                                Text(userModels.length.toString()),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  reaction = "Like";
+                                  getData();
+                                },
+                                icon: Icon(
+                                  Icons.thumb_up,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                              if (reaction == "Like")
+                                Text(userModels.length.toString()),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  reaction = "Love";
+                                  getData();
+                                },
+                                icon: const Icon(
+                                  Icons.favorite,
+                                  color: Colors.red,
+                                ),
+                              ),
+                              if (reaction == "Love")
+                                Text(userModels.length.toString()),
+                              const SizedBox(
+                                width: 20,
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  reaction = "Star";
+                                  getData();
+                                },
+                                icon: const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                              if (reaction == "Star")
+                                Text(userModels.length.toString()),
+                            ],
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: userModels.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage:
+                                      userModels[index].profilePicture == ""
+                                          ? const AssetImage(guestIcon)
+                                              as ImageProvider
+                                          : NetworkImage(
+                                              userModels[index].profilePicture),
+                                ),
+                                title: Text(userModels[index].username),
+                              );
+                            },
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: userModels.length,
+                            itemBuilder: (context, index) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage:
+                                      userModels[index].profilePicture == ""
+                                          ? const AssetImage(guestIcon)
+                                              as ImageProvider
+                                          : NetworkImage(
+                                              userModels[index].profilePicture),
+                                ),
+                                title: Text(userModels[index].username),
+                              );
+                            },
+                          )
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
       ),
     );
   }

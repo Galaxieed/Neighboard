@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
@@ -48,6 +49,7 @@ class _AllPostsState extends State<AllPosts> {
     postModels.clear();
     postModels = await AllPostsFunction.getAllPost() ?? [];
     postModels.sort((a, b) => b.postId.compareTo(a.postId));
+    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
@@ -65,6 +67,7 @@ class _AllPostsState extends State<AllPosts> {
             category: widget.category.trim()) ??
         [];
     postModels.sort((a, b) => b.postId.compareTo(a.postId));
+    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -81,6 +84,7 @@ class _AllPostsState extends State<AllPosts> {
         [];
 
     postModels.sort((a, b) => widget.searchedText.trim().compareTo(a.title));
+    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -125,9 +129,7 @@ class _AllPostsState extends State<AllPosts> {
                       post: post,
                       isAdmin: widget.isAdmin,
                       deviceScreenType: widget.deviceScreenType,
-                      stateSetter: () {
-                        getAllPost();
-                      },
+                      stateSetter: getAllPost,
                     ),
                   );
                 },
@@ -170,8 +172,8 @@ class _SinglePostState extends State<SinglePost> {
         _titleController.text.isNotEmpty) {
       bool isSucceess = await PostInteractorsFunctions.updatePost(
         postId: widget.post.postId,
-        postTitle: _titleController.text,
-        postContent: _contentController.text,
+        postTitle: profanityFilter.censor(_titleController.text),
+        postContent: profanityFilter.censor(_contentController.text),
       );
       if (isSucceess) {
         // ignore: use_build_context_synchronously
@@ -221,7 +223,7 @@ class _SinglePostState extends State<SinglePost> {
                     postModel: widget.post,
                     deviceScreenType: widget.deviceScreenType,
                     stateSetter: () {
-                      widget.stateSetter();
+                      setState(() {});
                     },
                   )),
                 )
@@ -234,7 +236,7 @@ class _SinglePostState extends State<SinglePost> {
                     postModel: widget.post,
                     deviceScreenType: widget.deviceScreenType,
                     stateSetter: () {
-                      widget.stateSetter();
+                      setState(() {});
                     },
                   ),
                 );

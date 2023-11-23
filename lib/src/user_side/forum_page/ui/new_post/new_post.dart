@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_function.dart';
@@ -79,8 +80,8 @@ class _NewPostState extends State<NewPost> {
         authorName: userModel!.username,
         profilePicture: userModel!.profilePicture,
         timeStamp: formattedDate(),
-        title: _postTitle,
-        content: _postContent,
+        title: profanityFilter.censor(_postTitle),
+        content: profanityFilter.censor(_postContent),
         noOfComments: 0,
         noOfViews: 0,
         noOfUpVotes: 0,
@@ -105,7 +106,7 @@ class _NewPostState extends State<NewPost> {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                builder: (context) => const ForumPage(),
+                builder: (context) => ForumPage(),
               ),
               (route) => false);
 
@@ -315,6 +316,7 @@ class _NewPostState extends State<NewPost> {
                                           onPressed: _getImage,
                                           icon: const Icon(Icons.image),
                                           tooltip: "Add Image",
+                                          color: Colors.indigo,
                                         ),
                                         SizedBox(
                                           width: 2.w,
@@ -324,12 +326,14 @@ class _NewPostState extends State<NewPost> {
                                           icon:
                                               const Icon(Icons.delete_outline),
                                           tooltip: "Discard Post",
+                                          color: colorFromHex(discardColor),
                                         ),
                                         const Spacer(),
                                         IconButton(
                                           onPressed: _publishPost,
                                           icon: const Icon(Icons.send),
                                           tooltip: "Publish",
+                                          color: colorFromHex(saveColor),
                                         ),
                                       ],
                                     )
@@ -338,9 +342,10 @@ class _NewPostState extends State<NewPost> {
                                         ElevatedButton.icon(
                                           onPressed: _getImage,
                                           style: ElevatedButton.styleFrom(
-                                            shape:
-                                                const BeveledRectangleBorder(),
-                                            backgroundColor: Colors.indigo[800],
+                                            shape: const RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(4))),
+                                            backgroundColor: Colors.indigo,
                                             foregroundColor: Colors.white,
                                           ),
                                           icon: const Icon(Icons.image),
@@ -363,9 +368,11 @@ class _NewPostState extends State<NewPost> {
                                         ElevatedButton.icon(
                                           onPressed: _discardPost,
                                           style: ElevatedButton.styleFrom(
-                                            shape:
-                                                const BeveledRectangleBorder(),
-                                            backgroundColor: Colors.red[900],
+                                            shape: const RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(4))),
+                                            backgroundColor:
+                                                colorFromHex(discardColor),
                                             foregroundColor: Colors.white,
                                           ),
                                           icon:
@@ -378,15 +385,15 @@ class _NewPostState extends State<NewPost> {
                                         ElevatedButton.icon(
                                           onPressed: _publishPost,
                                           style: ElevatedButton.styleFrom(
-                                            shape:
-                                                const BeveledRectangleBorder(),
-                                            backgroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            foregroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary,
-                                          ),
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  4))),
+                                              backgroundColor:
+                                                  colorFromHex(saveColor),
+                                              foregroundColor: Colors.white),
                                           icon: const Icon(Icons.send),
                                           label: const Text('Publish'),
                                         ),

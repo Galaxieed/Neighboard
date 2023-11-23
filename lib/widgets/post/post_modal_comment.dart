@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -57,6 +58,8 @@ class _PostModalCommentState extends State<PostModalComment> {
   UserModel? otherUser;
 
   sendNotification(userId, title, body) async {
+    title = profanityFilter.censor(title);
+    body = profanityFilter.censor(body);
     otherUser = await ProfileFunction.getUserDetails(userId);
     await MyNotification().sendPushMessage(
       otherUser!.deviceToken,
@@ -202,6 +205,7 @@ class _PostModalCommentState extends State<PostModalComment> {
       {required String recipientId,
       required String recipientName,
       required String response}) async {
+    response = profanityFilter.censor(response);
     widget.onTypeReply(
         recipientId: recipientId,
         recipientName: recipientName,
@@ -218,6 +222,7 @@ class _PostModalCommentState extends State<PostModalComment> {
   bool isEditing = false;
   updateComment() async {
     if (_controller.text.isNotEmpty) {
+      _controller.text = profanityFilter.censor(_controller.text);
       bool success = await CommentFunction.updateComment(
         postId: widget.postModel.postId,
         commentId: widget.commentModel.commentId,
@@ -572,6 +577,7 @@ class _ReplyItselfState extends State<ReplyItself> {
 
   updateReply() async {
     if (_controller.text.isNotEmpty) {
+      _controller.text = profanityFilter.censor(_controller.text);
       bool isSuccess = await CommentFunction.updateReply(
         postId: widget.postModel.postId,
         commentId: widget.commentModel.commentId,
@@ -802,7 +808,7 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
               widget.postModel.asAnonymous
           ? 'Anonymous replied: '
           : '${widget.currentUser.username} replied: ',
-      controller.text,
+      profanityFilter.censor(controller.text),
     );
 
     if (otherUser!.userId != widget.currentUser.userId) {
@@ -812,7 +818,7 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
                 widget.postModel.asAnonymous
             ? 'Anonymous replied: '
             : '${widget.currentUser.username} replied: ',
-        notifBody: controller.text,
+        notifBody: profanityFilter.censor(controller.text),
         notifTime: formattedDate(),
         notifLocation: "FORUM|${widget.postModel.postId}",
         isRead: false,
@@ -858,7 +864,7 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
                     senderName: widget.currentUser.username,
                     recipientId: widget.recipientId,
                     recipientName: widget.recipientName,
-                    replyMessage: controller.text,
+                    replyMessage: profanityFilter.censor(controller.text),
                   );
                   widget.addReply(reply: newReply);
                   //send notification to the recipient of this reply (from desktop)
@@ -890,7 +896,7 @@ class _ReplyTextBoxState extends State<ReplyTextBox> {
                     senderName: widget.currentUser.username,
                     recipientId: widget.recipientId,
                     recipientName: widget.recipientName,
-                    replyMessage: controller.text,
+                    replyMessage: profanityFilter.censor(controller.text),
                   );
                   widget.addReply(reply: newReply);
                   //send notification to the recipient of this reply (from desktop)

@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:neighboard/models/post_model.dart';
 
 class AllPostsFunction {
   static final FirebaseFirestore _firebaseFirestore =
       FirebaseFirestore.instance;
+
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static Future<List<PostModel>?> getAllPost() async {
     try {
@@ -33,7 +36,7 @@ class AllPostsFunction {
           .limit(3)
           .get();
       // Use a Set to keep track of unique post IDs
-      Set<String> uniquePostIds = Set<String>();
+      Set<String> uniquePostIds = <String>{};
 
       // Combine the results without duplicates
       List<PostModel> topPosts = [];
@@ -62,9 +65,18 @@ class AllPostsFunction {
     }
   }
 
-  static Future<List<PostModel>?> getAllPendingPost() async {
+  static Future<List<PostModel>?> getAllPendingPost(bool onMyPost) async {
     try {
-      final result = await _firebaseFirestore.collection("pending_posts").get();
+      final QuerySnapshot<Map<String, dynamic>> result;
+      if (onMyPost) {
+        result = await _firebaseFirestore
+            .collection("pending_posts")
+            .where('author_id', isEqualTo: _auth.currentUser!.uid)
+            .get();
+      } else {
+        result = await _firebaseFirestore.collection("pending_posts").get();
+      }
+
       List<PostModel> postModels = [];
       postModels =
           result.docs.map((e) => PostModel.fromJson(e.data())).toList();

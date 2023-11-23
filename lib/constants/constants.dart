@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_reaction_button/flutter_reaction_button.dart';
 import 'package:neighboard/main.dart';
 
 const String guestIcon = 'assets/guest_icon.png';
@@ -62,10 +63,8 @@ const Color ccForumLinksColor = Colors.blue;
 const Color ccForumDividerColor = Colors.black;
 
 //mypost styles
-Color ccMyPostCommentButtonBGColor(context) =>
-    Theme.of(context).colorScheme.primary;
-Color ccMyPostCommentButtonFGColor(context) =>
-    Theme.of(context).colorScheme.onPrimary;
+Color ccMyPostCommentButtonBGColor(context) => colorFromHex(saveColor);
+Color ccMyPostCommentButtonFGColor(context) => Colors.white;
 
 Color ccMyPostUpVotedBGColor(context) => Theme.of(context).disabledColor;
 Color ccMyPostUpVoteBGColor(context) => Theme.of(context).colorScheme.primary;
@@ -126,4 +125,49 @@ Container hoaTitleBanner(BuildContext context, String title) {
           ),
     ),
   );
+}
+
+Reaction<String> selectedReaction(BuildContext context, String react) {
+  if (react == "Like") {
+    return Reaction(
+      value: "Like",
+      icon: Icon(
+        Icons.thumb_up,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      title: const Text("Like"),
+    );
+  } else if (react == "Love") {
+    return const Reaction(
+      value: "Love",
+      icon: Icon(
+        Icons.favorite,
+        color: Colors.red,
+      ),
+      title: Text("Love"),
+    );
+  } else if (react == "Star") {
+    return const Reaction(
+      value: "Star",
+      icon: Icon(
+        Icons.star,
+        color: Colors.amber,
+      ),
+      title: Text("Star"),
+    );
+  } else {
+    return const Reaction(
+      value: null,
+      icon: Icon(Icons.thumb_up_outlined),
+    );
+  }
+}
+
+String saveColor = "#29C948";
+String discardColor = "#EF3E36";
+Color colorFromHex(String hexString) {
+  final buffer = StringBuffer();
+  if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+  buffer.write(hexString.replaceFirst('#', ''));
+  return Color(int.parse(buffer.toString(), radix: 16));
 }

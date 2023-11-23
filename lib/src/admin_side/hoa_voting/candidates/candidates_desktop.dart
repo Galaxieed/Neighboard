@@ -1,10 +1,9 @@
-import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/candidates_model.dart';
 import 'package:neighboard/models/election_model.dart';
 import 'package:neighboard/models/notification_model.dart';
@@ -12,13 +11,11 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
-import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
-import 'package:universal_io/io.dart';
 
 class CandidatesDesktop extends StatefulWidget {
   const CandidatesDesktop(
@@ -32,21 +29,19 @@ class CandidatesDesktop extends StatefulWidget {
 }
 
 class _CandidatesDesktopState extends State<CandidatesDesktop> {
-  final _formKey = GlobalKey<FormState>();
   TabController controller(context) => DefaultTabController.of(context);
   TextEditingController tcNote = TextEditingController();
-  TextEditingController tcFName = TextEditingController();
-  TextEditingController tcLName = TextEditingController();
+  TextEditingController tcName = TextEditingController();
+  TextEditingController tcUsername = TextEditingController();
+  TextEditingController tcGender = TextEditingController();
   TextEditingController tcAddress = TextEditingController();
 
+  UserModel? candidateUser;
   List<CandidateModel> candidateModels = [];
   CandidateModel? candidateModel;
   ElectionModel? electionModel;
 
-  File? profileImage;
-  PlatformFile? profileImageByte;
   String profileImageUrl = "";
-  List<List> profileImages = [];
 
   bool isTherePres = false, isThereVP = false;
   bool isThereSec = false, isThereAssistSec = false;
@@ -55,34 +50,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   bool isThereBD = false;
   bool isLoading = true;
   bool isElectionOngoing = false;
-
-  void pickImage(StateSetter modalStateSetter) async {
-    if (kIsWeb) {
-      FilePickerResult? result = await FilePicker.platform
-          .pickFiles(allowMultiple: false, type: FileType.image);
-      if (result != null) {
-        profileImageByte = result.files.single;
-        modalStateSetter(() {});
-      }
-    } else if (!kIsWeb) {
-      final pickedImage =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (pickedImage != null) {
-        profileImage = File(pickedImage.path);
-        modalStateSetter(() {});
-      }
-    }
-  }
-
-  Future<void> onSavingPic(ppImage, ppImageByte) async {
-    if (ppImage != null || ppImageByte != null) {
-      profileImageUrl = kIsWeb
-          ? await ProfileFunction.uploadImageWeb(ppImageByte!.bytes!,
-                  ppImageByte!.name, ppImageByte!.extension!) ??
-              ""
-          : await ProfileFunction.uploadImage(ppImage!) ?? "";
-    }
-  }
 
   void onStartElection() async {
     setState(() {
@@ -101,24 +68,13 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       //save the candidate 1 by 1
       try {
         for (int i = 0; i < candidateModels.length; i++) {
-          //Get the profile pic from the list of profileImages
-          profileImageUrl = '';
-          int imageIndex = profileImages.indexWhere(
-              (element) => element.contains(candidateModels[i].candidateId));
-          if (imageIndex != -1) {
-            await onSavingPic(
-                profileImages[imageIndex][1], profileImages[imageIndex][2]);
-          }
-
-          //set the profile pic of each candidates
-          candidateModels[i].profilePicture = profileImageUrl;
-
           //save the candidate in firebase
           await CandidatesFunctions.addCandidate(
             electionModel!.electionId,
             candidateModels[i],
           );
         }
+        mainIsElectionOngoing = true;
         isElectionOngoing = true;
         if (mounted) {
           setState(() {
@@ -163,12 +119,13 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   }
 
   void onClearForm() {
-    tcFName.clear();
-    tcLName.clear();
-    tcAddress.clear();
-    profileImage = null;
-    profileImageByte = null;
     profileImageUrl = '';
+    candidateModel = null;
+    candidateUser = null;
+    tcAddress.clear();
+    tcGender.clear();
+    tcName.clear();
+    tcUsername.clear();
   }
 
   int nextYear = DateTime.parse(DateTime.now().toString()).year + 1;
@@ -250,6 +207,16 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     super.initState();
     getAllUsers();
     checkIfElectionOngoing();
+  }
+
+  @override
+  void dispose() {
+    tcAddress.dispose();
+    tcName.dispose();
+    tcUsername.dispose();
+    tcGender.dispose();
+    tcNote.dispose();
+    super.dispose();
   }
 
   @override
@@ -356,32 +323,89 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                             ctrl.index < 8) {
                                           if (ctrl.index == 0 && isTherePres) {
                                             ctrl.animateTo(1);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 0) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc: "Put President candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 1 && isThereVP) {
                                             ctrl.animateTo(2);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 1) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc:
+                                                    "Put V.President candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 2 && isThereSec) {
                                             ctrl.animateTo(3);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 2) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc: "Put Secretary candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 3 &&
                                               isThereAssistSec) {
                                             ctrl.animateTo(4);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 3) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc:
+                                                    "Put Asst. Sec. candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 4 && isThereTres) {
                                             ctrl.animateTo(5);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 4) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc: "Put Treasurer candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 5 && isThereAudit) {
                                             ctrl.animateTo(6);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 5) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc: "Put Auditor candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 6 &&
                                               isThereAssistAudit) {
                                             ctrl.animateTo(7);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 6) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc:
+                                                    "Put Asst. Auditor candidate",
+                                                context: context);
                                           }
                                           if (ctrl.index == 7 && isThereBD) {
                                             ctrl.animateTo(8);
+                                            setState(() {});
+                                            return;
+                                          } else if (ctrl.index == 7) {
+                                            infoMessage(
+                                                title: "Put candidate",
+                                                desc: "Put B.O.D. candidate",
+                                                context: context);
                                           }
-
-                                          setState(() {});
                                         }
                                         if (!ctrl.indexIsChanging &&
                                             ctrl.index == 8) {
@@ -435,7 +459,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                       builder: (BuildContext context) {
                         return Padding(
                           padding: MediaQuery.of(context).viewInsets,
-                          child: addCandidateModal(title),
+                          child: addCandidateMobileModal(title),
                         );
                       },
                     )
@@ -485,9 +509,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                 var list = candidateModels
                     .where((element) => element.position == title);
                 CandidateModel candidate = list.elementAt(index);
-                int imageIndex = profileImages.indexWhere(
-                    (element) => element.contains(candidate.candidateId));
-                return candidatesCard(context, candidate, imageIndex);
+                return candidatesCard(context, candidate, index, title);
               },
             ),
           )
@@ -561,192 +583,468 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
 
   StatefulBuilder addCandidateModal(String title) {
     return StatefulBuilder(
-      builder: (BuildContext context, StateSetter mySetState) => Container(
-        padding: const EdgeInsets.all(8.0),
+      builder: (BuildContext context, StateSetter mySetState) => Stack(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(50.0),
+            width: 700,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Select Candidate",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium!
+                                  .copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primary),
+                            ),
+                            DropdownSearch<UserModel>(
+                              popupProps: PopupProps.menu(
+                                showSearchBox: true,
+                                searchFieldProps: const TextFieldProps(
+                                    decoration: InputDecoration(
+                                        hintText: "Search Here...")),
+                                searchDelay: const Duration(milliseconds: 100),
+                                disabledItemFn: (item) {
+                                  return candidateModels
+                                      .where((element) =>
+                                          element.firstName.trim() ==
+                                              item.firstName.trim() &&
+                                          element.lastName.trim() ==
+                                              item.lastName.trim())
+                                      .toList()
+                                      .isNotEmpty;
+                                },
+                              ),
+                              items: allUsers,
+                              selectedItem: candidateUser,
+                              filterFn: (item, filter) {
+                                filter = filter.toLowerCase();
+                                if (filter.isEmpty) return true;
+                                return item.firstName
+                                        .toLowerCase()
+                                        .contains(filter) ||
+                                    item.lastName
+                                        .toLowerCase()
+                                        .contains(filter);
+                              },
+                              itemAsString: (UserModel u) =>
+                                  "${u.firstName} ${u.lastName}",
+                              onChanged: (UserModel? data) => mySetState(() {
+                                candidateUser = data;
+                                tcName.text =
+                                    "${candidateUser?.firstName ?? ""} ${candidateUser?.lastName ?? ""}";
+                                tcUsername.text = candidateUser?.username ?? "";
+                                tcGender.text = candidateUser?.gender ?? "";
+                                tcAddress.text = candidateUser?.address ?? "";
+                                profileImageUrl =
+                                    candidateUser?.profilePicture ?? "";
+                                setState(() {});
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: CircleAvatar(
+                            radius: 80,
+                            backgroundImage: candidateUser == null ||
+                                    profileImageUrl.isEmpty
+                                ? const AssetImage(guestIcon) as ImageProvider
+                                : NetworkImage(candidateUser!.profilePicture),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: myTextFormField(tcName, "Candidate Name"),
+                      ),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      Expanded(child: myTextFormField(tcUsername, "Username")),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    children: [
+                      Expanded(child: myTextFormField(tcGender, "Gender")),
+                      const SizedBox(
+                        width: 50,
+                      ),
+                      Expanded(child: myTextFormField(tcAddress, "Address")),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          mySetState(() {
+                            onClearForm();
+                            setState(() {});
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          foregroundColor: Colors.red,
+                        ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text("Discard"),
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          if (candidateUser != null) {
+                            var candidateId = DateTime.now().toIso8601String();
+                            candidateModel = CandidateModel(
+                              candidateId: candidateId,
+                              firstName: candidateUser?.firstName.trim() ?? "",
+                              lastName: candidateUser?.lastName.trim() ?? "",
+                              username: candidateUser?.username.trim() ?? "",
+                              gender: candidateUser?.gender.trim() ?? "",
+                              profilePicture:
+                                  candidateUser?.profilePicture.trim() ?? "",
+                              address: candidateUser?.address.trim() ?? "",
+                              position: () {
+                                if (title == "PRESIDENT") {
+                                  return "PRESIDENT";
+                                } else if (title == "VICE PRESIDENT") {
+                                  return "VICE PRESIDENT";
+                                } else if (title == "SECRETARY") {
+                                  return "SECRETARY";
+                                } else if (title == "ASSISTANT SECRETARY") {
+                                  return "ASSISTANT SECRETARY";
+                                } else if (title == "TREASURER") {
+                                  return "TREASURER";
+                                } else if (title == "AUDITOR") {
+                                  return "AUDITOR";
+                                } else if (title == "ASSISTANT AUDITOR") {
+                                  return "ASSISTANT AUDITOR";
+                                } else if (title == "BOARD OF DIRECTORS") {
+                                  return "BOARD OF DIRECTORS";
+                                } else {
+                                  return "";
+                                }
+                              }(),
+                              noOfVotes: 0,
+                            );
+                            if (candidateModel != null) {
+                              candidateModels.add(candidateModel!);
+                              setState(() {
+                                if (title == "PRESIDENT") {
+                                  isTherePres = true;
+                                } else if (title == "VICE PRESIDENT") {
+                                  isThereVP = true;
+                                } else if (title == "SECRETARY") {
+                                  isThereSec = true;
+                                } else if (title == "ASSISTANT SECRETARY") {
+                                  isThereAssistSec = true;
+                                } else if (title == "TREASURER") {
+                                  isThereTres = true;
+                                } else if (title == "AUDITOR") {
+                                  isThereAudit = true;
+                                } else if (title == "ASSISTANT AUDITOR") {
+                                  isThereAssistAudit = true;
+                                } else {
+                                  isThereBD = true;
+                                }
+                              });
+                              onClearForm();
+                              Navigator.pop(context);
+                            }
+                          } else {
+                            errorMessage(
+                                title: "Choose Candidate",
+                                desc: "Choose Candidate First",
+                                context: context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          backgroundColor: colorFromHex(saveColor),
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onPrimary,
+                        ),
+                        icon: const Icon(Icons.add),
+                        label: const Text("Add"),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 5,
+            right: 5,
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: IconButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              icon: const Icon(Icons.close),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  StatefulBuilder addCandidateMobileModal(String title) {
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter mySetState) => SizedBox(
         width: 700,
         child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  "New Candidate",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Select Candidate",
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+              const SizedBox(
+                height: 15,
+              ),
+              DropdownSearch<UserModel>(
+                popupProps: PopupProps.menu(
+                  showSearchBox: true,
+                  searchFieldProps: const TextFieldProps(
+                      decoration: InputDecoration(hintText: "Search Here...")),
+                  searchDelay: const Duration(milliseconds: 100),
+                  disabledItemFn: (item) {
+                    return candidateModels
+                        .where((element) =>
+                            element.firstName.trim() == item.firstName.trim() &&
+                            element.lastName.trim() == item.lastName.trim())
+                        .toList()
+                        .isNotEmpty;
+                  },
                 ),
-                Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundImage:
-                          profileImage != null || profileImageByte != null
-                              ? kIsWeb
-                                  ? MemoryImage(profileImageByte!.bytes!)
-                                  : FileImage(profileImage!) as ImageProvider
-                              : const AssetImage(guestIcon),
-                    ),
-                    Positioned(
-                      bottom: 5,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        child: IconButton(
-                          onPressed: () {
-                            //update picture
-                            pickImage(mySetState);
-                          },
-                          icon: const Icon(Icons.camera_alt),
-                          color: Colors.white,
-                        ),
+                items: allUsers,
+                selectedItem: candidateUser,
+                filterFn: (item, filter) {
+                  filter = filter.toLowerCase();
+                  if (filter.isEmpty) return true;
+                  return item.firstName.toLowerCase().contains(filter) ||
+                      item.lastName.toLowerCase().contains(filter);
+                },
+                itemAsString: (UserModel u) => "${u.firstName} ${u.lastName}",
+                onChanged: (UserModel? data) => mySetState(() {
+                  candidateUser = data;
+                  tcName.text =
+                      "${candidateUser?.firstName ?? ""} ${candidateUser?.lastName ?? ""}";
+                  tcUsername.text = candidateUser?.username ?? "";
+                  tcGender.text = candidateUser?.gender ?? "";
+                  tcAddress.text = candidateUser?.address ?? "";
+                  profileImageUrl = candidateUser?.profilePicture ?? "";
+                  setState(() {});
+                }),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              CircleAvatar(
+                radius: 80,
+                backgroundImage:
+                    candidateUser == null || profileImageUrl.isEmpty
+                        ? const AssetImage(guestIcon) as ImageProvider
+                        : NetworkImage(candidateUser!.profilePicture),
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              myTextFormField(tcName, "Candidate Name"),
+              const SizedBox(
+                height: 5,
+              ),
+              myTextFormField(tcUsername, "Username"),
+              const SizedBox(
+                height: 5,
+              ),
+              myTextFormField(tcGender, "Gender"),
+              const SizedBox(
+                height: 5,
+              ),
+              myTextFormField(tcAddress, "Address"),
+              const SizedBox(
+                height: 15,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      mySetState(() {
+                        onClearForm();
+                        setState(() {});
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcFName, "First Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcLName, "Last Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcAddress, "Address", 5),
-                const SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        mySetState(() {
+                      foregroundColor: Colors.red,
+                    ),
+                    icon: const Icon(Icons.delete_outline),
+                    label: const Text("Discard"),
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (candidateUser != null) {
+                        var candidateId = DateTime.now().toIso8601String();
+                        candidateModel = CandidateModel(
+                          candidateId: candidateId,
+                          firstName: candidateUser?.firstName.trim() ?? "",
+                          lastName: candidateUser?.lastName.trim() ?? "",
+                          username: candidateUser?.username.trim() ?? "",
+                          gender: candidateUser?.gender.trim() ?? "",
+                          profilePicture:
+                              candidateUser?.profilePicture.trim() ?? "",
+                          address: candidateUser?.address.trim() ?? "",
+                          position: () {
+                            if (title == "PRESIDENT") {
+                              return "PRESIDENT";
+                            } else if (title == "VICE PRESIDENT") {
+                              return "VICE PRESIDENT";
+                            } else if (title == "SECRETARY") {
+                              return "SECRETARY";
+                            } else if (title == "ASSISTANT SECRETARY") {
+                              return "ASSISTANT SECRETARY";
+                            } else if (title == "TREASURER") {
+                              return "TREASURER";
+                            } else if (title == "AUDITOR") {
+                              return "AUDITOR";
+                            } else if (title == "ASSISTANT AUDITOR") {
+                              return "ASSISTANT AUDITOR";
+                            } else if (title == "BOARD OF DIRECTORS") {
+                              return "BOARD OF DIRECTORS";
+                            } else {
+                              return "";
+                            }
+                          }(),
+                          noOfVotes: 0,
+                        );
+                        if (candidateModel != null) {
+                          candidateModels.add(candidateModel!);
+                          setState(() {
+                            if (title == "PRESIDENT") {
+                              isTherePres = true;
+                            } else if (title == "VICE PRESIDENT") {
+                              isThereVP = true;
+                            } else if (title == "SECRETARY") {
+                              isThereSec = true;
+                            } else if (title == "ASSISTANT SECRETARY") {
+                              isThereAssistSec = true;
+                            } else if (title == "TREASURER") {
+                              isThereTres = true;
+                            } else if (title == "AUDITOR") {
+                              isThereAudit = true;
+                            } else if (title == "ASSISTANT AUDITOR") {
+                              isThereAssistAudit = true;
+                            } else {
+                              isThereBD = true;
+                            }
+                          });
                           onClearForm();
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        foregroundColor: Colors.red,
-                      ),
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text("Discard"),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          var candidateId = DateTime.now().toIso8601String();
-                          candidateModel = CandidateModel(
-                            candidateId: candidateId,
-                            firstName: tcFName.text.trim(),
-                            lastName: tcLName.text.trim(),
-                            profilePicture: '',
-                            address: tcAddress.text.trim(),
-                            position: () {
-                              if (title == "PRESIDENT") {
-                                return "PRESIDENT";
-                              } else if (title == "VICE PRESIDENT") {
-                                return "VICE PRESIDENT";
-                              } else if (title == "SECRETARY") {
-                                return "SECRETARY";
-                              } else if (title == "ASSISTANT SECRETARY") {
-                                return "ASSISTANT SECRETARY";
-                              } else if (title == "TREASURER") {
-                                return "TREASURER";
-                              } else if (title == "AUDITOR") {
-                                return "AUDITOR";
-                              } else if (title == "ASSISTANT AUDITOR") {
-                                return "ASSISTANT AUDITOR";
-                              } else if (title == "BOARD OF DIRECTORS") {
-                                return "BOARD OF DIRECTORS";
-                              } else {
-                                return "";
-                              }
-                            }(),
-                            noOfVotes: 0,
-                          );
-                          if (candidateModel != null) {
-                            candidateModels.add(candidateModel!);
-                            profileImages.add([
-                              candidateId,
-                              profileImage,
-                              profileImageByte,
-                            ]);
-                            setState(() {
-                              if (title == "PRESIDENT") {
-                                isTherePres = true;
-                              } else if (title == "VICE PRESIDENT") {
-                                isThereVP = true;
-                              } else if (title == "SECRETARY") {
-                                isThereSec = true;
-                              } else if (title == "ASSISTANT SECRETARY") {
-                                isThereAssistSec = true;
-                              } else if (title == "TREASURER") {
-                                isThereTres = true;
-                              } else if (title == "AUDITOR") {
-                                isThereAudit = true;
-                              } else if (title == "ASSISTANT AUDITOR") {
-                                isThereAssistAudit = true;
-                              } else {
-                                isThereBD = true;
-                              }
-                            });
-                            onClearForm();
-                            Navigator.pop(context);
-                          }
+                          Navigator.pop(context);
                         }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
+                      } else {
+                        errorMessage(
+                            title: "Choose Candidate",
+                            desc: "Choose Candidate First",
+                            context: context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      icon: const Icon(Icons.add),
-                      label: const Text("Add"),
+                      backgroundColor: colorFromHex(saveColor),
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     ),
-                  ],
-                )
-              ],
-            ),
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add"),
+                  ),
+                ],
+              )
+            ],
           ),
         ),
       ),
     );
   }
 
-  TextFormField myTextFormField(controller, label, [maxlines]) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        border: const OutlineInputBorder(),
-        label: Text(label),
-        alignLabelWithHint: true,
-      ),
-      validator: (value) {
-        if (value == '' || value == null) {
-          return "Enter value to this field";
-        }
-        return null;
-      },
-      maxLines: maxlines,
+  Widget myTextFormField(TextEditingController controller, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        TextField(
+          controller: controller,
+          readOnly: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
     );
   }
 
   Widget candidatesCard(
-      BuildContext context, CandidateModel candidate, int index) {
+      BuildContext context, CandidateModel candidate, int index, String title) {
     return Card(
       child: Stack(
         alignment: Alignment.center,
@@ -759,13 +1057,9 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
               Expanded(
                 child: FittedBox(
                   child: CircleAvatar(
-                    backgroundImage: (profileImages[index][1] != null ||
-                            profileImages[index][2] != null)
-                        ? kIsWeb
-                            ? MemoryImage(profileImages[index][2]!.bytes!)
-                            : FileImage(profileImages[index][1]!)
-                                as ImageProvider
-                        : const AssetImage(guestIcon),
+                    backgroundImage: candidate.profilePicture.isNotEmpty
+                        ? NetworkImage(candidate.profilePicture)
+                        : const AssetImage(guestIcon) as ImageProvider,
                   ),
                 ),
               ),
@@ -789,11 +1083,8 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
               SizedBox(
                 height: 5.h,
               ),
-              ElevatedButton.icon(
+              ElevatedButton(
                 onPressed: () {
-                  tcFName.text = candidate.firstName;
-                  tcLName.text = candidate.lastName;
-                  tcAddress.text = candidate.address;
                   widget.deviceScreenType == DeviceScreenType.mobile
                       ? showModalBottomSheet(
                           isScrollControlled: true,
@@ -803,7 +1094,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                           builder: (context) {
                             return Padding(
                               padding: MediaQuery.of(context).viewInsets,
-                              child: editCandidateModal(index, candidate),
+                              child: viewCandidateMobileModal(index, candidate),
                             );
                           },
                         )
@@ -815,14 +1106,12 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                   borderRadius: BorderRadius.circular(12)),
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: editCandidateModal(index, candidate),
+                                child: viewCandidateModal(index, candidate),
                               ),
                             );
                           },
                         );
                 },
-                icon: const Icon(Icons.edit),
-                label: const Text("Edit"),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -830,6 +1119,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
+                child: const Text("View Details"),
               ),
               SizedBox(
                 height: 25.h,
@@ -841,13 +1131,34 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
             right: 5,
             child: IconButton(
               onPressed: () {
-                //remove image from list of image
-                if (profileImages[index][1] != null ||
-                    profileImages[index][2] != null) {
-                  profileImages.removeAt(index);
-                } //remove candidate from list of candidates
+                //remove candidate from list of candidates
                 candidateModels.removeWhere(
                     (element) => element.candidateId == candidate.candidateId);
+
+                int lenght = candidateModels
+                    .where((element) => element.position == title)
+                    .toList()
+                    .length;
+                if (lenght == 0) {
+                  if (title == "PRESIDENT") {
+                    isTherePres = false;
+                  } else if (title == "VICE PRESIDENT") {
+                    isThereVP = false;
+                  } else if (title == "SECRETARY") {
+                    isThereSec = false;
+                  } else if (title == "ASSISTANT SECRETARY") {
+                    isThereAssistSec = false;
+                  } else if (title == "TREASURER") {
+                    isThereTres = false;
+                  } else if (title == "AUDITOR") {
+                    isThereAudit = false;
+                  } else if (title == "ASSISTANT AUDITOR") {
+                    isThereAssistAudit = false;
+                  } else {
+                    isThereBD = false;
+                  }
+                }
+
                 setState(() {});
               },
               icon: const Icon(Icons.close),
@@ -858,142 +1169,154 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     );
   }
 
-  StatefulBuilder editCandidateModal(int index, CandidateModel candidate) {
-    return StatefulBuilder(
-      builder: (BuildContext context, StateSetter mySetState) => Container(
-        padding: const EdgeInsets.all(8.0),
-        width: 700,
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
+  Widget viewCandidateModal(int index, CandidateModel candidate) {
+    tcName.text = "${candidate.firstName} ${candidate.lastName}";
+    tcUsername.text = candidate.username;
+    tcGender.text = candidate.gender;
+    tcAddress.text = candidate.address;
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(50.0),
+          width: 700,
+          child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Edit Candidate",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge!
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-                Stack(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 80,
-                      backgroundImage: (profileImages[index][1] != null ||
-                              profileImages[index][2] != null)
-                          ? profileImage != null || profileImageByte != null
-                              ? kIsWeb
-                                  ? MemoryImage(profileImageByte!.bytes!)
-                                  : FileImage(profileImage!) as ImageProvider
-                              : kIsWeb
-                                  ? MemoryImage(profileImages[index][2]!.bytes!)
-                                  : FileImage(profileImages[index][1]!)
-                                      as ImageProvider
-                          : profileImage != null || profileImageByte != null
-                              ? kIsWeb
-                                  ? MemoryImage(profileImageByte!.bytes!)
-                                  : FileImage(profileImage!) as ImageProvider
-                              : const AssetImage(guestIcon),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Candidate ${index + 1}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                          ),
+                        ],
+                      ),
                     ),
-                    Positioned(
-                      bottom: 5,
-                      right: 8,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey,
-                        child: IconButton(
-                          onPressed: () {
-                            //update picture
-                            pickImage(mySetState);
-                          },
-                          icon: const Icon(Icons.camera_alt),
-                          color: Colors.white,
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage: candidate.profilePicture.isEmpty
+                              ? const AssetImage(guestIcon) as ImageProvider
+                              : NetworkImage(candidate.profilePicture),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcFName, "First Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcLName, "Last Name"),
-                const SizedBox(
-                  height: 5,
-                ),
-                myTextFormField(tcAddress, "Address", 5),
                 const SizedBox(
                   height: 5,
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.max,
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        mySetState(() {
-                          onClearForm();
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        foregroundColor: Colors.red,
-                      ),
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text("Discard"),
+                    Expanded(
+                      child: myTextFormField(tcName, "Candidate Name"),
                     ),
                     const SizedBox(
-                      width: 10,
+                      width: 50,
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          //update candidateModels specific index
-                          int candidateIndex = candidateModels.indexWhere(
-                              (element) =>
-                                  element.candidateId == candidate.candidateId);
-
-                          candidateModels[candidateIndex] = CandidateModel(
-                              candidateId: candidate.candidateId,
-                              firstName: tcFName.text,
-                              lastName: tcLName.text,
-                              profilePicture: candidate.profilePicture,
-                              address: tcAddress.text,
-                              position: candidate.position,
-                              noOfVotes: candidate.noOfVotes);
-
-                          //update profileImages specific index
-                          profileImages[index][2] =
-                              profileImageByte ?? profileImages[index][2];
-                          profileImages[index][1] =
-                              profileImage ?? profileImages[index][1];
-
-                          onClearForm();
-                          setState(() {});
-                          Navigator.pop(context);
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      icon: const Icon(Icons.save),
-                      label: const Text("Update"),
-                    ),
+                    Expanded(child: myTextFormField(tcUsername, "Username")),
                   ],
-                )
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  children: [
+                    Expanded(child: myTextFormField(tcGender, "Gender")),
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    Expanded(child: myTextFormField(tcAddress, "Address")),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
               ],
             ),
           ),
+        ),
+        Positioned(
+          top: 5,
+          right: 5,
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            style: IconButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.close),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget viewCandidateMobileModal(int index, CandidateModel candidate) {
+    tcName.text = "${candidate.firstName} ${candidate.lastName}";
+    tcUsername.text = candidate.username;
+    tcGender.text = candidate.gender;
+    tcAddress.text = candidate.address;
+    return SizedBox(
+      width: 700,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Candidate ${index + 1}",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge!
+                  .copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
+            const SizedBox(
+              height: 15,
+            ),
+            CircleAvatar(
+              radius: 80,
+              backgroundImage: candidate.profilePicture.isEmpty
+                  ? const AssetImage(guestIcon) as ImageProvider
+                  : NetworkImage(candidate.profilePicture),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            myTextFormField(tcName, "Candidate Name"),
+            const SizedBox(
+              height: 5,
+            ),
+            myTextFormField(tcUsername, "Username"),
+            const SizedBox(
+              height: 5,
+            ),
+            myTextFormField(tcGender, "Gender"),
+            const SizedBox(
+              height: 5,
+            ),
+            myTextFormField(tcAddress, "Address"),
+            const SizedBox(
+              height: 15,
+            ),
+          ],
         ),
       ),
     );

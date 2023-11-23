@@ -39,13 +39,6 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
         title: Text("Mark all as read"),
       ),
     ),
-    // const PopupMenuItem(
-    //   value: "Archive all",
-    //   child: ListTile(
-    //     leading: Icon(Icons.archive_outlined),
-    //     title: Text("Archive all"),
-    //   ),
-    // ),
   ];
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -153,6 +146,11 @@ class _NotificationDrawerState extends State<NotificationDrawer> {
                       children: [
                         Row(
                           children: [
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(Icons.arrow_back_ios_new)),
                             const SizedBox(
                               width: 10,
                             ),

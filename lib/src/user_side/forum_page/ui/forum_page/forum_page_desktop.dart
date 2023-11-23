@@ -2,12 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/anonymous_posts/anonymous_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
@@ -50,6 +52,7 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
   void _openChat() {
     showModalBottomSheet(
       isScrollControlled: true,
+      showDragHandle: true,
       context: context,
       builder: (context) {
         return const MyChat();
@@ -130,9 +133,10 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                           const SizedBox(
                             height: 20,
                           ),
+                          //TODO: add anonymous
                           DefaultTabController(
-                            initialIndex: 1,
-                            length: 4,
+                            initialIndex: 2,
+                            length: 5,
                             child: Builder(
                               builder: (context) => Expanded(
                                 child: Column(
@@ -165,6 +169,11 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                                           physics:
                                               const NeverScrollableScrollPhysics(),
                                           children: [
+                                            AnonymousPosts(
+                                                searchedText: searchedText,
+                                                isAdmin: false,
+                                                deviceScreenType:
+                                                    DeviceScreenType.desktop),
                                             Categories(
                                               searchedText: searchedText,
                                               category: categoryText,
@@ -211,10 +220,10 @@ class _ForumPageDesktopState extends State<ForumPageDesktop> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: 10.w, vertical: 20.h),
-                          child: pageIndex == 0 ||
-                                  pageIndex == 1 ||
-                                  userModel == null
-                              ? otherLinks(context, postModels, getAllPost)
+                          child: pageIndex < 3 || userModel == null
+                              ? otherLinks(context, postModels, () {
+                                  setState(() {});
+                                })
                               : miniProfile(context, userModel!),
                         ),
                       ),
@@ -245,14 +254,16 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
     setState(() {
       selectedSubButton = newValue;
 
-      if (newValue == 'All Posts') {
-        widget.callback(1);
-      } else if (newValue == 'My Posts') {
+      if (newValue == 'Anonymous') {
+        widget.callback(0);
+      } else if (newValue == 'All Posts') {
         widget.callback(2);
-      } else if (newValue == 'New Post') {
+      } else if (newValue == 'My Posts') {
         widget.callback(3);
+      } else if (newValue == 'New Post') {
+        widget.callback(4);
       } else {
-        widget.callback(0, newValue);
+        widget.callback(1, newValue);
       }
     });
   }
@@ -262,6 +273,13 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        ForumPageNavButton(
+            selectedSubButton: selectedSubButton,
+            label: 'Anonymous',
+            callback: changingButton),
+        SizedBox(
+          width: 5.w,
+        ),
         PopupMenuButton(
           itemBuilder: (context) {
             return [
@@ -310,7 +328,8 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
           child: IgnorePointer(
             child: ForumPageNavButton(
               selectedSubButton: selectedSubButton,
-              label: selectedSubButton != 'All Posts' &&
+              label: selectedSubButton != 'Anonymous' &&
+                      selectedSubButton != 'All Posts' &&
                       selectedSubButton != 'My Posts' &&
                       selectedSubButton != 'New Post'
                   ? selectedSubButton
@@ -359,32 +378,40 @@ class ForumPageNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        selectedSubButton = label;
-        callback(label);
-      },
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(
-          color: selectedSubButton == label
-              ? ccForumSelectedButtonBorderColor
-              : ccForumButtonBorderColor(context),
-        ),
-        disabledBackgroundColor: Colors.grey,
-        backgroundColor: selectedSubButton == label
-            ? ccForumSelectedButtonBGColor(context)
-            : ccForumButtonBGColor(context),
-        foregroundColor: selectedSubButton == label
-            ? ccForumSelectedButtonFGColor(context)
-            : ccForumButtonFGColor(context),
-      ),
-      child: Row(
-        children: [
-          if (label == "New Post") const Icon(Icons.add),
-          Text(label),
-        ],
-      ),
-    );
+    return label == "Anonymous"
+        ? IconButton.filledTonal(
+            onPressed: () {
+              selectedSubButton = label;
+              callback(label);
+            },
+            icon: const Icon(FontAwesomeIcons.userSecret),
+          )
+        : OutlinedButton(
+            onPressed: () {
+              selectedSubButton = label;
+              callback(label);
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(
+                color: selectedSubButton == label
+                    ? ccForumSelectedButtonBorderColor
+                    : ccForumButtonBorderColor(context),
+              ),
+              disabledBackgroundColor: Colors.grey,
+              backgroundColor: selectedSubButton == label
+                  ? ccForumSelectedButtonBGColor(context)
+                  : ccForumButtonBGColor(context),
+              foregroundColor: selectedSubButton == label
+                  ? ccForumSelectedButtonFGColor(context)
+                  : ccForumButtonFGColor(context),
+            ),
+            child: Row(
+              children: [
+                if (label == "New Post") const Icon(Icons.add),
+                Text(label),
+              ],
+            ),
+          );
   }
 }
 
@@ -419,27 +446,21 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
       SizedBox(
         height: 5.h,
       ),
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.lightbulb_sharp,
-            color: Theme.of(context).colorScheme.primary,
-            size: 6.sp,
-            weight: 2,
-          ),
-          SizedBox(
-            width: 2.w,
-          ),
-          Text(
-            '${userModel.rank} [${userModel.posts}]',
-            style: TextStyle(
-              fontSize: 6.sp,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ],
+      Text(
+        'Interaction: ${userModel.rank}',
+        style: TextStyle(
+          fontSize: 4.sp,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+      Text(
+        'No. of Posts: ${userModel.posts}',
+        style: TextStyle(
+          fontSize: 4.sp,
+          fontWeight: FontWeight.bold,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
       SizedBox(
         height: 5.h,

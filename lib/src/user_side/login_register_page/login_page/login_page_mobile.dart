@@ -1,14 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/admin_side/admin_side.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
-import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class LoginPageMobile extends StatefulWidget {
@@ -21,6 +23,7 @@ class LoginPageMobile extends StatefulWidget {
 }
 
 class _LoginPageMobileState extends State<LoginPageMobile> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -39,16 +42,30 @@ class _LoginPageMobileState extends State<LoginPageMobile> {
     bool isAdmin = loginResult == "ADMIN";
 
     if (isUser) {
-      //Update deviceToken
-      Map<String, dynamic> deviceToken = {
-        'device_token': myToken,
-      };
-      await ProfileFunction.updateUserProfile(deviceToken);
-      // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const ForumPage()),
-          (route) => false);
+      UserModel? userModel;
+      if (_auth.currentUser != null) {
+        userModel =
+            await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
+        if (userModel != null && userModel.contactNo.isNotEmpty) {
+          // ignore: use_build_context_synchronously
+          Navigator.of(context).pushAndRemoveUntil(
+              PageTransition(
+                  duration: const Duration(milliseconds: 500),
+                  child: const ScreenDirect(),
+                  type: PageTransitionType.fade),
+              (route) => false);
+        } else {
+          setState(() {
+            isLoading = false;
+            return;
+          });
+        }
+      } else {
+        setState(() {
+          isLoading = false;
+          return;
+        });
+      }
     } else if (isAdmin) {
       //Update deviceToken
       Map<String, dynamic> deviceToken = {

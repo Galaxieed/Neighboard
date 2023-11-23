@@ -3,15 +3,19 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+import 'package:flutter_reaction_button/flutter_reaction_button.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/comments/comment_ui.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_post_function.dart';
@@ -24,6 +28,7 @@ import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
 import 'package:neighboard/widgets/page_messages/page_messages.dart';
 import 'package:neighboard/widgets/post/post_interactors_function.dart';
+import 'package:shimmer/shimmer.dart';
 
 class MyPosts extends StatefulWidget {
   const MyPosts({Key? key, required this.search}) : super(key: key);
@@ -50,6 +55,8 @@ class _MyPostsState extends State<MyPosts> {
           await MyPostFunction.getMyPost(authorId: _auth.currentUser!.uid) ??
               [];
       postModels.sort((a, b) => b.postId.compareTo(a.postId));
+      postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
+      await getPendingPosts();
     } catch (e) {
       return;
     }
@@ -62,6 +69,12 @@ class _MyPostsState extends State<MyPosts> {
     });
   }
 
+  List<PostModel> pendingPosts = [];
+  getPendingPosts() async {
+    pendingPosts = await AllPostsFunction.getAllPendingPost(true) ?? [];
+    pendingPosts.sort((a, b) => b.postId.compareTo(a.postId));
+  }
+
   void getMyPostsByTitle() async {
     setState(() {
       isLoading = true;
@@ -71,6 +84,7 @@ class _MyPostsState extends State<MyPosts> {
               authorId: _auth.currentUser!.uid, searchedWord: widget.search) ??
           [];
       postModels.sort((a, b) => widget.search.trim().compareTo(a.title));
+      postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     } catch (e) {
       return;
     }
@@ -139,28 +153,55 @@ class _MyPostsState extends State<MyPosts> {
                   ],
                 ),
               )
-            : postModels.isEmpty
+            : postModels.isEmpty && pendingPosts.isEmpty
                 ? noPostMessage()
                 : SingleChildScrollView(
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: postModels.length,
-                        itemBuilder: (context, index) {
-                          PostModel post = postModels[index];
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 0.w, vertical: 5.h),
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15),
-                                child: MyPostWithComments(
-                                  post: post,
-                                  stateSetter: () {
-                                    getMyPosts();
-                                  },
-                                )),
-                          );
-                        }),
+                    child: Column(
+                      children: [
+                        if (pendingPosts.isNotEmpty)
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: pendingPosts.length,
+                              itemBuilder: (context, index) {
+                                PostModel post = pendingPosts[index];
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 0.w, vertical: 5.h),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: MyPostWithComments(
+                                        isPending: true,
+                                        post: post,
+                                        stateSetter: () {
+                                          getMyPosts();
+                                        },
+                                      )),
+                                );
+                              }),
+                        if (postModels.isNotEmpty)
+                          ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: postModels.length,
+                              itemBuilder: (context, index) {
+                                PostModel post = postModels[index];
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 0.w, vertical: 5.h),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: MyPostWithComments(
+                                        isPending: false,
+                                        post: post,
+                                        stateSetter: () {
+                                          getMyPosts();
+                                        },
+                                      )),
+                                );
+                              }),
+                      ],
+                    ),
                   );
   }
 }
@@ -170,8 +211,9 @@ class MyPostWithComments extends StatefulWidget {
     super.key,
     required this.post,
     required this.stateSetter,
+    required this.isPending,
   });
-
+  final bool isPending;
   final PostModel post;
   final Function stateSetter;
 
@@ -180,7 +222,6 @@ class MyPostWithComments extends StatefulWidget {
 }
 
 class _MyPostWithCommentsState extends State<MyPostWithComments> {
-  int index = -1;
   final TextEditingController _comment = TextEditingController();
   bool isLoading = true;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -214,9 +255,6 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
 
   void onPostComment() async {
     if (_comment.text.isNotEmpty) {
-      // setState(() {
-      //   isLoading = true;
-      // });
       await getCurrentUser();
 
       CommentModel comment = CommentModel(
@@ -225,7 +263,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
         senderProfilePicture: currentUser!.profilePicture,
         senderName: currentUser!.username,
         timeStamp: formattedDate(),
-        commentMessage: _comment.text,
+        commentMessage: profanityFilter.censor(_comment.text),
         noOfLikes: 0,
         noOfDislikes: 0,
         noOfReplies: 0,
@@ -235,11 +273,6 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
           postId: widget.post.postId, commentModel: comment);
       //commentModel.add(comment);
       _comment.clear();
-      // if (mounted) {
-      //   setState(() {
-      //     isLoading = false;
-      //   });
-      // }
     } else {
       return;
     }
@@ -251,7 +284,7 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
     });
   }
 
-  bool isUpvoted = false;
+  String isUpvoted = "";
 
   void checkIfUpVoted() async {
     isUpvoted =
@@ -264,22 +297,34 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
     }
   }
 
-  upVoteFunc({required String postId}) async {
-    if (isUpvoted) {
-      setState(() {
-        widget.post.noOfUpVotes -= 1;
-        isUpvoted = false;
-      });
-      await MyPostFunction.onUpvoteAndUnUpvote(
-          postId: postId, isUpvoted: false);
+  upVoteFunc(String? react) async {
+    if (isUpvoted.isNotEmpty) {
+      if (react == null) {
+        setState(() {
+          isUpvoted = "";
+        });
+        await MyPostFunction.onUpvoteAndUnUpvote(
+            postId: widget.post.postId, isUpvoted: "", react: "");
+      } else {
+        setState(() {
+          isUpvoted = react;
+        });
+        await MyPostFunction.onUpvoteAndUnUpvote(
+          postId: widget.post.postId,
+          isUpvoted: "re",
+          react: react,
+        );
+      }
     } else {
       setState(() {
-        widget.post.noOfUpVotes += 1;
-        isUpvoted = true;
+        isUpvoted = react!;
       });
-      await MyPostFunction.onUpvoteAndUnUpvote(postId: postId, isUpvoted: true);
+      await MyPostFunction.onUpvoteAndUnUpvote(
+          postId: widget.post.postId, isUpvoted: "new", react: react ?? "");
     }
   }
+
+  bool isExpanded = false;
 
   @override
   void initState() {
@@ -300,92 +345,80 @@ class _MyPostWithCommentsState extends State<MyPostWithComments> {
         ? const LoadingPosts(
             postType: "My Posts",
           )
-        : ExpansionPanelList(
-            expandedHeaderPadding: const EdgeInsets.all(0),
-            animationDuration: const Duration(milliseconds: 500),
-            elevation: 0,
-            expansionCallback: (i, isOpen) {
+        : GestureDetector(
+            onTap: () {
               setState(() {
-                if (index == i) {
-                  index = -1;
-                } else {
-                  index = i;
-                }
+                isExpanded = !isExpanded;
               });
             },
-            children: [
-              ExpansionPanel(
-                //backgroundColor: ccExpansionPostColor(context),
-                canTapOnHeader: true,
-                isExpanded: index == 0,
-                headerBuilder: (BuildContext context, bool isExpanded) {
-                  return SingleMyPost(
-                    post: widget.post,
-                    upVote: upVoteFunc,
-                    isUpvoted: isUpvoted,
-                    isCollapsed: index == 0,
-                    stateSetter: widget.stateSetter,
-                  );
-                },
-                body: Column(
-                  children: [
-                    SizedBox(
-                      height: 5.h,
-                    ),
-                    Text(
-                      'Comments',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    SizedBox(
-                      height: 5.h,
-                    ),
-                    CommentBox(
-                        comment: _comment,
-                        addComment: onPostComment,
-                        clearComment: clearComment),
-                    SizedBox(
-                      height: 5.h,
-                    ),
-                    StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection("posts")
-                          .doc(widget.post.postId)
-                          .collection("comments")
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return const LoadingPosts(
-                            postType: "My Posts",
-                          );
-                        } else {
-                          return ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index) {
-                              final result = snapshot.data!;
-                              commentModels = result.docs
-                                  .map((e) => CommentModel.fromJson(e.data()))
-                                  .toList();
-                              commentModels.sort(
-                                  (a, b) => b.commentId.compareTo(a.commentId));
-                              CommentModel comment = commentModels[index];
-                              return CommentUI(
-                                  post: widget.post,
-                                  comment: comment,
-                                  currentUser: currentUser);
-                            },
-                          );
-                        }
-                      },
-                    ),
-                    // for (CommentModel comment in commentModel)
-                    //   CommentUI(post: widget.post, comment: comment),
-                  ],
+            child: Column(
+              children: [
+                SingleMyPost(
+                  post: widget.post,
+                  upVote: upVoteFunc,
+                  isUpvoted: isUpvoted,
+                  isCollapsed: isExpanded,
+                  stateSetter: widget.stateSetter,
+                  isPending: widget.isPending,
                 ),
-              )
-            ],
+                if (isExpanded && !widget.isPending)
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: 5.h,
+                      ),
+                      Text(
+                        'Comments',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      SizedBox(
+                        height: 5.h,
+                      ),
+                      CommentBox(
+                          comment: _comment,
+                          addComment: onPostComment,
+                          clearComment: clearComment),
+                      SizedBox(
+                        height: 5.h,
+                      ),
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection("posts")
+                            .doc(widget.post.postId)
+                            .collection("comments")
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const LoadingPosts(
+                              postType: "My Posts",
+                            );
+                          } else {
+                            return ListView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                final result = snapshot.data!;
+                                commentModels = result.docs
+                                    .map((e) => CommentModel.fromJson(e.data()))
+                                    .toList();
+                                commentModels.sort((a, b) =>
+                                    b.commentId.compareTo(a.commentId));
+                                CommentModel comment = commentModels[index];
+                                return CommentUI(
+                                    post: widget.post,
+                                    comment: comment,
+                                    currentUser: currentUser);
+                              },
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ).animate().fade(duration: 500.ms),
+              ],
+            ),
           );
   }
 }
@@ -430,6 +463,12 @@ class CommentBox extends StatelessWidget {
                   },
                   icon: const Icon(Icons.cancel_outlined),
                   label: const Text('Cancel'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
+                  ),
                 ),
                 SizedBox(
                   width: 2.w,
@@ -444,6 +483,8 @@ class CommentBox extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: ccMyPostCommentButtonBGColor(context),
                     foregroundColor: ccMyPostCommentButtonFGColor(context),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4)),
                   ),
                 ),
               ],
@@ -463,11 +504,13 @@ class SingleMyPost extends StatefulWidget {
     required this.isUpvoted,
     required this.isCollapsed,
     required this.stateSetter,
+    required this.isPending,
   });
 
   final Function upVote, stateSetter;
   final PostModel post;
-  final bool isUpvoted, isCollapsed;
+  final bool isCollapsed, isPending;
+  final String isUpvoted;
 
   @override
   State<SingleMyPost> createState() => _SingleMyPostState();
@@ -483,17 +526,20 @@ class _SingleMyPostState extends State<SingleMyPost> {
     widget.stateSetter();
     successMessage(
         title: "Success!", desc: "Post was deleted!", context: context);
-    await PostInteractorsFunctions.removePost(postModel: widget.post);
+    await PostInteractorsFunctions.removePost(
+      postModel: widget.post,
+      collection: widget.isPending ? "pending_posts" : null,
+    );
   }
 
   updatePost() async {
     if (_contentController.text.isNotEmpty &&
         _titleController.text.isNotEmpty) {
       bool isSucceess = await PostInteractorsFunctions.updatePost(
-        postId: widget.post.postId,
-        postTitle: _titleController.text,
-        postContent: _contentController.text,
-      );
+          postId: widget.post.postId,
+          postTitle: profanityFilter.censor(_titleController.text),
+          postContent: profanityFilter.censor(_contentController.text),
+          collection: widget.isPending ? "pending_posts" : null);
       if (isSucceess) {
         // ignore: use_build_context_synchronously
         successMessage(
@@ -534,6 +580,9 @@ class _SingleMyPostState extends State<SingleMyPost> {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: widget.isPending
+          ? Theme.of(context).colorScheme.primaryContainer
+          : null,
       elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -786,12 +835,27 @@ class _SingleMyPostState extends State<SingleMyPost> {
             const SizedBox(
               height: 10,
             ),
-            ActionBarMyPost(
-              post: widget.post,
-              upVote: widget.upVote,
-              isUpvoted: widget.isUpvoted,
-              isEditing: isEditing,
-            ),
+            widget.isPending
+                ? Align(
+                    alignment: Alignment.bottomRight,
+                    child: Shimmer.fromColors(
+                      baseColor: Theme.of(context).primaryColor,
+                      highlightColor: Theme.of(context).secondaryHeaderColor,
+                      child: const Text(
+                        "Pending...",
+                        style: TextStyle(
+                          letterSpacing: 1,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  )
+                : ActionBarMyPost(
+                    post: widget.post,
+                    onUpVote: widget.upVote,
+                    isUpvoted: widget.isUpvoted,
+                    isEditing: isEditing,
+                  ),
           ],
         ),
       ),
@@ -803,13 +867,13 @@ class ActionBarMyPost extends StatelessWidget {
   const ActionBarMyPost({
     super.key,
     required this.post,
-    required this.upVote,
+    required this.onUpVote,
     required this.isUpvoted,
     required this.isEditing,
   });
 
-  final bool isUpvoted;
-  final Function upVote;
+  final String isUpvoted;
+  final Function onUpVote;
   final PostModel post;
   final bool isEditing;
 
@@ -828,21 +892,53 @@ class ActionBarMyPost extends StatelessWidget {
           ),
         ),
         if (!isEditing)
-          ElevatedButton.icon(
-            onPressed: () {
-              upVote(postId: post.postId);
+          ReactionButton<String>(
+            isChecked: isUpvoted.isNotEmpty,
+            selectedReaction: isUpvoted.isNotEmpty
+                ? selectedReaction(context, isUpvoted)
+                : null,
+            toggle: true,
+            onReactionChanged: (Reaction<String>? reaction) {
+              onUpVote(reaction?.value);
             },
-            icon: const Icon(Icons.arrow_upward_rounded),
-            label: Text(isUpvoted ? 'Voted' : 'Vote'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isUpvoted
-                  ? ccMyPostUpVotedBGColor(context)
-                  : ccMyPostUpVoteBGColor(context),
-              foregroundColor: isUpvoted
-                  ? ccMyPostUpVotedFGColor(context)
-                  : ccMyPostUpVoteFGColor(context),
+            reactions: <Reaction<String>>[
+              Reaction(
+                value: "Like",
+                icon: Icon(
+                  Icons.thumb_up,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                title: const Text("Like"),
+              ),
+              const Reaction(
+                value: "Love",
+                icon: Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                ),
+                title: Text("Love"),
+              ),
+              const Reaction(
+                value: "Star",
+                icon: Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                ),
+                title: Text("Star"),
+              ),
+            ],
+            placeholder: Reaction<String>(
+              value: null,
+              icon: Icon(
+                Icons.arrow_upward,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-          )
+            boxColor: Theme.of(context).colorScheme.onPrimary,
+            boxRadius: 10,
+            itemsSpacing: 20,
+            itemSize: const Size(40, 60),
+          ),
       ],
     );
   }

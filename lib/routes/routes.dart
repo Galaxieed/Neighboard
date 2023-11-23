@@ -20,7 +20,7 @@ class Routes {
     if (route == 'Forum') {
       Navigator.of(context!).push(PageTransition(
           duration: const Duration(milliseconds: 500),
-          child: const ForumPage(),
+          child: ForumPage(),
           type: PageTransitionType.fade));
     }
     if (route == 'Login') {

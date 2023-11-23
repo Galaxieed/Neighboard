@@ -35,6 +35,7 @@ class ProfileScreenMobile extends StatefulWidget {
 class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
   final TextEditingController tcFname = TextEditingController();
   final TextEditingController tcLname = TextEditingController();
+  final TextEditingController tcSuffix = TextEditingController();
   final TextEditingController tcUsername = TextEditingController();
   final TextEditingController tcEmail = TextEditingController();
   final TextEditingController tcBlock = TextEditingController();
@@ -47,7 +48,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
   bool passToggle1 = true;
   File? profileImage;
   PlatformFile? profileImageByte;
-  String profileImageUrl = "", street = "";
+  String profileImageUrl = "", street = "", gender = "";
 
   UserModel? userModel;
   bool isEditing = false;
@@ -144,8 +145,9 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
     Map<String, dynamic> userDetails = {
       'first_name': tcFname.text,
       'last_name': tcLname.text,
+      'suffix': tcSuffix.text,
       'username': tcUsername.text,
-      'email': tcEmail.text,
+      'gender': gender,
       'address': "Blk ${tcBlock.text} Lot ${tcLot.text}, $street",
       'contact_no': tcCNo.text,
     };
@@ -180,6 +182,9 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
       List<String> addressParts = userModel!.address.split(', ');
       if (addressParts.length >= 2) {
         street = addressParts[1];
+        if (!street.contains('St.')) {
+          street = "$street St.";
+        }
       } else {
         // Handle the case where the split result doesn't have enough elements.
         print('Error: userModel.address does not have enough parts');
@@ -193,8 +198,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
     tcEmail.text = userModel!.email;
     tcFname.text = userModel!.firstName;
     tcLname.text = userModel!.lastName;
+    tcSuffix.text = userModel!.suffix;
     tcUsername.text = userModel!.username;
     currentUsername = userModel!.username;
+    gender = userModel!.gender;
   }
 
   @override
@@ -205,6 +212,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
     tcEmail.dispose();
     tcFname.dispose();
     tcLname.dispose();
+    tcSuffix.dispose();
     tcUsername.dispose();
     super.dispose();
   }
@@ -285,8 +293,8 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Theme.of(context).disabledColor.withOpacity(.1),
+                    backgroundColor: Colors.grey,
+                    foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.cancel),
                   tooltip: "Cancel",
@@ -297,6 +305,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                 IconButton.filledTonal(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      _formKey.currentState!.save();
                       try {
                         onSavingDetails();
                       } catch (e) {
@@ -308,8 +317,8 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                    backgroundColor: colorFromHex("#29C948"),
+                    foregroundColor: Colors.white,
                   ),
                   icon: const Icon(Icons.save),
                   tooltip: "Save",
@@ -342,6 +351,11 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                             infoTitle(context, "First Name"),
                             TextFormField(
                               controller: tcFname,
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(),
+                                hintText: 'First Name',
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "First name is required";
@@ -355,23 +369,68 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                             ),
                           ],
                         ),
-                        Column(
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            infoTitle(context, "Last Name"),
-                            TextFormField(
-                              controller: tcLname,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Last name is required";
-                                }
-                                final alpha = RegExp(r'^[a-zA-Z ]+$');
-                                if (!alpha.hasMatch(value)) {
-                                  return "Symbols and Numbers are not allowed.";
-                                }
-                                return null;
-                              },
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  infoTitle(context, "Last Name"),
+                                  TextFormField(
+                                    controller: tcLname,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Last Name',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return "Last name is required";
+                                      }
+                                      final alpha = RegExp(r'^[a-zA-Z ]+$');
+                                      if (!alpha.hasMatch(value)) {
+                                        return "Symbols and Numbers are not allowed.";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  infoTitle(context, "Suffix"),
+                                  TextFormField(
+                                    controller: tcSuffix,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Suffix',
+                                    ),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return null;
+                                      }
+                                      final alpha = RegExp(r'^[a-zA-Z 0-9]+$');
+                                      if (!alpha.hasMatch(value)) {
+                                        return "Symbols are not allowed.";
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -382,118 +441,209 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                             infoTitle(context, "Username"),
                             TextFormField(
                               controller: tcUsername,
+                              decoration: const InputDecoration(
+                                isDense: true,
+                                border: OutlineInputBorder(),
+                                hintText: 'Username',
+                              ),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return "Username is required";
                                 }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Address"),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text("Block"),
-                                const SizedBox(width: 5),
-                                TextFormField(
-                                  controller: tcBlock,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d{0,2}$'),
-                                    ),
-                                  ],
-                                  textAlign: TextAlign.center,
-                                  decoration: const InputDecoration(
-                                    isDense: true,
-                                    border: OutlineInputBorder(),
-                                    constraints: BoxConstraints(
-                                      maxWidth: 50,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                const Text("Lot"),
-                                const SizedBox(width: 5),
-                                TextFormField(
-                                  controller: tcLot,
-                                  keyboardType: TextInputType.number,
-                                  textAlign: TextAlign.center,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                      RegExp(r'^\d{0,2}$'),
-                                    ),
-                                  ],
-                                  decoration: const InputDecoration(
-                                    isDense: true,
-                                    border: OutlineInputBorder(),
-                                    constraints: BoxConstraints(
-                                      maxWidth: 50,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: DropdownButtonFormField(
-                                    onChanged: (value) {
-                                      setState(() {
-                                        street = value.toString();
-                                      });
-                                    },
-                                    items: siteModel == null
-                                        ? []
-                                        : siteModel!.siteStreets
-                                            .map((String e) {
-                                            return DropdownMenuItem<String>(
-                                              value: e,
-                                              child: Text(e),
-                                            );
-                                          }).toList(),
-                                    //value: street,
-                                    hint: const Text('Street'),
-                                    value: street.isEmpty ? null : street,
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            infoTitle(context, "Contact Number"),
-                            TextFormField(
-                              controller: tcCNo,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d{0,10}$'),
-                                ),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return null;
-                                } else if (value.length != 10) {
-                                  return 'Please enter exactly 10 digits';
+                                if (profanityFilter.hasProfanity(value)) {
+                                  return "Don't use bad words";
                                 }
                                 return null;
                               },
-                              decoration:
-                                  const InputDecoration(prefix: Text("+63")),
                             ),
                           ],
                         ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Gender"),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: ["Male", "Female", "Others"]
+                                    .map(
+                                      (e) => Row(
+                                        children: [
+                                          Radio(
+                                            value: e == "Others"
+                                                ? gender == "Male" ||
+                                                        gender == "Female"
+                                                    ? e
+                                                    : gender
+                                                : e,
+                                            groupValue: gender,
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() {
+                                                  gender = val;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  gender = e;
+                                                });
+                                              },
+                                              child: Text(e)),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        if (gender != "Male" &&
+                            gender != "Female" &&
+                            !widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Other Gender"),
+                              TextFormField(
+                                initialValue: gender == "Others" ? "" : gender,
+                                onSaved: (newValue) {
+                                  gender = newValue ?? "";
+                                },
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Please specify...',
+                                ),
+                                validator: (value) {
+                                  if ((value == null || value.isEmpty) &&
+                                      (gender != "Male" &&
+                                          gender != "Female")) {
+                                    return "Specify gender";
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Address"),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text("Block"),
+                                  const SizedBox(width: 5),
+                                  TextFormField(
+                                    controller: tcBlock,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d{0,2}$'),
+                                      ),
+                                    ],
+                                    textAlign: TextAlign.center,
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      constraints: BoxConstraints(
+                                        maxWidth: 50,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  const Text("Lot"),
+                                  const SizedBox(width: 5),
+                                  TextFormField(
+                                    controller: tcLot,
+                                    keyboardType: TextInputType.number,
+                                    textAlign: TextAlign.center,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d{0,2}$'),
+                                      ),
+                                    ],
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
+                                      constraints: BoxConstraints(
+                                        maxWidth: 50,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Street"),
+                              DropdownButtonFormField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    street = value.toString();
+                                  });
+                                },
+                                items: siteModel == null
+                                    ? []
+                                    : siteModel!.siteStreets.map((String e) {
+                                        return DropdownMenuItem<String>(
+                                          value: e,
+                                          child: Text(e),
+                                        );
+                                      }).toList(),
+                                hint: const Text('Street'),
+                                value: street.isEmpty ? null : street,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        if (!widget.isAdmin)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              infoTitle(context, "Contact Number"),
+                              TextFormField(
+                                controller: tcCNo,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,10}$'),
+                                  ),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return null;
+                                  } else if (value.length != 10) {
+                                    return 'Please enter exactly 10 digits';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                    isDense: true,
+                                    border: OutlineInputBorder(),
+                                    hintText: 'Contact No',
+                                    prefix: Text("+63")),
+                              ),
+                            ],
+                          ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -503,7 +653,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                               controller: tcPass,
                               obscureText: passToggle,
                               decoration: InputDecoration(
-                                suffix: InkWell(
+                                isDense: true,
+                                border: const OutlineInputBorder(),
+                                hintText: 'New Password',
+                                suffixIcon: InkWell(
                                   onTap: () {
                                     setState(() {
                                       passToggle = !passToggle;
@@ -538,7 +691,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                               controller: tcConfirmPass,
                               obscureText: passToggle1,
                               decoration: InputDecoration(
-                                suffix: InkWell(
+                                isDense: true,
+                                border: const OutlineInputBorder(),
+                                hintText: 'Retype Password',
+                                suffixIcon: InkWell(
                                   onTap: () {
                                     setState(() {
                                       passToggle1 = !passToggle1;
@@ -609,6 +765,10 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                             isEditing = true;
                           });
                         },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.grey,
+                          foregroundColor: Colors.white,
+                        ),
                         icon: const Icon(Icons.edit),
                         tooltip: "Edit Info",
                       )
@@ -640,12 +800,32 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                           actualInfo(context, userModel!.firstName),
                         ],
                       ),
-                      Column(
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          infoTitle(context, "Last Name"),
-                          actualInfo(context, userModel!.lastName),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                infoTitle(context, "Last Name"),
+                                actualInfo(context, userModel!.lastName),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                infoTitle(context, "Suffix"),
+                                actualInfo(context, userModel!.suffix),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       Column(
@@ -656,26 +836,37 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                           actualInfo(context, userModel!.username),
                         ],
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          infoTitle(context, "Address"),
-                          actualInfo(context, userModel!.address),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          infoTitle(context, "Contact Number"),
-                          actualInfo(
-                              context,
-                              userModel!.contactNo.isEmpty
-                                  ? "+63"
-                                  : "+63${int.parse(userModel!.contactNo).toString()}"),
-                        ],
-                      ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Gender"),
+                            actualInfo(context, userModel!.gender),
+                          ],
+                        ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Address"),
+                            actualInfo(context, userModel!.address),
+                          ],
+                        ),
+                      if (!widget.isAdmin)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            infoTitle(context, "Contact Number"),
+                            actualInfo(
+                                context,
+                                userModel!.contactNo.isEmpty
+                                    ? "+63"
+                                    : "+63${int.parse(userModel!.contactNo).toString()}"),
+                          ],
+                        ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -832,8 +1023,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                                 checker = false;
                                               },
                                               style: IconButton.styleFrom(
-                                                backgroundColor:
-                                                    Colors.red[800],
+                                                backgroundColor: Colors.grey,
                                                 foregroundColor: Colors.white,
                                               ),
                                               icon: const Icon(Icons.cancel),
@@ -873,9 +1063,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                                               },
                                               style: IconButton.styleFrom(
                                                 backgroundColor:
-                                                    Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
+                                                    colorFromHex("#29C948"),
                                                 foregroundColor: Colors.white,
                                               ),
                                               icon: const Icon(Icons.save),
@@ -900,7 +1088,7 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
               height: 7.w,
             ),
             Text(
-              "${userModel!.firstName} ${userModel!.lastName}",
+              "${userModel!.firstName} ${userModel!.lastName} ${userModel!.suffix}",
               textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme

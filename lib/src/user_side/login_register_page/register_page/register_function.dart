@@ -7,66 +7,15 @@ class RegisterFunction {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future<String> createAccout(
-    String email,
-    String password,
-    String firstName,
-    String lastName,
-    String username,
-  ) async {
+  static Future<String> registerUser(String email, String password) async {
     try {
-      final result = await _auth.createUserWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      if (result.user != null) {
-        _saveUserDetails(
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          username: username,
-        );
-        return "true";
-      } else {
-        return "Email already in use";
-      }
+      return "true";
     } on FirebaseAuthException catch (e) {
-      String err = e.message.toString();
-      //     .split("/")[1]
-      //     .split(")")[0]
-      //     .replaceAll(RegExp(r'-'), ' ');
-      // err = err.substring(0, 1).toUpperCase() + err.substring(1);
-      return err;
-    }
-  }
-
-  static Future<void> _saveUserDetails({
-    required String email,
-    required String firstName,
-    required String lastName,
-    required String username,
-  }) async {
-    try {
-      String userId = _auth.currentUser!.uid;
-      UserModel userModel = UserModel(
-        userId: userId,
-        firstName: firstName,
-        lastName: lastName,
-        username: username,
-        email: email,
-        address: "",
-        contactNo: "",
-        socialMediaLinks: [],
-        rank: 0,
-        posts: 0,
-        profilePicture: "",
-        role: "USER",
-        deviceToken: myToken,
-      );
-      await _firestore.collection("users").doc(userId).set(userModel.toJson());
-    } catch (e) {
-      return;
+      return e.message.toString();
     }
   }
 
@@ -76,4 +25,69 @@ class RegisterFunction {
           .get())
       .docs
       .isNotEmpty;
+
+  static Future<void> sendEmailVerification() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    await user?.sendEmailVerification();
+  }
+
+  static Future<bool> checkEmailVerification() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      await user.reload();
+      user = FirebaseAuth.instance.currentUser; // Refresh the user data
+      if (user == null) return false;
+      if (user.emailVerified) {
+        // User's email is verified
+        print('Email is verified');
+        return true;
+      } else {
+        // User's email is not verified
+        user.delete();
+        print('Email is not verified');
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  static Future<bool> saveUserDetails({
+    required String email,
+    required String firstName,
+    required String lastName,
+    required String suffix,
+    required String username,
+    required String gender,
+    required String address,
+    required String cNo,
+  }) async {
+    try {
+      String userId = _auth.currentUser!.uid;
+      UserModel userModel = UserModel(
+        userId: userId,
+        firstName: firstName,
+        lastName: lastName,
+        suffix: suffix,
+        username: username,
+        gender: gender,
+        email: email,
+        address: address,
+        contactNo: cNo,
+        socialMediaLinks: [],
+        rank: 0,
+        posts: 0,
+        profilePicture: "",
+        role: "USER",
+        deviceToken: myToken,
+      );
+      await _firestore.collection("users").doc(userId).set(userModel.toJson());
+
+      //await enrollPhoneNumber(userModel.contactNo);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

@@ -192,6 +192,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) {
         return const MyChat();
       },
@@ -235,7 +236,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                     height: 15,
                   ),
                   Text(
-                    'HOA Election',
+                    'Board of Directors Election',
                     style: Theme.of(context).textTheme.headlineLarge!.copyWith(
                         fontFamily: "Montserrat", fontWeight: FontWeight.bold),
                   ),

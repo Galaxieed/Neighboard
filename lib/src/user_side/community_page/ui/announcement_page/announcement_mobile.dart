@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/announcement_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
@@ -562,8 +563,8 @@ class OtherAnnouncement extends StatelessWidget {
         _detailsController.text.isNotEmpty) {
       bool status = await AnnouncementFunction.updateAnnouncement(
           announcementModel.announcementId,
-          _titleController.text,
-          _detailsController.text);
+          profanityFilter.censor(_titleController.text),
+          profanityFilter.censor(_detailsController.text));
 
       if (status) {
         // ignore: use_build_context_synchronously

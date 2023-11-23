@@ -4,63 +4,49 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:neighboard/data/posts_data.dart';
-import 'package:neighboard/models/notification_model.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/post_model.dart';
-import 'package:neighboard/models/user_model.dart';
-import 'package:neighboard/services/notification/notification.dart';
-import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_function.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
-import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
-import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts_function.dart';
-import 'package:neighboard/src/user_side/forum_page/ui/categories/categories_function.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/anonymous_posts/anonymous_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
-import 'package:neighboard/widgets/notification/notification_function.dart';
-import 'package:neighboard/widgets/page_messages/page_messages.dart';
-import 'package:neighboard/widgets/post/post_interactors.dart';
-import 'package:neighboard/widgets/post/post_interactors_function.dart';
-import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:neighboard/widgets/others/author_name_text.dart';
 import 'package:neighboard/widgets/others/post_content_text.dart';
 import 'package:neighboard/widgets/others/post_time_text.dart';
 import 'package:neighboard/widgets/others/post_title_text.dart';
 import 'package:neighboard/widgets/others/small_profile_pic.dart';
+import 'package:neighboard/widgets/page_messages/page_messages.dart';
+import 'package:neighboard/widgets/post/post_interactors.dart';
+import 'package:neighboard/widgets/post/post_interactors_function.dart';
+import 'package:neighboard/widgets/post/post_modal.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
-class Categories extends StatefulWidget {
-  const Categories(
-      {Key? key,
-      required this.category,
-      required this.isAdmin,
-      this.scrollController,
-      required this.deviceScreenType,
-      required this.searchedText})
-      : super(key: key);
-  final String category, searchedText;
+class AnonymousPosts extends StatefulWidget {
+  const AnonymousPosts({
+    super.key,
+    required this.isAdmin,
+    required this.deviceScreenType,
+    required this.searchedText,
+  });
+
+  final String searchedText;
   final bool isAdmin;
-  final ScrollController? scrollController;
   final DeviceScreenType deviceScreenType;
+
   @override
-  State<Categories> createState() => _CategoriesState();
+  State<AnonymousPosts> createState() => _AnonymousPostsState();
 }
 
-class _CategoriesState extends State<Categories> {
+class _AnonymousPostsState extends State<AnonymousPosts> {
   List<PostModel> postModels = [];
-  bool isLoading = true;
+  bool isLoading = false;
 
-  void getAllPost() async {
+  getAllAnonymousPosts() async {
     setState(() {
       isLoading = true;
     });
-    postModels.clear();
-    if (widget.isAdmin) {
-      postModels = await AllPostsFunction.getAllPendingPost(false) ?? [];
-      postModels.sort((a, b) => b.postId.compareTo(a.postId));
-    } else {
-      postModels = await AllPostsFunction.getAllPost() ?? [];
-      postModels.sort((a, b) => b.postId.compareTo(a.postId));
-      postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-    }
+    postModels = await AnonymousFunction.getAllAnonymousPosts() ?? [];
+    postModels.sort((a, b) => b.postId.compareTo(a.postId));
+    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
@@ -70,44 +56,11 @@ class _CategoriesState extends State<Categories> {
     });
   }
 
-  void getCategoryTitlePosts() async {
+  getSearchedPost() async {
     setState(() {
       isLoading = true;
     });
-    postModels = await CategoriesFunction.getPostsByCategoryAndTitle(
-            category: widget.category.trim(),
-            searchedWord: widget.searchedText.trim()) ??
-        [];
-    postModels.sort((a, b) => b.postId.compareTo(a.postId));
-    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void getCategoryPosts() async {
-    setState(() {
-      isLoading = true;
-    });
-    postModels = await CategoriesFunction.getPostsByCategory(
-            category: widget.category.trim()) ??
-        [];
-    postModels.sort((a, b) => b.postId.compareTo(a.postId));
-    postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void getTitlePost() async {
-    setState(() {
-      isLoading = true;
-    });
-    postModels = await CategoriesFunction.getPostsByTitle(
+    postModels = await AnonymousFunction.getPostsBySearch(
             searchedWord: widget.searchedText.trim()) ??
         [];
 
@@ -120,83 +73,21 @@ class _CategoriesState extends State<Categories> {
     }
   }
 
-  void _denyPost(PostModel postModel) async {
-    setState(() {
-      isLoading = true;
-    });
-    await PendingPostFunction.removePendingPost(postModel);
-    await sendNotificaton(postModel, false);
-    // ignore: use_build_context_synchronously
-    errorMessage(title: "Denied!", desc: "Post was Denied!", context: context);
-    setState(() {
-      postModels.remove(postModel);
-      isLoading = false;
-    });
-  }
-
-  void _approvePost(PostModel postModel) async {
-    setState(() {
-      isLoading = true;
-    });
-    await PendingPostFunction.approvePendingPost(postModel);
-    await sendNotificaton(postModel, true);
-    // ignore: use_build_context_synchronously
-    successMessage(
-        title: "Approved!",
-        desc: "Post Successfully Approved!",
-        context: context);
-    setState(() {
-      postModels.remove(postModel);
-      isLoading = false;
-    });
-  }
-
-  //send notif to one
-  UserModel? otherUser;
-  Future<void> sendNotificaton(PostModel post, bool isApproved) async {
-    otherUser = await ProfileFunction.getUserDetails(post.authorId);
-    await MyNotification().sendPushMessage(
-      otherUser!.deviceToken,
-      isApproved ? "Your post has been approved: " : "Your post was declined: ",
-      post.title,
-    );
-
-    //ADD sa notification TAB
-    NotificationModel notificationModel = NotificationModel(
-      notifId: DateTime.now().toIso8601String(),
-      notifTitle: isApproved
-          ? "Your post has been approved: "
-          : "Your post was declined: ",
-      notifBody: post.title,
-      notifTime: formattedDate(),
-      notifLocation: isApproved ? "FORUM|${post.postId}" : "",
-      isRead: false,
-      isArchived: false,
-    );
-
-    await NotificationFunction.addNotification(
-        notificationModel, post.authorId);
-  }
-
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    getAllPost();
+    getAllAnonymousPosts();
   }
 
   @override
-  void didUpdateWidget(covariant Categories oldWidget) {
+  void didUpdateWidget(covariant AnonymousPosts oldWidget) {
+    // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-    //this is for filtering based on search and tags
-    if ((widget.category.isNotEmpty || widget.category != "") &&
-        (widget.searchedText.isNotEmpty || widget.searchedText != "")) {
-      getCategoryTitlePosts();
-    } else if (widget.category.isNotEmpty || widget.category != "") {
-      getCategoryPosts();
-    } else if (widget.searchedText.isNotEmpty || widget.searchedText != "") {
-      getTitlePost();
+    if (widget.searchedText.isNotEmpty || widget.searchedText != "") {
+      getSearchedPost();
     } else {
-      getAllPost();
+      getAllAnonymousPosts();
     }
   }
 
@@ -208,26 +99,17 @@ class _CategoriesState extends State<Categories> {
             ? noPostMessage()
             : ListView.builder(
                 shrinkWrap: true,
-                controller: widget.scrollController,
                 itemCount: postModels.length,
                 itemBuilder: (context, index) {
                   PostModel post = postModels[index];
                   return Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: 0.w, vertical: 5.h),
-                    child: Column(
-                      children: [
-                        SinglePost(
-                          post: post,
-                          isAdmin: widget.isAdmin,
-                          denyPost: _denyPost,
-                          approvePost: _approvePost,
-                          deviceScreenType: widget.deviceScreenType,
-                          stateSetter: () {
-                            getAllPost();
-                          },
-                        ),
-                      ],
+                    child: SinglePost(
+                      post: post,
+                      isAdmin: widget.isAdmin,
+                      deviceScreenType: widget.deviceScreenType,
+                      stateSetter: getAllAnonymousPosts,
                     ),
                   );
                 },
@@ -240,15 +122,13 @@ class SinglePost extends StatefulWidget {
     super.key,
     required this.post,
     required this.isAdmin,
-    required this.approvePost,
-    required this.denyPost,
     required this.deviceScreenType,
     required this.stateSetter,
   });
   final DeviceScreenType deviceScreenType;
   final PostModel post;
   final bool isAdmin;
-  final Function denyPost, approvePost, stateSetter;
+  final Function stateSetter;
 
   @override
   State<SinglePost> createState() => _SinglePostState();
@@ -272,8 +152,8 @@ class _SinglePostState extends State<SinglePost> {
         _titleController.text.isNotEmpty) {
       bool isSucceess = await PostInteractorsFunctions.updatePost(
         postId: widget.post.postId,
-        postTitle: _titleController.text,
-        postContent: _contentController.text,
+        postTitle: profanityFilter.censor(_titleController.text),
+        postContent: profanityFilter.censor(_contentController.text),
       );
       if (isSucceess) {
         // ignore: use_build_context_synchronously
@@ -305,7 +185,6 @@ class _SinglePostState extends State<SinglePost> {
       noOfPics = 4;
       extraPics = widget.post.images.length - 4;
     }
-
     _titleController.text = widget.post.title;
     _contentController.text = widget.post.content;
   }
@@ -313,7 +192,6 @@ class _SinglePostState extends State<SinglePost> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
       child: InkWell(
         borderRadius: BorderRadius.circular(4),
         onTap: () {
@@ -353,24 +231,27 @@ class _SinglePostState extends State<SinglePost> {
                   Row(
                     children: [
                       SmallProfilePic(
-                          profilePic: widget.post.asAnonymous
-                              ? ""
-                              : widget.post.profilePicture),
+                        profilePic: widget.post.asAnonymous
+                            ? ""
+                            : widget.post.profilePicture,
+                      ),
                       const SizedBox(
                         width: 10,
                       ),
                       Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          AuthorNameText(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            AuthorNameText(
                               authorName: widget.post.asAnonymous
                                   ? "Anonymous"
-                                  : widget.post.authorName),
-                          PostTimeText(time: widget.post.timeStamp)
-                        ],
-                      )),
+                                  : widget.post.authorName,
+                            ),
+                            PostTimeText(time: widget.post.timeStamp)
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   if (_auth.currentUser != null &&
@@ -484,6 +365,7 @@ class _SinglePostState extends State<SinglePost> {
               const SizedBox(
                 height: 10,
               ),
+              //TODO: PIC
               if (widget.post.images.isNotEmpty)
                 SizedBox(
                   height: 400,
@@ -561,8 +443,6 @@ class _SinglePostState extends State<SinglePost> {
               ActionBarPosts(
                 post: widget.post,
                 isAdmin: widget.isAdmin,
-                denyPost: widget.denyPost,
-                approvePost: widget.approvePost,
                 deviceScreenType: widget.deviceScreenType,
               )
             ],
@@ -578,14 +458,12 @@ class ActionBarPosts extends StatefulWidget {
     super.key,
     required this.post,
     required this.isAdmin,
-    required this.approvePost,
-    required this.denyPost,
     required this.deviceScreenType,
   });
-  final DeviceScreenType deviceScreenType;
+
   final PostModel post;
   final bool isAdmin;
-  final Function denyPost, approvePost;
+  final DeviceScreenType deviceScreenType;
 
   @override
   State<ActionBarPosts> createState() => _ActionBarPostsState();
@@ -594,117 +472,83 @@ class ActionBarPosts extends StatefulWidget {
 class _ActionBarPostsState extends State<ActionBarPosts> {
   @override
   Widget build(BuildContext context) {
-    return widget.isAdmin
-        ? Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  widget.denyPost(widget.post);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Theme.of(context).disabledColor.withOpacity(0),
-                  foregroundColor: Theme.of(context).colorScheme.onBackground,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                child: const Text("Deny"),
-              ),
-              const SizedBox(
-                width: 20,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  widget.approvePost(widget.post);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                child: const Text("Approve"),
-              ),
-            ],
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                onPressed: () {
-                  widget.deviceScreenType == DeviceScreenType.mobile
-                      ? showModalBottomSheet(
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          context: context,
-                          builder: (BuildContext context) => PostInteractors(
-                            postModel: widget.post,
-                            collection: "views",
-                          ),
-                        )
-                      : showDialog(
-                          context: context,
-                          builder: (BuildContext context) => Dialog(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0)),
-                            elevation: 4,
-                            child: PostInteractors(
-                              postModel: widget.post,
-                              collection: "views",
-                            ),
-                          ),
-                        );
-                },
-                icon: const Icon(Icons.remove_red_eye_outlined),
-              ),
-              Text('${widget.post.noOfViews}'),
-              const SizedBox(
-                width: 20,
-              ),
-              AbsorbPointer(
-                child: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.mode_comment_outlined),
-                ),
-              ),
-              Text('${widget.post.noOfComments}'),
-              const SizedBox(
-                width: 20,
-              ),
-              IconButton(
-                onPressed: () {
-                  widget.deviceScreenType == DeviceScreenType.mobile
-                      ? showModalBottomSheet(
-                          isScrollControlled: true,
-                          useSafeArea: true,
-                          context: context,
-                          builder: (BuildContext context) => PostInteractors(
-                            postModel: widget.post,
-                            collection: "upvotes",
-                          ),
-                        )
-                      : showDialog(
-                          context: context,
-                          builder: (BuildContext context) => Dialog(
-                            child: PostInteractors(
-                              postModel: widget.post,
-                              collection: "upvotes",
-                            ),
-                          ),
-                        );
-                },
-                icon: const Icon(Icons.arrow_upward),
-              ),
-              Text('${widget.post.noOfUpVotes}'),
-              const SizedBox(
-                width: 20,
-              ),
-            ],
-          );
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        IconButton(
+          onPressed: () {
+            widget.deviceScreenType == DeviceScreenType.mobile
+                ? showModalBottomSheet(
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    context: context,
+                    builder: (BuildContext context) => PostInteractors(
+                      postModel: widget.post,
+                      collection: "views",
+                    ),
+                  )
+                : showDialog(
+                    context: context,
+                    builder: (BuildContext context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0)),
+                      elevation: 4,
+                      child: PostInteractors(
+                        postModel: widget.post,
+                        collection: "views",
+                      ),
+                    ),
+                  );
+          },
+          icon: const Icon(Icons.remove_red_eye_outlined),
+        ),
+        Text('${widget.post.noOfViews}'),
+        const SizedBox(
+          width: 20,
+        ),
+        AbsorbPointer(
+          child: IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.mode_comment_outlined),
+          ),
+        ),
+        Text('${widget.post.noOfComments}'),
+        const SizedBox(
+          width: 20,
+        ),
+        IconButton(
+          onPressed: () {
+            widget.deviceScreenType == DeviceScreenType.mobile
+                ? showModalBottomSheet(
+                    isScrollControlled: true,
+                    useSafeArea: true,
+                    context: context,
+                    builder: (BuildContext context) => PostInteractors(
+                      postModel: widget.post,
+                      collection: "upvotes",
+                    ),
+                  )
+                : showDialog(
+                    context: context,
+                    builder: (BuildContext context) => Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0)),
+                      elevation: 4,
+                      child: PostInteractors(
+                        postModel: widget.post,
+                        collection: "upvotes",
+                      ),
+                    ),
+                  );
+          },
+          icon: const Icon(Icons.arrow_upward),
+        ),
+        Text('${widget.post.noOfUpVotes}'),
+        const SizedBox(
+          width: 20,
+        ),
+      ],
+    );
   }
 }

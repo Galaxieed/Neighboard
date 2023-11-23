@@ -13,6 +13,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/hoa_list/hoa_list_ui.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -21,6 +22,7 @@ import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
 
@@ -45,7 +47,6 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   final TextEditingController tcSubHeader = TextEditingController();
   final TextEditingController tcAbout = TextEditingController();
   final TextEditingController tcOfficeAddress = TextEditingController();
-  SiteModel? siteModel;
 
   File? homeImg, aboutImg, logoImg, logoImgDark;
   PlatformFile? homeImgByte, aboutImgByte, logoImgByte, logoImgByteDark;
@@ -55,7 +56,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       logoImgUrlDark = "";
 
   bool isLoading = true;
-
+  int index = -1;
   void pickImage(img) async {
     if (img == 'home') {
       if (kIsWeb) {
@@ -156,11 +157,11 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       await onSavingPic();
       SiteModel site = SiteModel(
         siteId: _auth.currentUser!.uid,
-        siteSubdName: tcSubdName.text,
+        siteSubdName: profanityFilter.censor(tcSubdName.text),
         siteLocation: '',
-        siteHeader: tcHeader.text,
-        siteSubheader: tcSubHeader.text,
-        siteAbout: tcAbout.text,
+        siteHeader: profanityFilter.censor(tcHeader.text),
+        siteSubheader: profanityFilter.censor(tcSubHeader.text),
+        siteAbout: profanityFilter.censor(tcAbout.text),
         siteOfficeAddress: tcOfficeAddress.text,
         siteContactNo: contactNumbers,
         siteStreets: streets,
@@ -174,6 +175,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       bool isSuccessful = await SiteSettingsFunction.saveNewSiteSettings(site);
 
       if (isSuccessful) {
+        siteModel = site;
         successMessage(
             title: "Success!",
             desc: "Site settings successfully added",
@@ -181,7 +183,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         setState(() {
           isLoading = false;
         });
-        await sendNotifToAll();
+        //await sendNotifToAll();
       } else {
         setState(() {
           isLoading = false;
@@ -191,10 +193,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     } else {
       await onSavingPic();
       Map<String, dynamic> siteDetails = {
-        'site_header': tcHeader.text,
-        'site_subd_name': tcSubdName.text,
-        'site_subheader': tcSubHeader.text,
-        'site_about': tcAbout.text,
+        'site_header': profanityFilter.censor(tcHeader.text),
+        'site_subd_name': profanityFilter.censor(tcSubdName.text),
+        'site_subheader': profanityFilter.censor(tcSubHeader.text),
+        'site_about': profanityFilter.censor(tcAbout.text),
         'site_office_address': tcOfficeAddress.text,
         'site_contact_no': contactNumbers,
         'site_streets': streets,
@@ -213,7 +215,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       setState(() {
         isLoading = false;
       });
-      await sendNotifToAll();
+      //await sendNotifToAll();
     }
   }
 
@@ -228,14 +230,13 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   List<TextEditingController> tcSteets = [];
   List<String> streets = [];
 
-  void addStreets([String? initialData]) {
-    tcSteets.add(TextEditingController(text: initialData));
+  void addStreets() {
+    tcSteets.add(TextEditingController());
     setState(() {});
   }
 
   getSiteSettings() async {
-    siteModel =
-        await SiteSettingsFunction.getSiteSettings(_auth.currentUser!.uid);
+    siteModel = await SiteSettingsFunction.getSiteSettings(siteAdminId);
     tcHeader.text = siteModel?.siteHeader ?? "";
     tcSubdName.text = siteModel?.siteSubdName ?? "";
     tcSubHeader.text = siteModel?.siteSubheader ?? "";
@@ -255,6 +256,14 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     aboutImgUrl = siteModel?.siteAboutImage ?? "";
     logoImgUrl = siteModel?.siteLogo ?? "";
     logoImgUrlDark = siteModel?.siteLogoDark ?? "";
+    homeImg = null;
+    homeImgByte = null;
+    aboutImg = null;
+    aboutImgByte = null;
+    logoImg = null;
+    logoImgByte = null;
+    logoImgDark = null;
+    logoImgByteDark = null;
     setState(() {
       isLoading = false;
     });
@@ -310,6 +319,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       audModel,
       astAudModel;
   List<CandidateModel> bodModels = [];
+
   getOfficers() async {
     officersModel.clear();
     officersModel =
@@ -354,7 +364,9 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   void initState() {
     super.initState();
     getAllUsers();
-    getOfficers();
+    if (mainIsElectionOngoing == false) {
+      getOfficers();
+    }
     getSiteSettings();
   }
 
@@ -488,6 +500,19 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                 ],
                               ),
                               const Divider(),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(PageTransition(
+                                        child: const HOAList(),
+                                        type: PageTransitionType.fade));
+                                  },
+                                  icon: const Icon(Icons.people_outline),
+                                  label: const Text("List of HOA"),
+                                ),
+                              ),
+                              const Divider(),
                               ListTile(
                                 onTap: () {
                                   pickImage('logo');
@@ -560,126 +585,6 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                               const SizedBox(
                                 height: 20,
                               ),
-                              //generate textformField
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: ElevatedButton.icon(
-                                  onPressed: addContactNo,
-                                  icon: const Icon(Icons.add),
-                                  label: const Text('Add Contact Number'),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              ...tcContactNo.map((e) {
-                                final index = tcContactNo.indexOf(e);
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 10.0),
-                                  child: TextFormField(
-                                    controller: tcContactNo[index],
-                                    keyboardType: TextInputType.phone,
-                                    inputFormatters: <TextInputFormatter>[
-                                      FilteringTextInputFormatter.digitsOnly,
-                                      LengthLimitingTextInputFormatter(11),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return "Enter contact number";
-                                      }
-                                      if (value.length != 11) {
-                                        return "Enter 11-digit number";
-                                      }
-                                      return null;
-                                    },
-                                    onSaved: (value) => {
-                                      if (!contactNumbers.contains(value))
-                                        {
-                                          contactNumbers.add(value!),
-                                        }
-                                    },
-                                    decoration: InputDecoration(
-                                      border: const OutlineInputBorder(),
-                                      labelText: "Contact Number",
-                                      alignLabelWithHint: true,
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            try {
-                                              contactNumbers.removeAt(index);
-                                            } catch (e) {
-                                              print(e);
-                                            }
-                                            tcContactNo[index].dispose();
-                                            tcContactNo.removeAt(index);
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete_forever),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              const SizedBox(
-                                height: 20,
-                              ),
-
-                              //generate streets
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: ElevatedButton.icon(
-                                  onPressed: addStreets,
-                                  icon: const Icon(Icons.add),
-                                  label: const Text('Add Street'),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              ...tcSteets.map((e) {
-                                final index = tcSteets.indexOf(e);
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 10.0),
-                                  child: TextFormField(
-                                    controller: tcSteets[index],
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return "Enter a Street";
-                                      }
-                                      return null;
-                                    },
-                                    onSaved: (value) => {
-                                      if (!streets.contains(value))
-                                        {
-                                          streets.add(value!),
-                                        }
-                                    },
-                                    decoration: InputDecoration(
-                                      border: const OutlineInputBorder(),
-                                      labelText: "Streets",
-                                      alignLabelWithHint: true,
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            try {
-                                              streets.removeAt(index);
-                                            } catch (e) {
-                                              print(e);
-                                            }
-                                            tcSteets[index].dispose();
-                                            tcSteets.removeAt(index);
-                                          });
-                                        },
-                                        icon: const Icon(Icons.delete_forever),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                              const SizedBox(
-                                height: 20,
-                              ),
-
                               TextFormField(
                                 controller: tcHeader,
                                 decoration: const InputDecoration(
@@ -713,7 +618,217 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
                                 ),
                                 maxLines: 10,
                               ),
-                              const Divider(),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              ExpansionPanelList(
+                                expansionCallback: (panelIndex, isExpanded) {
+                                  setState(() {
+                                    if (index == panelIndex) {
+                                      index = -1;
+                                    } else {
+                                      index = panelIndex;
+                                    }
+                                  });
+                                },
+                                animationDuration: const Duration(seconds: 1),
+                                dividerColor: Colors.grey,
+                                elevation: 0,
+                                children: [
+                                  //generate streets
+                                  ExpansionPanel(
+                                    canTapOnHeader: true,
+                                    isExpanded: index == 0,
+                                    headerBuilder: (context, isExpanded) {
+                                      return ListTile(
+                                        title: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: ElevatedButton.icon(
+                                            onPressed: addStreets,
+                                            icon: const Icon(Icons.add),
+                                            label: const Text('Add Street'),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    body: ListView(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      reverse: true,
+                                      shrinkWrap: true,
+                                      children: [
+                                        ...tcSteets.map((e) {
+                                          final index = tcSteets.indexOf(e);
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10.0),
+                                            child: TextFormField(
+                                              autofocus: true,
+                                              controller: tcSteets[index],
+                                              validator: (value) {
+                                                if (value == null) {
+                                                  return "Enter a Street";
+                                                }
+                                                return null;
+                                              },
+                                              onChanged: (value) {
+                                                if (streets.length ==
+                                                    tcSteets.length) {
+                                                  streets[index] = value;
+                                                }
+                                              },
+                                              onSaved: (value) => {
+                                                if (value != null &&
+                                                    streets.length <
+                                                        tcSteets.length)
+                                                  {
+                                                    if (!value.contains('St.'))
+                                                      {
+                                                        value = "$value St.",
+                                                        if (!streets
+                                                            .contains(value))
+                                                          {
+                                                            streets.add(value),
+                                                          }
+                                                      }
+                                                    else
+                                                      {
+                                                        if (!streets
+                                                            .contains(value))
+                                                          {
+                                                            streets.add(value),
+                                                          }
+                                                      }
+                                                  }
+                                              },
+                                              decoration: InputDecoration(
+                                                border:
+                                                    const OutlineInputBorder(),
+                                                labelText: "Street Name",
+                                                alignLabelWithHint: true,
+                                                suffixIcon: IconButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      try {
+                                                        streets.removeAt(index);
+                                                      } catch (e) {
+                                                        print(e);
+                                                      }
+                                                      tcSteets[index].dispose();
+                                                      tcSteets.removeAt(index);
+                                                    });
+                                                  },
+                                                  icon: const Icon(
+                                                      Icons.delete_forever),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+                                    ),
+                                  ),
+                                  //Contact NO
+                                  ExpansionPanel(
+                                    canTapOnHeader: true,
+                                    isExpanded: index == 1,
+                                    headerBuilder: (context, isExpanded) {
+                                      return ListTile(
+                                        title: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: ElevatedButton.icon(
+                                            onPressed: addContactNo,
+                                            icon: const Icon(Icons.add),
+                                            label: const Text(
+                                                'Add Contact Number'),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    body: ListView(
+                                      reverse: true,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      shrinkWrap: true,
+                                      children: [
+                                        ...tcContactNo.map((e) {
+                                          final index = tcContactNo.indexOf(e);
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10.0),
+                                            child: TextFormField(
+                                              autofocus: true,
+                                              controller: tcContactNo[index],
+                                              keyboardType: TextInputType.phone,
+                                              inputFormatters: <TextInputFormatter>[
+                                                FilteringTextInputFormatter
+                                                    .digitsOnly,
+                                                LengthLimitingTextInputFormatter(
+                                                    11),
+                                              ],
+                                              validator: (value) {
+                                                if (value == null) {
+                                                  return "Enter contact number";
+                                                }
+                                                if (value.length != 11) {
+                                                  return "Enter 11-digit number";
+                                                }
+                                                return null;
+                                              },
+                                              onChanged: (value) {
+                                                if (contactNumbers.length ==
+                                                    tcContactNo.length) {
+                                                  contactNumbers[index] = value;
+                                                }
+                                              },
+                                              onSaved: (value) => {
+                                                if (contactNumbers.length <
+                                                        tcContactNo.length &&
+                                                    value != null)
+                                                  {
+                                                    if (!contactNumbers
+                                                        .contains(value))
+                                                      {
+                                                        contactNumbers
+                                                            .add(value),
+                                                      }
+                                                  }
+                                              },
+                                              decoration: InputDecoration(
+                                                border:
+                                                    const OutlineInputBorder(),
+                                                labelText: "Contact Number",
+                                                alignLabelWithHint: true,
+                                                suffixIcon: IconButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      try {
+                                                        contactNumbers
+                                                            .removeAt(index);
+                                                      } catch (e) {
+                                                        print(e);
+                                                      }
+                                                      tcContactNo[index]
+                                                          .dispose();
+                                                      tcContactNo
+                                                          .removeAt(index);
+                                                    });
+                                                  },
+                                                  icon: const Icon(
+                                                      Icons.delete_forever),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [

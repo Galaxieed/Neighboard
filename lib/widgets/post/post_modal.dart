@@ -3,9 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:like_button/like_button.dart';
+import 'package:flutter_reaction_button/flutter_reaction_button.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/comment_model.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
@@ -45,7 +46,7 @@ class _PostModalState extends State<PostModal> {
   final TextEditingController _ctrlComment = TextEditingController();
   List<CommentModel> commentModels = [];
   UserModel? currentUser, otherUser;
-  bool isUpvoted = false;
+  String isUpvoted = "";
   bool isLoading = true;
   bool isLoggedIn = false;
   String? respondType, cmntId, recipientId, recipientName;
@@ -55,6 +56,8 @@ class _PostModalState extends State<PostModal> {
   }
 
   sendNotification(userId, title, body) async {
+    title = profanityFilter.censor(title);
+    body = profanityFilter.censor(body);
     otherUser = await ProfileFunction.getUserDetails(userId);
     await MyNotification().sendPushMessage(
       otherUser!.deviceToken,
@@ -85,6 +88,7 @@ class _PostModalState extends State<PostModal> {
   void addComment() async {
     if (_ctrlComment.text.isNotEmpty) {
       //for reply in mobile layout
+      _ctrlComment.text = profanityFilter.censor(_ctrlComment.text);
       if (respondType != null && respondType == "REPLY") {
         addReplyMobile();
 
@@ -121,6 +125,8 @@ class _PostModalState extends State<PostModal> {
         '${currentUser!.username} commented on this post: ',
         widget.postModel.title,
       );
+      widget.postModel.noOfComments += 1;
+      widget.stateSetter!();
     } else {
       return;
     }
@@ -144,21 +150,34 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
-  void onUpVote() async {
-    if (isUpvoted) {
-      setState(() {
-        widget.postModel.noOfUpVotes -= 1;
-        isUpvoted = false;
-      });
-      await MyPostFunction.onUpvoteAndUnUpvote(
-          postId: widget.postModel.postId, isUpvoted: false);
+  void onUpVote(String? react) async {
+    if (isUpvoted.isNotEmpty) {
+      if (react == null) {
+        setState(() {
+          widget.postModel.noOfUpVotes -= 1;
+          isUpvoted = "";
+        });
+        await MyPostFunction.onUpvoteAndUnUpvote(
+            postId: widget.postModel.postId, isUpvoted: "", react: "");
+      } else {
+        setState(() {
+          isUpvoted = react;
+        });
+        await MyPostFunction.onUpvoteAndUnUpvote(
+          postId: widget.postModel.postId,
+          isUpvoted: "re",
+          react: react,
+        );
+      }
     } else {
       setState(() {
         widget.postModel.noOfUpVotes += 1;
-        isUpvoted = true;
+        isUpvoted = react!;
       });
       await MyPostFunction.onUpvoteAndUnUpvote(
-          postId: widget.postModel.postId, isUpvoted: true);
+          postId: widget.postModel.postId,
+          isUpvoted: "new",
+          react: react ?? "");
 
       //send Notification to the author when upvoted
       sendNotification(
@@ -166,6 +185,7 @@ class _PostModalState extends State<PostModal> {
           '${currentUser!.username} upvoted this post: ',
           widget.postModel.title);
     }
+    widget.stateSetter!();
   }
 
   onTypeReply({
@@ -174,6 +194,8 @@ class _PostModalState extends State<PostModal> {
     required String response,
     required String commentId,
   }) {
+    response = profanityFilter.censor(response);
+
     if (widget.deviceScreenType == DeviceScreenType.mobile) {
       _ctrlComment.text = widget.postModel.authorId == recipientId &&
               widget.postModel.asAnonymous
@@ -188,6 +210,7 @@ class _PostModalState extends State<PostModal> {
   }
 
   addReplyMobile() async {
+    _ctrlComment.text = profanityFilter.censor(_ctrlComment.text);
     ReplyModel newReply = ReplyModel(
       replyId: DateTime.now().toIso8601String(),
       senderId: currentUser!.userId,
@@ -241,6 +264,7 @@ class _PostModalState extends State<PostModal> {
           isAlreadyViewed = true;
           widget.postModel.noOfViews += 1;
         });
+        widget.stateSetter!();
         await PostInteractorsFunctions.onViewPost(
             widget.postModel.postId, true);
       }
@@ -264,6 +288,8 @@ class _PostModalState extends State<PostModal> {
   updatePost() async {
     if (_contentController.text.isNotEmpty &&
         _titleController.text.isNotEmpty) {
+      _contentController.text = profanityFilter.censor(_contentController.text);
+      _titleController.text = profanityFilter.censor(_titleController.text);
       bool isSucceess = await PostInteractorsFunctions.updatePost(
         postId: widget.postModel.postId,
         postTitle: _titleController.text,
@@ -376,32 +402,33 @@ class _PostModalState extends State<PostModal> {
                               updatePost();
                             },
                             decoration: InputDecoration(
-                                suffixIcon: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _titleController.text =
-                                          widget.postModel.title;
-                                      isEditing = false;
-                                    });
-                                  },
-                                  icon: const Icon(
-                                    Icons.cancel_outlined,
-                                    color: Colors.red,
+                              suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _titleController.text =
+                                            widget.postModel.title;
+                                        isEditing = false;
+                                      });
+                                    },
+                                    icon: const Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.red,
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  onPressed: updatePost,
-                                  icon: Icon(
-                                    Icons.save,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                )
-                              ],
-                            )),
+                                  IconButton(
+                                    onPressed: updatePost,
+                                    icon: Icon(
+                                      Icons.save,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           )
                         : Text(
                             widget.postModel.title,
@@ -628,16 +655,52 @@ class _PostModalState extends State<PostModal> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        LikeButton(
-          isLiked: isUpvoted,
-          onTap: (bool isLiked) {
-            onUpVote();
-            return Future.value(!isLiked);
+        ReactionButton<String>(
+          isChecked: isUpvoted.isNotEmpty,
+          selectedReaction: isUpvoted.isNotEmpty
+              ? selectedReaction(context, isUpvoted)
+              : null,
+          toggle: true,
+          onReactionChanged: (Reaction<String>? reaction) {
+            onUpVote(reaction?.value);
           },
-          likeBuilder: (isLiked) => isLiked
-              ? const Icon(Icons.arrow_downward)
-              : const Icon(Icons.arrow_upward),
-          likeCount: widget.postModel.noOfUpVotes,
+          reactions: <Reaction<String>>[
+            Reaction(
+              value: "Like",
+              icon: Icon(
+                Icons.thumb_up,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              title: const Text("Like"),
+            ),
+            const Reaction(
+              value: "Love",
+              icon: Icon(
+                Icons.favorite,
+                color: Colors.red,
+              ),
+              title: Text("Love"),
+            ),
+            const Reaction(
+              value: "Star",
+              icon: Icon(
+                Icons.star,
+                color: Colors.amber,
+              ),
+              title: Text("Star"),
+            ),
+          ],
+          placeholder: Reaction<String>(
+            value: null,
+            icon: Icon(
+              Icons.arrow_upward,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          boxColor: Theme.of(context).colorScheme.onPrimary,
+          boxRadius: 10,
+          itemsSpacing: 20,
+          itemSize: const Size(40, 60),
         ),
         TextButton.icon(
           onPressed: () {

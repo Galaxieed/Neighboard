@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/anonymous_posts/anonymous_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
@@ -140,7 +142,8 @@ class _ForumPageMobileState extends State<ForumPageMobile>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: widget.isAdmin ? 4 : 3, vsync: this);
+    _tabController = TabController(
+        initialIndex: 1, length: widget.isAdmin ? 5 : 4, vsync: this);
     if (_auth.currentUser != null) {
       getCurrentUserDetails();
     }
@@ -253,13 +256,20 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               ],
             ),
       bottomNavigationBar: TabBar(
-        isScrollable: widget.isAdmin ? true : false,
+        isScrollable: true,
         onTap: (value) {
           setState(() {
             _tabController.index = value;
           });
         },
         tabs: [
+          const SizedBox(
+            width: 70,
+            child: Tab(
+              icon: Icon(FontAwesomeIcons.userSecret),
+              text: "Anon.",
+            ),
+          ),
           if (widget.isAdmin)
             const SizedBox(
               width: 70,
@@ -299,7 +309,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         deviceScreenType: DeviceScreenType.mobile,
         stateSetter: setState,
       ),
-      floatingActionButton: widget.isAdmin || _tabController.index != 0
+      floatingActionButton: widget.isAdmin || _tabController.index != 1
           ? null
           : GestureDetector(
               onTapDown: (TapDownDetails details) {
@@ -320,6 +330,10 @@ class _ForumPageMobileState extends State<ForumPageMobile>
               child: TabBarView(
                 controller: _tabController,
                 children: [
+                  AnonymousPosts(
+                      searchedText: searchedText,
+                      isAdmin: false,
+                      deviceScreenType: DeviceScreenType.desktop),
                   if (widget.isAdmin)
                     Categories(
                       searchedText: searchedText,

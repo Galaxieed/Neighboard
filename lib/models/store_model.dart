@@ -6,6 +6,7 @@ class StoreModel {
   late String storeStreetName;
   late String storeContactNo;
   late String storeImage;
+  late String storeLoc;
 
   StoreModel({
     required this.storeId,
@@ -15,6 +16,7 @@ class StoreModel {
     required this.storeStreetName,
     required this.storeContactNo,
     required this.storeImage,
+    required this.storeLoc,
   });
 
   StoreModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class StoreModel {
     storeStreetName = json['store_street_name'];
     storeContactNo = json['store_contact_no'];
     storeImage = json['store_image'];
+    storeLoc = json['store_location'];
   }
 
   Map<String, dynamic> toJson() {
@@ -36,6 +39,7 @@ class StoreModel {
     data['store_street_name'] = storeStreetName;
     data['store_contact_no'] = storeContactNo;
     data['store_image'] = storeImage;
+    data['store_location'] = storeLoc;
     return data;
   }
 }

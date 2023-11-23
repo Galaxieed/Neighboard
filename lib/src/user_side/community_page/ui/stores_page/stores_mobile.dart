@@ -2,10 +2,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
+import 'package:neighboard/main.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
@@ -24,6 +26,7 @@ import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
 import 'package:neighboard/widgets/notification/notification_function.dart';
+import 'package:neighboard/widgets/others/map.dart';
 import 'package:neighboard/widgets/others/tab_header.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 import 'package:universal_io/io.dart';
@@ -43,12 +46,11 @@ class _StoresMobileState extends State<StoresMobile> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _ctrlName = TextEditingController();
   final TextEditingController _ctrlOffers = TextEditingController();
-  final TextEditingController _ctrlHouseNo = TextEditingController();
-  final TextEditingController _ctrlStreet = TextEditingController();
+  final TextEditingController _ctrlBlock = TextEditingController();
+  final TextEditingController _ctrlLot = TextEditingController();
   final TextEditingController _ctrlContactInfo = TextEditingController();
   String _name = '';
   String _offers = '';
-  String _houseNo = '';
   String _street = '';
   final String _contactInfo = '';
   bool isOnNewPost = false;
@@ -67,8 +69,9 @@ class _StoresMobileState extends State<StoresMobile> {
       _ctrlContactInfo.text = '';
       _ctrlName.text = '';
       _ctrlOffers.text = '';
-      _ctrlHouseNo.text = '';
-      _ctrlStreet.text = '';
+      _ctrlBlock.text = '';
+      _ctrlLot.text = '';
+      _street = '';
       isOnNewPost = !isOnNewPost;
     });
   }
@@ -84,11 +87,17 @@ class _StoresMobileState extends State<StoresMobile> {
     }
   }
 
+  double? lat, long;
+  void setStoreLocation(double lat, double long) {
+    this.lat = lat;
+    this.long = long;
+  }
+
   void onPublishNewStore() async {
-    setState(() {
-      isLoading = true;
-    });
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
       _formKey.currentState!.save();
 
       if (image != null || imageByte != null) {
@@ -100,20 +109,21 @@ class _StoresMobileState extends State<StoresMobile> {
       }
 
       StoreModel storeModel = StoreModel(
-          storeId: DateTime.now().toIso8601String(),
-          storeName: _name,
-          storeOffers: _offers,
-          storeHouseNumber: _houseNo,
-          storeStreetName: _street,
-          storeContactNo: _contactInfo,
-          storeImage: imageUrl);
+        storeId: DateTime.now().toIso8601String(),
+        storeName: _name,
+        storeOffers: _offers,
+        storeHouseNumber: "Blk ${_ctrlBlock.text} Lot ${_ctrlLot.text}",
+        storeStreetName: _street,
+        storeContactNo: _contactInfo,
+        storeImage: imageUrl,
+        storeLoc: lat != null || long != null ? '$lat|$long' : "",
+      );
 
       bool isSuccessful = await StoreFunction.addStore(storeModel);
 
       if (isSuccessful) {
         storeModels.add(storeModel);
         storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
-        await sendNotifToAll();
         onNewStore();
         // ignore: use_build_context_synchronously
         successMessage(
@@ -121,11 +131,16 @@ class _StoresMobileState extends State<StoresMobile> {
           desc: 'Store successfully added',
           context: context,
         );
+        setState(() {
+          isLoading = false;
+        });
+        await sendNotifToAll();
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
   void pickImage() async {
@@ -215,10 +230,10 @@ class _StoresMobileState extends State<StoresMobile> {
   @override
   void dispose() {
     _ctrlContactInfo.dispose();
-    _ctrlHouseNo.dispose();
+    _ctrlBlock.dispose();
     _ctrlName.dispose();
     _ctrlOffers.dispose();
-    _ctrlStreet.dispose();
+    _ctrlLot.dispose();
     super.dispose();
   }
 
@@ -455,42 +470,95 @@ class _StoresMobileState extends State<StoresMobile> {
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFormField(
-                          controller: _ctrlHouseNo,
-                          onSaved: (newValue) => _houseNo = newValue!,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 4.0),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _ctrlBlock,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,2}$'),
+                                  ),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Block Number is required';
+                                  }
+                                  return null;
+                                },
+                                textAlign: TextAlign.center,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 4.0),
+                                  ),
+                                  prefixIcon: Text(" Block"),
+                                ),
+                              ),
                             ),
-                            labelText: "House Number",
-                          ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _ctrlLot,
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d{0,2}$'),
+                                  ),
+                                ],
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Lot Number is required';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Colors.black, width: 4.0),
+                                  ),
+                                  prefixIcon: Text(" Lot"),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 5),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        DropdownButtonFormField(
+                          onChanged: (value) {
+                            setState(() {
+                              _street = value.toString();
+                            });
+                          },
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'House Number is required';
+                            if (value == null) {
+                              return 'Street is required';
                             }
                             return null;
                           },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _ctrlStreet,
-                          onSaved: (newValue) => _street = newValue!,
+                          items: siteModel == null
+                              ? []
+                              : siteModel!.siteStreets.map((String e) {
+                                  return DropdownMenuItem<String>(
+                                    value: e,
+                                    child: Text(e),
+                                  );
+                                }).toList(),
+                          //value: street,
+                          hint: const Text('Street'),
+                          value: _street.isEmpty ? null : _street,
                           decoration: const InputDecoration(
-                            border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 4.0),
-                            ),
-                            labelText: "Street Name",
+                            border: OutlineInputBorder(),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Street Name is required';
-                            }
-                            return null;
-                          },
                         ),
                         const SizedBox(
                           height: 10,
@@ -498,6 +566,21 @@ class _StoresMobileState extends State<StoresMobile> {
                         const SizedBox(
                           height: 10,
                         ),
+                        if (siteModel != null)
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => MyMap(
+                                  setLocation: setStoreLocation,
+                                  lat: lat,
+                                  long: long,
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.map),
+                            label: const Text("Map Location"),
+                          ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

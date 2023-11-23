@@ -17,7 +17,9 @@ import 'package:neighboard/src/landing_page/ui/landing_page.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/forum_page/forum_page.dart';
+import 'package:neighboard/src/user_side/login_register_page/login_page/login_page_ui.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
+import 'package:page_transition/page_transition.dart';
 
 String myToken = '';
 List<NotificationModel> notificationModels = [];
@@ -48,14 +50,60 @@ class _ScreenDirectState extends State<ScreenDirect> {
       isLoading = true;
     });
     if (_auth.currentUser != null) {
-      await getUserDetails(_auth.currentUser!.uid);
-      Map<String, dynamic> deviceToken = {
-        'device_token': myToken,
-      };
+      bool emailVerified = _auth.currentUser!.emailVerified;
+      List<String> exemptedUser = [
+        '2jB7wg7PFZUV382mpTId2dqoTyL2',
+        '8Jnmea0EkxgwTOLNpA9PQjm85j72',
+        'sJuGAwN3Ena76LVIdJIdudfPSmh2',
+        'v0HBgPZPb3OxY4VsQAWrI2oY4rF2',
+      ];
 
-      await ProfileFunction.updateUserProfile(deviceToken);
-      isLoggedIn = true;
-      listenForNotification();
+      if (!emailVerified && !exemptedUser.contains(_auth.currentUser!.uid)) {
+        await _auth.currentUser!.delete().catchError((e) {
+          _auth.signOut();
+          infoMessage(
+              title: "Login session expired",
+              desc: "Please login again",
+              context: context);
+          Navigator.of(context).pushReplacement(PageTransition(
+              child: const LoginPage(), type: PageTransitionType.fade));
+        });
+
+        // ignore: use_build_context_synchronously
+        infoMessage(
+            title: "",
+            desc:
+                "This account is not verified\nRegister again and verify your email",
+            context: context);
+        isLoggedIn = false;
+      } else {
+        if (exemptedUser.contains(_auth.currentUser!.uid)) {
+          await getUserDetails(_auth.currentUser!.uid);
+          Map<String, dynamic> deviceToken = {
+            'device_token': myToken,
+          };
+
+          await ProfileFunction.updateUserProfile(deviceToken);
+          isLoggedIn = true;
+          listenForNotification();
+        } else {
+          User? user = _auth.currentUser;
+          if (user != null) {
+            await getUserDetails(_auth.currentUser!.uid);
+            Map<String, dynamic> deviceToken = {
+              'device_token': myToken,
+            };
+
+            await ProfileFunction.updateUserProfile(deviceToken);
+            isLoggedIn = true;
+            listenForNotification();
+          } else {
+            _auth.signOut();
+            print("SIGNS OUT");
+            isLoggedIn = false;
+          }
+        }
+      }
     } else {
       isLoggedIn = false;
     }
@@ -230,7 +278,7 @@ class _ScreenDirectState extends State<ScreenDirect> {
       if (userModel!.role == "ADMIN") {
         return const AdminSide();
       } else {
-        return const ForumPage();
+        return ForumPage();
       }
     } else {
       return const LandingPage();

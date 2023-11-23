@@ -69,6 +69,7 @@ class _LandingPageState extends State<LandingPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) {
         return const MyChat();
       },

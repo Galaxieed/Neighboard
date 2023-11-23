@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/all_posts/all_posts.dart';
+import 'package:neighboard/src/user_side/forum_page/ui/anonymous_posts/anonymous_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/categories/categories.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/my_posts/my_posts.dart';
 import 'package:neighboard/src/user_side/forum_page/ui/new_post/new_post.dart';
@@ -44,7 +46,7 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
           ),
           DefaultTabController(
             initialIndex: 1,
-            length: 4,
+            length: 5,
             child: Builder(
               builder: (context) => Expanded(
                 child: Column(
@@ -72,6 +74,10 @@ class _AdminForumDesktopState extends State<AdminForumDesktop> {
                         child: TabBarView(
                           physics: const NeverScrollableScrollPhysics(),
                           children: [
+                            AnonymousPosts(
+                                searchedText: searchedText,
+                                isAdmin: false,
+                                deviceScreenType: DeviceScreenType.desktop),
                             Categories(
                               searchedText: searchedText,
                               category: "",
@@ -116,22 +122,24 @@ class ForumPageNavBar extends StatefulWidget {
 }
 
 class _ForumPageNavBarState extends State<ForumPageNavBar> {
-  String selectedSubButton = 'All Posts';
+  String selectedSubButton = 'Pending Posts';
 
   changingButton(String newValue) {
     setState(() {
       selectedSubButton = newValue;
-      if (newValue == 'Pending Posts') {
+      if (newValue == 'Anonymous') {
         widget.callback(0);
-      }
-      if (newValue == 'All Posts') {
+      } else if (newValue == 'Pending Posts') {
         widget.callback(1);
       }
-      if (newValue == 'My Posts') {
+      if (newValue == 'All Posts') {
         widget.callback(2);
       }
-      if (newValue == 'New Post') {
+      if (newValue == 'My Posts') {
         widget.callback(3);
+      }
+      if (newValue == 'New Post') {
+        widget.callback(4);
       }
     });
   }
@@ -141,6 +149,13 @@ class _ForumPageNavBarState extends State<ForumPageNavBar> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
+        ForumPageNavButton(
+            selectedSubButton: selectedSubButton,
+            label: 'Anonymous',
+            callback: changingButton),
+        SizedBox(
+          width: 5.w,
+        ),
         ForumPageNavButton(
             selectedSubButton: selectedSubButton,
             label: 'Pending Posts',
@@ -185,31 +200,39 @@ class ForumPageNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        selectedSubButton = label;
-        callback(label);
-      },
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(
-          color: selectedSubButton == label
-              ? ccForumSelectedButtonBorderColor
-              : ccForumButtonBorderColor(context),
-        ),
-        disabledBackgroundColor: Colors.grey,
-        backgroundColor: selectedSubButton == label
-            ? ccForumSelectedButtonBGColor(context)
-            : ccForumButtonBGColor(context),
-        foregroundColor: selectedSubButton == label
-            ? ccForumSelectedButtonFGColor(context)
-            : ccForumButtonFGColor(context),
-      ),
-      child: Row(
-        children: [
-          if (label == "New Post") const Icon(Icons.add),
-          Text(label),
-        ],
-      ),
-    );
+    return label == "Anonymous"
+        ? IconButton.filledTonal(
+            onPressed: () {
+              selectedSubButton = label;
+              callback(label);
+            },
+            icon: const Icon(FontAwesomeIcons.userSecret),
+          )
+        : OutlinedButton(
+            onPressed: () {
+              selectedSubButton = label;
+              callback(label);
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(
+                color: selectedSubButton == label
+                    ? ccForumSelectedButtonBorderColor
+                    : ccForumButtonBorderColor(context),
+              ),
+              disabledBackgroundColor: Colors.grey,
+              backgroundColor: selectedSubButton == label
+                  ? ccForumSelectedButtonBGColor(context)
+                  : ccForumButtonBGColor(context),
+              foregroundColor: selectedSubButton == label
+                  ? ccForumSelectedButtonFGColor(context)
+                  : ccForumButtonFGColor(context),
+            ),
+            child: Row(
+              children: [
+                if (label == "New Post") const Icon(Icons.add),
+                Text(label),
+              ],
+            ),
+          );
   }
 }

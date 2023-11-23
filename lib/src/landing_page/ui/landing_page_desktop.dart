@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
@@ -626,7 +627,7 @@ class MyFooter extends StatelessWidget {
                       onPressed: () {
                         Navigator.of(context).push(PageTransition(
                             duration: const Duration(milliseconds: 500),
-                            child: const ForumPage(),
+                            child: ForumPage(),
                             type: PageTransitionType.fade));
                       },
                       child: Text(
@@ -720,7 +721,7 @@ class OffersPage extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        ).animate().fade(delay: 500.ms, duration: 300.ms).slideY(),
         const Spacer(),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -774,7 +775,7 @@ class OffersPage extends StatelessWidget {
     );
   }
 
-  Container offersCard(
+  Widget offersCard(
     BuildContext context,
     IconData icon,
     String title,
@@ -814,7 +815,7 @@ class OffersPage extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).animate().fade(delay: 500.ms, duration: 500.ms);
   }
 }
 
@@ -884,7 +885,10 @@ class AboutPage extends StatelessWidget {
                       color: ccSubHeaderFGColor(context),
                     )
                   ],
-                ),
+                )
+                    .animate()
+                    .fade(delay: 300.ms, duration: 800.ms)
+                    .slideX(duration: 500.ms),
               ),
             ),
             const SizedBox(
@@ -895,16 +899,13 @@ class AboutPage extends StatelessWidget {
               borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(90),
                   bottomLeft: Radius.circular(90)),
-              child: Transform.flip(
-                flipX: false,
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: aboutImage == ''
-                            ? const AssetImage(noImage) as ImageProvider
-                            : NetworkImage(aboutImage),
-                        fit: BoxFit.cover),
-                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: aboutImage == ''
+                          ? const AssetImage(noImage) as ImageProvider
+                          : NetworkImage(aboutImage),
+                      fit: BoxFit.cover),
                 ),
               ),
             )),
@@ -951,16 +952,21 @@ class HomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  LandPageHeader(header: header),
+                  LandPageHeader(header: header)
+                      .animate()
+                      .fade(delay: 300.ms, duration: 500.ms)
+                      .slideX(duration: 1000.ms),
                   LandPageHeaderSmall(
                     header: subHeader,
                     size: 5,
                     color: Colors.white,
-                  ),
+                  ).animate().fade(delay: 1.seconds),
                   SizedBox(
                     height: 15.h,
                   ),
-                  LandPageButton(label: 'Explore', callback: Routes().navigate),
+                  LandPageButton(label: 'Explore', callback: Routes().navigate)
+                      .animate()
+                      .fade(delay: 1200.ms),
                 ],
               ),
             ),

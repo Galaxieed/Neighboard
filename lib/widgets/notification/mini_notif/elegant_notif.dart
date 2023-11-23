@@ -55,9 +55,11 @@ void errorMessage(
 void infoMessage(
     {required String title,
     required String desc,
-    required BuildContext context}) {
+    required BuildContext context,
+    int? duration}) {
   ElegantNotification.info(
     width: 360,
+    toastDuration: Duration(seconds: duration ?? 3),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(
