@@ -85,7 +85,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         PopupMenuItem(
             onTap: () {
               categoryText = '';
-              _tabController.animateTo(0);
+              _tabController.animateTo(1);
               setState(() {});
             },
             child: const Text("All Posts")),
@@ -133,7 +133,7 @@ class _ForumPageMobileState extends State<ForumPageMobile>
       elevation: 8.0,
     ).then((value) {
       if (categoryText != "") {
-        _tabController.animateTo(0);
+        _tabController.animateTo(1);
         setState(() {});
       }
     });

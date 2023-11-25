@@ -15,6 +15,7 @@ import 'package:neighboard/shared_preferences/shared_preferences.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:profanity_filter/profanity_filter.dart';
+import 'package:intl/intl.dart';
 
 AndroidNotificationChannel channel = const AndroidNotificationChannel(
   'high_importance_channel', // id
@@ -111,19 +112,33 @@ mainCheckIfElectionOngoing() async {
   if (mainElectionModel != null) {
     DateTime elecStartDate =
         DateTime.parse(mainElectionModel!.electionStartDate);
-    DateTime elecEndDate = DateTime.parse(mainElectionModel!.electionEndDate);
-    DateTime now = DateTime.now();
-    elecStartDate =
-        DateTime(elecStartDate.year, elecStartDate.month, elecStartDate.day);
-    elecEndDate =
-        DateTime(elecEndDate.year, elecEndDate.month, elecEndDate.day);
-    now = DateTime(now.year, now.month, now.day);
 
-    if (now.isAfter(elecStartDate) && now.isBefore(elecEndDate)) {
+    TimeOfDay elecStartTime = TimeOfDay.fromDateTime(
+        DateFormat("h:mm a").parse(mainElectionModel!.electionStartTime));
+    TimeOfDay elecEndTime = TimeOfDay.fromDateTime(
+        DateFormat("h:mm a").parse(mainElectionModel!.electionEndTime));
+    DateTime now = DateTime.now();
+    DateTime startDateTime = DateTime(
+      elecStartDate.year,
+      elecStartDate.month,
+      elecStartDate.day,
+      elecStartTime.hour,
+      elecStartTime.minute,
+    );
+    DateTime endDateTime = DateTime(
+      elecStartDate.year,
+      elecStartDate.month,
+      elecStartDate.day,
+      elecEndTime.hour,
+      elecEndTime.minute,
+    );
+    now = DateTime(now.year, now.month, now.day, now.hour, now.minute);
+    //now.isAfter(startDateTime) &&
+    if (now.isBefore(endDateTime)) {
       // print('The date is within the range');
       mainIsElectionOngoing = true;
-    } else if (now.isAtSameMomentAs(elecStartDate) ||
-        now.isAtSameMomentAs(elecEndDate)) {
+    } else if (now.isAtSameMomentAs(startDateTime) ||
+        now.isAtSameMomentAs(endDateTime)) {
       // print('The date is within the range');
       mainIsElectionOngoing = true;
     } else {

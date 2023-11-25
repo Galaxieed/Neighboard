@@ -59,16 +59,39 @@ class CategoriesFunction {
       searchedWord = searchedWord.toLowerCase();
       //search all postModels based on title or searchedWord
       List<PostModel> postByTitle = [];
-      postByTitle = postModels
-          .where((post) =>
-              post.tags.any((tag) => tag.toLowerCase().contains(category)) &&
-              (post.authorName.toLowerCase().contains(searchedWord) ||
-                  post.content.toLowerCase().contains(searchedWord) ||
-                  post.tags
-                      .any((tag) => tag.toLowerCase().contains(searchedWord)) ||
-                  post.timeStamp.toLowerCase().contains(searchedWord) ||
-                  post.title.toLowerCase().contains(searchedWord)))
-          .toList();
+      if (category == "general discussion") {
+        print("GENERAL");
+        postByTitle = postModels
+            .where((post) =>
+                post.tags.any((tag) => ![
+                      'Water Billing',
+                      'Parking Space',
+                      'Electric Billing',
+                      'Garbage Collection',
+                      'Power Interruption',
+                      'Marketplace/Business',
+                      'Clubhouse Fees and Rental',
+                    ].contains(tag)) &&
+                (post.authorName.toLowerCase().contains(searchedWord) ||
+                    post.content.toLowerCase().contains(searchedWord) ||
+                    post.tags.any(
+                        (tag) => tag.toLowerCase().contains(searchedWord)) ||
+                    post.timeStamp.toLowerCase().contains(searchedWord) ||
+                    post.title.toLowerCase().contains(searchedWord)))
+            .toList();
+      } else {
+        postByTitle = postModels
+            .where((post) =>
+                post.tags.any((tag) => tag.toLowerCase().contains(category)) &&
+                (post.authorName.toLowerCase().contains(searchedWord) ||
+                    post.content.toLowerCase().contains(searchedWord) ||
+                    post.tags.any(
+                        (tag) => tag.toLowerCase().contains(searchedWord)) ||
+                    post.timeStamp.toLowerCase().contains(searchedWord) ||
+                    post.title.toLowerCase().contains(searchedWord)))
+            .toList();
+      }
+
       return postByTitle;
     } catch (e) {
       return null;

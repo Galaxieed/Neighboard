@@ -48,7 +48,7 @@ class _CategoriesState extends State<Categories> {
   List<PostModel> postModels = [];
   bool isLoading = true;
 
-  void getAllPost() async {
+  getAllPost() async {
     setState(() {
       isLoading = true;
     });
@@ -91,9 +91,27 @@ class _CategoriesState extends State<Categories> {
     setState(() {
       isLoading = true;
     });
-    postModels = await CategoriesFunction.getPostsByCategory(
-            category: widget.category.trim()) ??
-        [];
+    await getAllPost();
+    if (widget.category == "General Discussion") {
+      postModels = postModels
+          .where((element) => ![
+                'Water Billing',
+                'Parking Space',
+                'Electric Billing',
+                'Garbage Collection',
+                'Power Interruption',
+                'Marketplace/Business',
+                'Clubhouse Fees and Rental',
+              ].contains(element.tags[0]))
+          .toList();
+    } else {
+      postModels = postModels
+          .where((element) => element.tags[0] == widget.category)
+          .toList();
+    }
+    // postModels = await CategoriesFunction.getPostsByCategory(
+    //         category: widget.category.trim()) ??
+    //     [];
     postModels.sort((a, b) => b.postId.compareTo(a.postId));
     postModels.sort((a, b) => b.noOfUpVotes.compareTo(a.noOfUpVotes));
     if (mounted) {

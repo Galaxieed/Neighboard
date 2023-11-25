@@ -1,6 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
@@ -56,9 +57,10 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       isLoading = true;
     });
     electionModel = ElectionModel(
-      electionId: '$startingDate-$endingDate',
+      electionId: startingDate,
       electionStartDate: startingDate,
-      electionEndDate: endingDate,
+      electionStartTime: startingTime,
+      electionEndTime: endingTime,
       electionNote: tcNote.text,
     );
 
@@ -104,7 +106,6 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   //first collect all data then add all at the end
 
   String startingDate = '';
-  String endingDate = '';
 
   Future<void> setStartDate(String newDate) async {
     setState(() {
@@ -112,9 +113,19 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     });
   }
 
-  Future<void> setEndDate(String newDate) async {
+  String startingTime = '';
+
+  Future<void> setStartTime(String newTime) async {
     setState(() {
-      endingDate = newDate;
+      startingTime = newTime;
+    });
+  }
+
+  String endingTime = '';
+
+  Future<void> setEndTime(String newTime) async {
+    setState(() {
+      endingTime = newTime;
     });
   }
 
@@ -128,29 +139,39 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     tcUsername.clear();
   }
 
-  int nextYear = DateTime.parse(DateTime.now().toString()).year + 1;
-  int thisMonth = DateTime.parse(DateTime.now().toString()).month;
-  int thisDay = DateTime.parse(DateTime.now().toString()).day;
-
   checkIfElectionOngoing() async {
     electionModel = await CandidatesFunctions.getLatestElection();
     if (electionModel != null) {
       DateTime elecStartDate = DateTime.parse(electionModel!.electionStartDate);
-      DateTime elecEndDate = DateTime.parse(electionModel!.electionEndDate);
+      TimeOfDay elecStartTime = TimeOfDay.fromDateTime(
+          DateFormat("h:mm a").parse(electionModel!.electionStartTime));
+      TimeOfDay elecEndTime = TimeOfDay.fromDateTime(
+          DateFormat("h:mm a").parse(electionModel!.electionEndTime));
       DateTime now = DateTime.now();
-      elecStartDate =
-          DateTime(elecStartDate.year, elecStartDate.month, elecStartDate.day);
-      elecEndDate =
-          DateTime(elecEndDate.year, elecEndDate.month, elecEndDate.day);
-      now = DateTime(now.year, now.month, now.day);
+      DateTime startDateTime = DateTime(
+        elecStartDate.year,
+        elecStartDate.month,
+        elecStartDate.day,
+        elecStartTime.hour,
+        elecStartTime.minute,
+      );
+      DateTime endDateTime = DateTime(
+        elecStartDate.year,
+        elecStartDate.month,
+        elecStartDate.day,
+        elecEndTime.hour,
+        elecEndTime.minute,
+      );
 
-      if (now.isAfter(elecStartDate) && now.isBefore(elecEndDate)) {
+      now = DateTime(now.year, now.month, now.day, now.hour, now.minute);
+      //now.isAfter(startDateTime) &&
+      if (now.isBefore(endDateTime)) {
         // print('The date is within the range');
         setState(() {
           isElectionOngoing = true;
         });
-      } else if (now.isAtSameMomentAs(elecStartDate) ||
-          now.isAtSameMomentAs(elecEndDate)) {
+      } else if (now.isAtSameMomentAs(startDateTime) ||
+          now.isAtSameMomentAs(endDateTime)) {
         // print('The date is within the range');
         setState(() {
           isElectionOngoing = true;
@@ -179,7 +200,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Election has added: ",
-      '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}',
+      '${DateFormat.yMMMd().format(DateTime.parse(startingDate))}\n${TimeOfDay.fromDateTime(DateFormat("h:mm a").parse(startingTime))} - ${TimeOfDay.fromDateTime(DateFormat("h:mm a").parse(endingTime))}',
     );
 
     //ADD sa notification TAB
@@ -187,7 +208,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Election has added: ",
       notifBody:
-          '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}',
+          '${DateFormat.yMMMd().format(DateTime.parse(startingDate))}\n${TimeOfDay.fromDateTime(DateFormat("h:mm a").parse(startingTime))} - ${TimeOfDay.fromDateTime(DateFormat("h:mm a").parse(endingTime))}',
       notifTime: formattedDate(),
       notifLocation: "ELECTION",
       isRead: false,
@@ -205,8 +226,33 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   @override
   void initState() {
     super.initState();
+
     getAllUsers();
     checkIfElectionOngoing();
+    if (!mainIsElectionOngoing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) {
+              return AlertDialog.adaptive(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                title: const Text("NOTE!!!"),
+                content: const Text(
+                    "Setting this up should be done at least TWO(2) weeks\nprior to the exact date of election"),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Understood!"),
+                  )
+                ],
+              );
+            });
+      });
+    }
   }
 
   @override
@@ -410,9 +456,160 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                                         if (!ctrl.indexIsChanging &&
                                             ctrl.index == 8) {
                                           if (candidateModels != [] &&
-                                              startingDate != '' &&
-                                              endingDate != '') {
-                                            onStartElection();
+                                              startingDate.isNotEmpty &&
+                                              startingTime.isNotEmpty &&
+                                              endingTime.isNotEmpty) {
+                                            showDialog(
+                                              context: context,
+                                              builder: (_) {
+                                                return AlertDialog.adaptive(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12)),
+                                                  title: const Text("Confirm?"),
+                                                  content: SizedBox(
+                                                    width: 500,
+                                                    height: 500,
+                                                    child: ListView.builder(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 30),
+                                                      shrinkWrap: true,
+                                                      itemCount: candidateModels
+                                                          .length,
+                                                      itemBuilder:
+                                                          (context, index) {
+                                                        CandidateModel
+                                                            listCand =
+                                                            candidateModels[
+                                                                index];
+                                                        return ListTile(
+                                                          title: Text(
+                                                            "${listCand.firstName} ${listCand.lastName}",
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                          subtitle: Text(
+                                                              listCand
+                                                                  .position),
+                                                          trailing: IconButton(
+                                                            onPressed: () {
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "PRESIDENT") {
+                                                                ctrl.animateTo(
+                                                                    0);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "VICE PRESIDENT") {
+                                                                ctrl.animateTo(
+                                                                    2);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "SECRETARY") {
+                                                                ctrl.animateTo(
+                                                                    3);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "ASSISTANT SECRETARY") {
+                                                                ctrl.animateTo(
+                                                                    4);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "TREASURER") {
+                                                                ctrl.animateTo(
+                                                                    5);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "AUDITOR") {
+                                                                ctrl.animateTo(
+                                                                    6);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "ASSISTANT AUDITOR") {
+                                                                ctrl.animateTo(
+                                                                    7);
+                                                              }
+                                                              if (listCand
+                                                                      .position ==
+                                                                  "BOARD OF DIRECTORS") {
+                                                                ctrl.animateTo(
+                                                                    8);
+                                                              }
+                                                              setState(() {});
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            icon: const Icon(
+                                                                FontAwesomeIcons
+                                                                    .staylinked),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  actions: [
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12)),
+                                                        backgroundColor:
+                                                            colorFromHex(
+                                                                discardColor),
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                      ),
+                                                      child:
+                                                          const Text("Cancel"),
+                                                    ),
+                                                    ElevatedButton(
+                                                      onPressed: () {
+                                                        onStartElection();
+                                                      },
+                                                      style: ElevatedButton
+                                                          .styleFrom(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12)),
+                                                        backgroundColor:
+                                                            colorFromHex(
+                                                                saveColor),
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                      ),
+                                                      child: const Text(
+                                                          "Confirm!"),
+                                                    )
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          } else {
+                                            errorMessage(
+                                              title: "Neighboard Says..",
+                                              desc:
+                                                  "Set date and time schedule when the election should start",
+                                              duration: 6,
+                                              context: context,
+                                            );
                                           }
                                         }
                                       },
@@ -523,46 +720,118 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () {
-                            showDateRangePicker(
+                            final DateTime now = DateTime.now();
+                            showDatePicker(
                               context: context,
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(nextYear, thisMonth, thisDay),
-                            ).then(
-                              (value) {
-                                if (value != null) {
-                                  DateTimeRange fromRange = DateTimeRange(
-                                      start: DateTime.now(),
-                                      end: DateTime.now());
-                                  fromRange = value;
-                                  // String startDate = DateFormat.yMMMd()
-                                  //     .format(fromRange.start);
-                                  // String endDate =
-                                  //     DateFormat.yMMMd().format(fromRange.end);
-                                  setStartDate(fromRange.start.toString());
-                                  setEndDate(fromRange.end.toString());
-                                }
-                              },
-                            );
+                              initialDate: startingDate.isEmpty
+                                  ? DateTime(now.year, now.month, now.day + 14)
+                                  : DateTime.parse(startingDate),
+                              firstDate:
+                                  DateTime(now.year, now.month, now.day + 14),
+                              lastDate: DateTime(
+                                  now.year + 1, now.month, now.day + 14),
+                            ).then((value) {
+                              if (value != null) {
+                                setStartDate(value.toString());
+                              }
+                            });
                           },
                           icon: const Icon(Icons.date_range_outlined),
-                          label: const Text("Set Election Date Range"),
+                          label: const Text("Set Date"),
                         ),
                         const SizedBox(
                           width: 10,
                         ),
-                        if ((startingDate != '' || endingDate != '') &&
-                            widget.deviceScreenType != DeviceScreenType.mobile)
-                          Text(
-                              '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}'),
+                        if (startingDate.isNotEmpty)
+                          Text(DateFormat.yMMMd()
+                              .format(DateTime.parse(startingDate))),
                       ],
                     ),
                     const SizedBox(
                       height: 20,
                     ),
-                    if ((startingDate != '' || endingDate != '') &&
-                        widget.deviceScreenType == DeviceScreenType.mobile)
-                      Text(
-                          '${DateFormat.yMMMd().format(DateTime.parse(startingDate))} - ${DateFormat.yMMMd().format(DateTime.parse(endingDate))}'),
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            showTimePicker(
+                              context: context,
+                              initialTime: startingTime.isEmpty
+                                  ? TimeOfDay.now()
+                                  : TimeOfDay.fromDateTime(
+                                      DateFormat("h:mm a").parse(startingTime)),
+                            ).then((value) {
+                              if (value != null) {
+                                setStartTime(value.format(context).toString());
+                              }
+                            });
+                          },
+                          icon: const Icon(Icons.timer_outlined),
+                          label: const Text("Start Time"),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        if (startingTime.isNotEmpty) Text(startingTime),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            if (startingTime.isEmpty) {
+                              errorMessage(
+                                title: "Time error",
+                                desc: "Choose starting date first",
+                                context: context,
+                                duration: 5,
+                              );
+                              return;
+                            }
+                            showTimePicker(
+                              context: context,
+                              initialTime: endingTime.isEmpty
+                                  ? TimeOfDay.now()
+                                  : TimeOfDay.fromDateTime(
+                                      DateFormat("h:mm a").parse(endingTime)),
+                            ).then((value) {
+                              if (value != null) {
+                                if (startingTime.isNotEmpty) {
+                                  final startHour = TimeOfDay.fromDateTime(
+                                      DateFormat("h:mm a").parse(startingTime));
+                                  if (value.hour > startHour.hour) {
+                                    setEndTime(
+                                        value.format(context).toString());
+                                  } else {
+                                    errorMessage(
+                                      title: "Time error",
+                                      desc:
+                                          "Time should be above starting date",
+                                      context: context,
+                                      duration: 5,
+                                    );
+                                  }
+                                } else {
+                                  setEndTime("");
+                                }
+                              }
+                            });
+                          },
+                          icon: const Icon(Icons.timer_outlined),
+                          label: const Text("End Time"),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        if (endingTime.isNotEmpty) Text(endingTime),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Expanded(
                       child: TextField(
                         controller: tcNote,

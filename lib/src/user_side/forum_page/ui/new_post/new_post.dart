@@ -39,6 +39,7 @@ class _NewPostState extends State<NewPost> {
 
   final TextEditingController _cTitlePost = TextEditingController();
   final TextEditingController _cContentPost = TextEditingController();
+  final TextEditingController _cOthers = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool isLoading = false;
@@ -170,6 +171,14 @@ class _NewPostState extends State<NewPost> {
   }
 
   @override
+  void dispose() {
+    _cContentPost.dispose();
+    _cOthers.dispose();
+    _cTitlePost.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return isLoading
         ? const LoadingScreen()
@@ -218,15 +227,82 @@ class _NewPostState extends State<NewPost> {
                               DropdownButtonFormField(
                                 decoration: const InputDecoration(
                                     border: OutlineInputBorder()),
-                                value: _category,
                                 hint: const Text('Choose categories *'),
                                 onChanged: (String? newValue) {
-                                  setState(() {
-                                    _category = newValue;
-                                  });
+                                  if (newValue == "Others (Specify...)") {
+                                    _cOthers.clear();
+                                    showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (_) {
+                                        final thisKey = GlobalKey<FormState>();
+                                        return Form(
+                                          key: thisKey,
+                                          child: AlertDialog(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12)),
+                                            title: const Text("Enter Option"),
+                                            content: TextFormField(
+                                              controller: _cOthers,
+                                              validator: (value) {
+                                                if (value == null ||
+                                                    value.isEmpty) {
+                                                  return "Specify *";
+                                                }
+                                                return null;
+                                              },
+                                            ),
+                                            actions: <Widget>[
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12)),
+                                                  foregroundColor: colorFromHex(
+                                                      discardColor),
+                                                ),
+                                                onPressed: () {
+                                                  _category = null;
+                                                  setState(() {});
+                                                  Navigator.pop(context);
+                                                },
+                                                child: const Text('Cancel'),
+                                              ),
+                                              ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12)),
+                                                  backgroundColor:
+                                                      colorFromHex(saveColor),
+                                                  foregroundColor: Colors.white,
+                                                ),
+                                                onPressed: () {
+                                                  if (thisKey.currentState!
+                                                      .validate()) {
+                                                    setState(() {
+                                                      _category = _cOthers.text;
+                                                    });
+                                                    Navigator.pop(context);
+                                                  }
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  } else {
+                                    setState(() {
+                                      _category = newValue;
+                                    });
+                                  }
                                 },
                                 items: [
-                                  'General Discussion',
                                   'Water Billing',
                                   'Parking Space',
                                   'Electric Billing',
@@ -234,14 +310,29 @@ class _NewPostState extends State<NewPost> {
                                   'Power Interruption',
                                   'Marketplace/Business',
                                   'Clubhouse Fees and Rental',
+                                  'Others (Specify...)',
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    child: Text(value),
+                                    child:
+                                        Text(value == "Others (Specify...)" &&
+                                                _category != null &&
+                                                ![
+                                                  'Water Billing',
+                                                  'Parking Space',
+                                                  'Electric Billing',
+                                                  'Garbage Collection',
+                                                  'Power Interruption',
+                                                  'Marketplace/Business',
+                                                  'Clubhouse Fees and Rental',
+                                                ].contains(_category)
+                                            ? "Others ($_category)"
+                                            : value),
                                   );
                                 }).toList(),
                                 validator: (value) {
-                                  if (value == null) {
+                                  if (_category == null ||
+                                      _category == "Others (Specify...)") {
                                     return 'Please select a category';
                                   }
                                   return null;

@@ -10,7 +10,7 @@ class PostTagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
+    return Chip(
       avatar: CircleAvatar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         child: Text(tag.substring(0, 1)),
@@ -18,11 +18,13 @@ class PostTagChip extends StatelessWidget {
       label: Text(
         tag,
         overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.labelSmall,
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall!
+            .copyWith(color: Colors.white),
       ),
       backgroundColor: Theme.of(context).disabledColor,
       side: BorderSide.none,
-      onPressed: () {},
     );
   }
 }

@@ -20,7 +20,7 @@ import 'package:neighboard/widgets/navigation_bar/navigation_bar.dart';
 import 'package:neighboard/widgets/navigation_bar/navigation_drawer.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:neighboard/widgets/notification/notification_drawer.dart';
-
+import 'package:intl/intl.dart';
 import 'package:responsive_builder/responsive_builder.dart';
 
 class HOAVotingMobile extends StatefulWidget {
@@ -77,24 +77,37 @@ class _HOAVotingMobileState extends State<HOAVotingMobile> {
     //there is election
     if (electionModel != null) {
       DateTime elecStartDate = DateTime.parse(electionModel!.electionStartDate);
-      DateTime elecEndDate = DateTime.parse(electionModel!.electionEndDate);
+      TimeOfDay elecStartTime = TimeOfDay.fromDateTime(
+          DateFormat("h:mm a").parse(electionModel!.electionStartTime));
+      TimeOfDay elecEndTime = TimeOfDay.fromDateTime(
+          DateFormat("h:mm a").parse(electionModel!.electionEndTime));
       DateTime now = DateTime.now();
-      elecStartDate =
-          DateTime(elecStartDate.year, elecStartDate.month, elecStartDate.day);
-      elecEndDate =
-          DateTime(elecEndDate.year, elecEndDate.month, elecEndDate.day);
-      now = DateTime(now.year, now.month, now.day);
+      DateTime startDateTime = DateTime(
+        elecStartDate.year,
+        elecStartDate.month,
+        elecStartDate.day,
+        elecStartTime.hour,
+        elecStartTime.minute,
+      );
+      DateTime endDateTime = DateTime(
+        elecStartDate.year,
+        elecStartDate.month,
+        elecStartDate.day,
+        elecEndTime.hour,
+        elecEndTime.minute,
+      );
+      now = DateTime(now.year, now.month, now.day, now.hour, now.minute);
 
       //election is within the set date
-      if (now.isAfter(elecStartDate) && now.isBefore(elecEndDate)) {
+      if (now.isAfter(startDateTime) && now.isBefore(endDateTime)) {
         await checkIfAlreadyVoted();
         if (isAlreadyVoted) return;
         await getAllCandidates();
         setState(() {
           isElectionOngoing = true;
         });
-      } else if (now.isAtSameMomentAs(elecStartDate) ||
-          now.isAtSameMomentAs(elecEndDate)) {
+      } else if (now.isAtSameMomentAs(startDateTime) ||
+          now.isAtSameMomentAs(endDateTime)) {
         await checkIfAlreadyVoted();
         if (isAlreadyVoted) return;
         await getAllCandidates();

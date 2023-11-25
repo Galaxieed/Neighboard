@@ -45,7 +45,8 @@ class _VotingDesktopState extends State<VotingDesktop> {
     electionModels.sort((a, b) => a.electionId.compareTo(b.electionId));
     for (ElectionModel election in electionModels) {
       String dateText =
-          '${DateFormat.yMMMd().format(DateTime.parse(election.electionStartDate))} - ${DateFormat.yMMMd().format(DateTime.parse(election.electionEndDate))}';
+          DateFormat.yMMMd().format(DateTime.parse(election.electionStartDate));
+
       var newItem = DropdownMenuItem(
         value: election.electionId,
         child: Text(dateText),

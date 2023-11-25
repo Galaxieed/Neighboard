@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
@@ -429,7 +430,9 @@ Widget miniProfile(BuildContext context, UserModel userModel) {
       ),
       CircleAvatar(
         radius: 40.sp,
-        backgroundImage: NetworkImage(userModel.profilePicture.toString()),
+        backgroundImage: userModel.profilePicture.isEmpty
+            ? const AssetImage(guestIcon) as ImageProvider
+            : NetworkImage(userModel.profilePicture),
       ),
       Text(
         "@${userModel.username}",
