@@ -174,7 +174,9 @@ class _CommunityMapMobileState extends State<CommunityMapMobile> {
         child: const Icon(Icons.my_location_outlined),
       ),
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
-          ? const NavDrawer()
+          ? NavDrawer(
+              isLoggedIn: isLoggedIn,
+            )
           : null,
       endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.mobile,

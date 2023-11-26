@@ -8,7 +8,9 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:share_plus/share_plus.dart';
 
 class NavDrawer extends StatelessWidget {
-  const NavDrawer({super.key});
+  const NavDrawer({super.key, required this.isLoggedIn});
+
+  final bool isLoggedIn;
 
   shareNeighboard() async {
     Share.share(
@@ -130,14 +132,15 @@ class NavDrawer extends StatelessWidget {
               Routes().navigate("Home", context);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.forum),
-            title: const Text("Forum"),
-            onTap: () {
-              Navigator.pop(context); // close the drawer
-              Routes().navigate("Forum", context);
-            },
-          ),
+          if (isLoggedIn)
+            ListTile(
+              leading: const Icon(Icons.forum),
+              title: const Text("Forum"),
+              onTap: () {
+                Navigator.pop(context); // close the drawer
+                Routes().navigate("Forum", context);
+              },
+            ),
           ListTile(
             leading: const Icon(Icons.announcement),
             title: const Text("Announcements"),

@@ -236,7 +236,9 @@ class _ProfileScreenMobileState extends State<ProfileScreenMobile> {
                     ],
                   ),
             drawer: widget.deviceScreenType == DeviceScreenType.mobile
-                ? const NavDrawer()
+                ? const NavDrawer(
+                    isLoggedIn: true,
+                  )
                 : null,
             body: Container(
               padding: EdgeInsets.symmetric(horizontal: 0.w, vertical: 15.h),

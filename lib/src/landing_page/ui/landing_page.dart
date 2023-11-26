@@ -196,10 +196,9 @@ class _LandingPageState extends State<LandingPage> {
                 ),
                 drawer: sizingInformation.deviceScreenType ==
                         DeviceScreenType.mobile
-                    ? const NavDrawer(
-                        // officeAddress: officeAddress,
-                        // contactNo: siteContactNo,
-                        )
+                    ? NavDrawer(
+                        isLoggedIn: isLoggedIn,
+                      )
                     : null,
                 endDrawer: NotificationDrawer(
                   deviceScreenType: sizingInformation.deviceScreenType,

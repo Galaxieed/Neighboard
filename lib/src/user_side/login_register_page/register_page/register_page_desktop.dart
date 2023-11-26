@@ -282,542 +282,512 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                 body: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Expanded(
-                        flex: 5,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 60, vertical: 0),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Register',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 32,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  const Text(
-                                    'Get more features and priviliges by joining the Villa Roma 5 Community',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: firstName,
-                                    onFieldSubmitted: (value) {
-                                      if (_formKey.currentState!.validate()) {
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "First name is required";
-                                      }
-                                      final alpha = RegExp(r'^[a-zA-Z ]+$');
-                                      if (!alpha.hasMatch(value)) {
-                                        return "Symbols and Numbers are not allowed.";
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: 'First Name',
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(15),
-                                    ),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        flex: 3,
-                                        child: TextFormField(
-                                          controller: lastName,
-                                          onFieldSubmitted: (value) {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              onCreateAccount(context);
-                                            }
-                                          },
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return "Last name is required";
-                                            }
-                                            final alpha =
-                                                RegExp(r'^[a-zA-Z ]+$');
-                                            if (!alpha.hasMatch(value)) {
-                                              return "Symbols and Numbers are not allowed.";
-                                            }
-                                            return null;
-                                          },
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(),
-                                            labelText: 'Last Name',
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.all(15),
-                                          ),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: TextFormField(
-                                          controller: suffix,
-                                          onFieldSubmitted: (value) {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              onCreateAccount(context);
-                                            }
-                                          },
-                                          validator: (value) {
-                                            if (value == null ||
-                                                value.isEmpty) {
-                                              return null;
-                                            }
-                                            final alpha =
-                                                RegExp(r'^[a-zA-Z 0-9]+$');
-                                            if (!alpha.hasMatch(value)) {
-                                              return "Symbols are not allowed.";
-                                            }
-                                            return null;
-                                          },
-                                          decoration: const InputDecoration(
-                                            border: OutlineInputBorder(),
-                                            labelText: 'Suffix',
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.all(15),
-                                          ),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Text("Gender: "),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: ["Male", "Female", "Others"]
-                                            .map(
-                                              (e) => Row(
-                                                children: [
-                                                  Radio(
-                                                    value: e,
-                                                    groupValue: gender,
-                                                    onChanged: (val) {
-                                                      if (val != null) {
-                                                        setState(() {
-                                                          gender = val;
-                                                        });
-                                                      }
-                                                    },
-                                                  ),
-                                                  GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          gender = e;
-                                                        });
-                                                      },
-                                                      child: Text(e)),
-                                                  const SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                            .toList(),
-                                      ),
-                                      const SizedBox(
-                                        width: 5,
-                                      ),
-                                      if (gender == "Others")
-                                        Expanded(
-                                          child: TextFormField(
-                                            onSaved: (newValue) {
-                                              gender = newValue ?? "";
-                                            },
-                                            decoration: const InputDecoration(
-                                              border: OutlineInputBorder(),
-                                              hintText: 'Please specify...',
-                                              isDense: true,
-                                              contentPadding:
-                                                  EdgeInsets.all(15),
-                                            ),
-                                            validator: (value) {
-                                              if ((value == null ||
-                                                      value.isEmpty) &&
-                                                  gender == "Others") {
-                                                return "Specify gender";
-                                              }
-                                              return null;
-                                            },
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium,
-                                          ),
-                                        )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: username,
-                                    onFieldSubmitted: (value) {
-                                      if (_formKey.currentState!.validate()) {
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "Username is required";
-                                      }
-                                      if (profanityFilter.hasProfanity(value)) {
-                                        return "Don't use bad words";
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: 'Username',
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(15),
-                                    ),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Block"),
-                                      const SizedBox(width: 5),
-                                      TextFormField(
-                                        controller: tcBlock,
-                                        keyboardType: TextInputType.number,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                            RegExp(r'^\d{0,2}$'),
-                                          ),
-                                        ],
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return "*";
-                                          }
-                                          return null;
-                                        },
-                                        textAlign: TextAlign.center,
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.all(15),
-                                          border: OutlineInputBorder(),
-                                          constraints: BoxConstraints(
-                                            maxWidth: 50,
-                                          ),
-                                        ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      const Text("Lot"),
-                                      const SizedBox(width: 5),
-                                      TextFormField(
-                                        controller: tcLot,
-                                        keyboardType: TextInputType.number,
-                                        textAlign: TextAlign.center,
-                                        inputFormatters: [
-                                          FilteringTextInputFormatter.allow(
-                                            RegExp(r'^\d{0,2}$'),
-                                          ),
-                                        ],
-                                        validator: (value) {
-                                          if (value == null || value.isEmpty) {
-                                            return "*";
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          contentPadding: EdgeInsets.all(15),
-                                          border: OutlineInputBorder(),
-                                          constraints: BoxConstraints(
-                                            maxWidth: 50,
-                                          ),
-                                        ),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Expanded(
-                                        child: DropdownButtonFormField(
-                                          onChanged: (value) {
-                                            setState(() {
-                                              street = value.toString();
-                                            });
-                                          },
-                                          items: siteModel == null
-                                              ? []
-                                              : siteModel!.siteStreets
-                                                  .map((String e) {
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    value: e,
-                                                    child: Text(e),
-                                                  );
-                                                }).toList(),
-                                          validator: (value) {
-                                            if (value == null) {
-                                              return "Street is required";
-                                            }
-                                            return null;
-                                          },
-                                          hint: const Text('Street'),
-                                          value: street.isEmpty ? null : street,
-                                          decoration: const InputDecoration(
-                                            isDense: true,
-                                            contentPadding: EdgeInsets.all(15),
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: tcCNo,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d{0,10}$'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "Contact Number is required";
-                                      } else if (value.length != 10) {
-                                        return 'Please enter exactly 10 digits';
-                                      }
-                                      return null;
-                                    },
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      border: OutlineInputBorder(),
-                                      hintText: 'Contact No',
-                                      prefix: Text("+63"),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: email,
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.all(15),
-                                      border: OutlineInputBorder(),
-                                      labelText: 'Email',
-                                    ),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                    onFieldSubmitted: (value) {
-                                      if (_formKey.currentState!.validate()) {
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Email is required';
-                                      }
-                                      String pattern = r'\w+@\w+\.\w+';
-                                      RegExp regex = RegExp(pattern);
-                                      if (!regex.hasMatch(value)) {
-                                        return 'Invalid Email format';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: password,
-                                    obscureText: passToggle,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding: const EdgeInsets.all(15),
-                                      border: const OutlineInputBorder(),
-                                      labelText: 'Password',
-                                      suffixIcon: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            passToggle = !passToggle;
-                                          });
-                                        },
-                                        child: Icon(passToggle
-                                            ? Icons.visibility
-                                            : Icons.visibility_off),
-                                      ),
-                                    ),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                    onFieldSubmitted: (value) {
-                                      if (_formKey.currentState!.validate()) {
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "Password is required";
-                                      }
-                                      String pattern =
-                                          r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$';
-                                      RegExp regex = RegExp(pattern);
-                                      if (!regex.hasMatch(value)) {
-                                        return 'Password must be at least 8 characters, \nInclude an uppercase letter and a number';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  TextFormField(
-                                    controller: confPassword,
-                                    obscureText: passToggle,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding: const EdgeInsets.all(15),
-                                      border: const OutlineInputBorder(),
-                                      labelText: 'Confirm Password',
-                                      suffixIcon: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            passToggle = !passToggle;
-                                          });
-                                        },
-                                        child: Icon(passToggle
-                                            ? Icons.visibility
-                                            : Icons.visibility_off),
-                                      ),
-                                    ),
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                    onFieldSubmitted: (value) {
-                                      if (_formKey.currentState!.validate()) {
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return "Retype your password";
-                                      }
-                                      if (value != password.text) {
-                                        return "Password don't match";
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 20,
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      if (_formKey.currentState!.validate()) {
-                                        _formKey.currentState!.save();
-                                        onCreateAccount(context);
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize:
-                                          const Size(double.infinity, 50.0),
-                                      backgroundColor:
-                                          ccRegisterButtonBGColor(context),
-                                      foregroundColor:
-                                          ccRegisterButtonFGColor(context),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(5)),
-                                    ),
-                                    child: const Text(
-                                      'REGISTER',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        )),
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: siteModel != null
-                                ? siteModel!.siteAboutImage == ""
-                                    ? const AssetImage(noImage) as ImageProvider
-                                    : NetworkImage(siteModel!.siteAboutImage)
-                                : const AssetImage(noImage),
-                            fit: BoxFit.cover,
-                            alignment: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ),
+                    Expanded(flex: 5, child: _buildForm(context)),
+                    Expanded(flex: 6, child: _buildImage()),
                   ],
                 ),
               ),
             ),
           );
+  }
+
+  Container _buildImage() {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: siteModel != null
+              ? siteModel!.siteAboutImage == ""
+                  ? const AssetImage(noImage) as ImageProvider
+                  : NetworkImage(siteModel!.siteAboutImage)
+              : const AssetImage(noImage),
+          fit: BoxFit.cover,
+          alignment: Alignment.bottomCenter,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        vertical: 20,
+        horizontal: 60,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Register',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+              ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            const Text(
+              'Get more features and priviliges by joining the Villa Roma 5 Community',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: firstName,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  onCreateAccount(context);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "First name is required";
+                }
+                final alpha = RegExp(r'^[a-zA-Z ]+$');
+                if (!alpha.hasMatch(value)) {
+                  return "Symbols and Numbers are not allowed.";
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'First Name',
+                isDense: true,
+                contentPadding: EdgeInsets.all(15),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextFormField(
+                    controller: lastName,
+                    onFieldSubmitted: (value) {
+                      if (_formKey.currentState!.validate()) {
+                        onCreateAccount(context);
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "Last name is required";
+                      }
+                      final alpha = RegExp(r'^[a-zA-Z ]+$');
+                      if (!alpha.hasMatch(value)) {
+                        return "Symbols and Numbers are not allowed.";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Last Name',
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(15),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: TextFormField(
+                    controller: suffix,
+                    onFieldSubmitted: (value) {
+                      if (_formKey.currentState!.validate()) {
+                        onCreateAccount(context);
+                      }
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return null;
+                      }
+                      final alpha = RegExp(r'^[a-zA-Z 0-9]+$');
+                      if (!alpha.hasMatch(value)) {
+                        return "Symbols are not allowed.";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Suffix',
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(15),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.grey[600]!)),
+              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("Gender: "),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: ["Male", "Female", "Others"]
+                        .map(
+                          (e) => Row(
+                            children: [
+                              Radio(
+                                value: e,
+                                groupValue: gender,
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() {
+                                      gender = val;
+                                    });
+                                  }
+                                },
+                              ),
+                              GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      gender = e;
+                                    });
+                                  },
+                                  child: Text(e)),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                            ],
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  if (gender == "Others")
+                    Expanded(
+                      child: TextFormField(
+                        onSaved: (newValue) {
+                          gender = newValue ?? "";
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Specify...',
+                          isDense: true,
+                          contentPadding: EdgeInsets.all(15),
+                        ),
+                        validator: (value) {
+                          if ((value == null || value.isEmpty) &&
+                              gender == "Others") {
+                            return "Specify gender";
+                          }
+                          return null;
+                        },
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    )
+                  else
+                    const Spacer(),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: username,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  onCreateAccount(context);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Username is required";
+                }
+                if (profanityFilter.hasProfanity(value)) {
+                  return "Don't use bad words";
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Username',
+                isDense: true,
+                contentPadding: EdgeInsets.all(15),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextFormField(
+                    controller: tcBlock,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d{0,2}$'),
+                      ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "*";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      label: Text("Block"),
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(15),
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  flex: 2,
+                  child: TextFormField(
+                    controller: tcLot,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d{0,2}$'),
+                      ),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return "*";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      label: Text("Lot"),
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(15),
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Expanded(
+                  flex: 3,
+                  child: DropdownButtonFormField(
+                    onChanged: (value) {
+                      setState(() {
+                        street = value.toString();
+                      });
+                    },
+                    items: siteModel == null
+                        ? []
+                        : siteModel!.siteStreets.map((String e) {
+                            return DropdownMenuItem<String>(
+                              value: e,
+                              child: Text(e),
+                            );
+                          }).toList(),
+                    validator: (value) {
+                      if (value == null) {
+                        return "Street is required";
+                      }
+                      return null;
+                    },
+                    hint: const Text('Street'),
+                    value: street.isEmpty ? null : street,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.all(13),
+                      isCollapsed: true,
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                )
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: tcCNo,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'^\d{0,10}$'),
+                ),
+              ],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Contact Number is required";
+                } else if (value.length != 10) {
+                  return 'Please enter exactly 10 digits';
+                }
+                return null;
+              },
+              decoration: const InputDecoration(
+                isDense: true,
+                border: OutlineInputBorder(),
+                hintText: 'Contact No',
+                prefix: Text("+63 | "),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: email,
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.all(15),
+                border: OutlineInputBorder(),
+                labelText: 'Email',
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  onCreateAccount(context);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Email is required';
+                }
+                String pattern = r'\w+@\w+\.\w+';
+                RegExp regex = RegExp(pattern);
+                if (!regex.hasMatch(value)) {
+                  return 'Invalid Email format';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: password,
+              obscureText: passToggle,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.all(15),
+                border: const OutlineInputBorder(),
+                labelText: 'Password',
+                suffixIcon: InkWell(
+                  onTap: () {
+                    setState(() {
+                      passToggle = !passToggle;
+                    });
+                  },
+                  child: Icon(
+                      passToggle ? Icons.visibility : Icons.visibility_off),
+                ),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  onCreateAccount(context);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Password is required";
+                }
+                String pattern = r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$';
+                RegExp regex = RegExp(pattern);
+                if (!regex.hasMatch(value)) {
+                  return 'Password must be at least 8 characters, \nInclude an uppercase letter and a number';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: confPassword,
+              obscureText: passToggle,
+              decoration: InputDecoration(
+                isDense: true,
+                contentPadding: const EdgeInsets.all(15),
+                border: const OutlineInputBorder(),
+                labelText: 'Confirm Password',
+                suffixIcon: InkWell(
+                  onTap: () {
+                    setState(() {
+                      passToggle = !passToggle;
+                    });
+                  },
+                  child: Icon(
+                      passToggle ? Icons.visibility : Icons.visibility_off),
+                ),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium,
+              onFieldSubmitted: (value) {
+                if (_formKey.currentState!.validate()) {
+                  onCreateAccount(context);
+                }
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Retype your password";
+                }
+                if (value != password.text) {
+                  return "Password don't match";
+                }
+                return null;
+              },
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _formKey.currentState!.save();
+                  onCreateAccount(context);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50.0),
+                backgroundColor: ccRegisterButtonBGColor(context),
+                foregroundColor: ccRegisterButtonFGColor(context),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+              ),
+              child: const Text(
+                'REGISTER',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

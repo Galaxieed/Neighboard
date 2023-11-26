@@ -5,7 +5,7 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/src/admin_side/announcements/announcements.dart';
 import 'package:neighboard/src/admin_side/community_map/community_map.dart';
-import 'package:neighboard/src/admin_side/dashboard/dashboard.dart';
+import 'package:neighboard/src/admin_side/dashboard/dashboard2.dart';
 import 'package:neighboard/src/admin_side/forum/forum.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters.dart';
@@ -152,7 +152,7 @@ class _AdminMobileState extends State<AdminMobile> {
                             stateSetter: getCurrentUserDetails,
                           )
                         : const Placeholder(),
-                    Dashboard(
+                    AdminDashboard(
                       currentUser: userModel,
                       callback: (i) {
                         switchPage(controller, i);

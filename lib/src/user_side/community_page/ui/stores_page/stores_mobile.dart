@@ -340,7 +340,9 @@ class _StoresMobileState extends State<StoresMobile> {
               ],
             ),
       drawer: widget.deviceScreenType == DeviceScreenType.mobile
-          ? const NavDrawer()
+          ? NavDrawer(
+              isLoggedIn: isLoggedIn,
+            )
           : null,
       endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.mobile,

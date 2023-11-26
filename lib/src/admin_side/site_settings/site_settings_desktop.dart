@@ -183,7 +183,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
         setState(() {
           isLoading = false;
         });
-        //await sendNotifToAll();
+        await sendNotifToAll();
       } else {
         setState(() {
           isLoading = false;
@@ -215,7 +215,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       setState(() {
         isLoading = false;
       });
-      //await sendNotifToAll();
+      await sendNotifToAll();
     }
   }
 

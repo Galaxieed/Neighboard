@@ -303,7 +303,9 @@ class _ForumPageMobileState extends State<ForumPageMobile>
         controller: _tabController,
       ),
       drawer: widget.screenType == DeviceScreenType.mobile
-          ? const NavDrawer()
+          ? NavDrawer(
+              isLoggedIn: isLoggedIn,
+            )
           : null,
       endDrawer: NotificationDrawer(
         deviceScreenType: DeviceScreenType.mobile,

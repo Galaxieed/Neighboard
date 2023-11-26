@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/hoa_model.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
@@ -215,7 +216,6 @@ class _HOAListState extends State<HOAList> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _fnameController.dispose();
     _lnameController.dispose();
@@ -235,7 +235,10 @@ class _HOAListState extends State<HOAList> {
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
                   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-                  title: const Text("List of HOA"),
+                  title: const Text(
+                    "List of HOA",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   floating: true,
                   forceElevated: innerBoxIsScrolled,
                   pinned: true,
@@ -465,12 +468,25 @@ class _HOAListState extends State<HOAList> {
                                         },
                                       );
                                     },
-                                    icon: const Icon(Icons.clear),
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      foregroundColor:
+                                          colorFromHex(discardColor),
+                                    ),
+                                    icon: const Icon(Icons.remove),
                                     label: const Text("Table"),
                                   ),
                                 const SizedBox(width: 10),
                                 ElevatedButton.icon(
                                   onPressed: clearFields,
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12)),
+                                    foregroundColor: colorFromHex(discardColor),
+                                  ),
                                   icon: const Icon(Icons.clear),
                                   label: const Text("Fields"),
                                 ),
@@ -481,11 +497,24 @@ class _HOAListState extends State<HOAList> {
                                       isEditing = false;
                                       clearFields();
                                     },
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      foregroundColor:
+                                          colorFromHex(discardColor),
+                                    ),
                                     child: const Text("Cancel"),
                                   ),
                                 const SizedBox(width: 10),
                                 ElevatedButton(
                                   onPressed: onSave,
+                                  style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      backgroundColor: colorFromHex(saveColor),
+                                      foregroundColor: Colors.white),
                                   child: Text(isEditing ? "Save" : "Add"),
                                 ),
                               ],

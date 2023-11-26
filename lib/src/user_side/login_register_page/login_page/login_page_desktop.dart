@@ -418,7 +418,7 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                       ),
                     ),
                     Expanded(
-                      flex: 5,
+                      flex: 6,
                       child: Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(

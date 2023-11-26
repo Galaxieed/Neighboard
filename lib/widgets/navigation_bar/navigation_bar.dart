@@ -57,11 +57,12 @@ class NavBar extends StatelessWidget implements PreferredSizeWidget {
         const SizedBox(
           width: 10,
         ),
-        NavBarTextButton(
-          text: 'Forum',
-          callback: Routes().navigate,
-          currentPage: currentPage,
-        ),
+        if (isLoggedIn)
+          NavBarTextButton(
+            text: 'Forum',
+            callback: Routes().navigate,
+            currentPage: currentPage,
+          ),
         const SizedBox(
           width: 5,
         ),
