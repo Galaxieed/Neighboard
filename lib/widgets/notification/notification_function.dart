@@ -20,8 +20,6 @@ class NotificationFunction {
           .collection("all")
           .doc(notificationModel.notifId)
           .set(notificationModel.toJson());
-
-      await _firestore.runTransaction((transaction) async {});
     } catch (e) {
       if (kDebugMode) print("ADDNOTIF: $e");
     }

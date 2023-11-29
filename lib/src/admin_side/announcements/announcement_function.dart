@@ -31,13 +31,60 @@ class AnnouncementFunction {
     }
   }
 
-  static Future<bool> removeAnnouncement(String announcementId) async {
+  static Future<bool> removeAnnouncement(
+      AnnouncementModel announcementModel) async {
     try {
-      //remove announcement
-      await _firestore.collection("announcements").doc(announcementId).delete();
+      //transfer first
+      await _firestore
+          .collection("archived_announcements")
+          .doc(announcementModel.announcementId)
+          .set(announcementModel.toJson())
+          .then((value) async {
+        //remove announcement
+        await _firestore
+            .collection("announcements")
+            .doc(announcementModel.announcementId)
+            .delete();
+      });
+
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<bool> retrieveArchivedAnnouncement(
+      AnnouncementModel announcementModel) async {
+    try {
+      //transfer first
+      await _firestore
+          .collection("announcements")
+          .doc(announcementModel.announcementId)
+          .set(announcementModel.toJson())
+          .then((value) async {
+        //remove archived announcement
+        await _firestore
+            .collection("archived_announcements")
+            .doc(announcementModel.announcementId)
+            .delete();
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<AnnouncementModel>?> getArchivedAnnouncements() async {
+    try {
+      final result =
+          await _firestore.collection("archived_announcements").get();
+      List<AnnouncementModel> announcement = [];
+      announcement =
+          result.docs.map((e) => AnnouncementModel.fromJson(e.data())).toList();
+      return announcement;
+    } catch (e) {
+      return null;
     }
   }
 

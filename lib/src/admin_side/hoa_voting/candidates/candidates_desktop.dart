@@ -10,6 +10,7 @@ import 'package:neighboard/models/election_model.dart';
 import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/candidates/candidates_function.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
@@ -196,7 +197,7 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(UserModel user, NotificationModel model) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Election has added: ",
@@ -204,6 +205,11 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(model, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Election has added: ",
@@ -215,12 +221,10 @@ class _CandidatesDesktopState extends State<CandidatesDesktop> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   @override

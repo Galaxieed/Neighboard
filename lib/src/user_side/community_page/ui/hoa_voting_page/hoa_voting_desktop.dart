@@ -220,10 +220,18 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     checkIfLoggedIn();
   }
 
+  TextEditingController tcName = TextEditingController();
+  TextEditingController tcUsername = TextEditingController();
+  TextEditingController tcGender = TextEditingController();
+  TextEditingController tcAddress = TextEditingController();
+
   @override
   void dispose() {
+    tcName.dispose();
+    tcUsername.dispose();
+    tcGender.dispose();
+    tcAddress.dispose();
     super.dispose();
-    //controller(context).dispose();
   }
 
   @override
@@ -462,7 +470,7 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
                   .where((element) => element.position == title)
                   .elementAt(index);
 
-              return voteCandidatesCard(context, title, candidate);
+              return voteCandidatesCard(context, title, candidate, index);
             },
           ),
         ),
@@ -470,8 +478,8 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
     );
   }
 
-  Widget voteCandidatesCard(
-      BuildContext context, String position, CandidateModel candidate) {
+  Widget voteCandidatesCard(BuildContext context, String position,
+      CandidateModel candidate, int index) {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(10),
@@ -625,11 +633,162 @@ class _HOAVotingDesktopState extends State<HOAVotingDesktop> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             SizedBox(
+              height: 5.h,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Dialog(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: viewCandidateModal(index, candidate),
+                      ),
+                    );
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              child: const Text("View Details"),
+            ),
+            SizedBox(
               height: 25.h,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget viewCandidateModal(int index, CandidateModel candidate) {
+    tcName.text = "${candidate.firstName} ${candidate.lastName}";
+    tcUsername.text = candidate.username;
+    tcGender.text = candidate.gender;
+    tcAddress.text = candidate.address;
+    return Stack(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(50.0),
+          width: 700,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Candidate ${index + 1}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundImage: candidate.profilePicture.isEmpty
+                              ? const AssetImage(guestIcon) as ImageProvider
+                              : NetworkImage(candidate.profilePicture),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: myTextFormField(tcName, "Candidate Name"),
+                    ),
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    Expanded(child: myTextFormField(tcUsername, "Username")),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                Row(
+                  children: [
+                    Expanded(child: myTextFormField(tcGender, "Gender")),
+                    const SizedBox(
+                      width: 50,
+                    ),
+                    Expanded(child: myTextFormField(tcAddress, "Address")),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          top: 5,
+          right: 5,
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            style: IconButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.close),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget myTextFormField(TextEditingController controller, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(
+          height: 5,
+        ),
+        TextField(
+          controller: controller,
+          readOnly: true,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
     );
   }
 }

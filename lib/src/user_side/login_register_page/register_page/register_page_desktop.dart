@@ -4,12 +4,11 @@ import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/hoa_model.dart';
 import 'package:neighboard/routes/routes.dart';
-import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
+import 'package:neighboard/src/user_side/login_register_page/register_page/multi_factor_auth.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
-import 'package:page_transition/page_transition.dart';
 
 class RegisterPageDesktop extends StatefulWidget {
   const RegisterPageDesktop({super.key});
@@ -125,7 +124,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
       showDialog(
         barrierDismissible: false,
         context: context,
-        builder: (_) => AlertDialog(
+        builder: (ctx) => AlertDialog(
           title: const Text("Email Sent!"),
           content: const Text(
               "Check your email and click\nthe link attached on it to verify your email.\nClick 'DONE' when you're done. Thank you!"),
@@ -157,7 +156,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
                       duration: 6);
                 }
                 // ignore: use_build_context_synchronously
-                Navigator.pop(context);
+                Navigator.pop(ctx);
               },
               child: const Text("DONE"),
             ),
@@ -192,12 +191,7 @@ class _RegisterPageDesktopState extends State<RegisterPageDesktop> {
     if (status) {
       await SiteSettingsFunction.registerHOA(hoaId);
       // ignore: use_build_context_synchronously
-      Navigator.of(context).pushAndRemoveUntil(
-          PageTransition(
-              duration: const Duration(milliseconds: 500),
-              child: const ScreenDirect(),
-              type: PageTransitionType.fade),
-          (route) => false);
+      await MyMFA.enrollMultiFactorAuthentication("+63${tcCNo.text}", context);
     }
   }
 

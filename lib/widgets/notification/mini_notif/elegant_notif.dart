@@ -9,7 +9,7 @@ void successMessage(
     int? duration}) {
   ElegantNotification.success(
     width: 360,
-    toastDuration: Duration(seconds: duration ?? 3),
+    toastDuration: Duration(seconds: duration ?? 5),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(
@@ -22,6 +22,8 @@ void successMessage(
     description: Text(
       desc,
       style: const TextStyle(color: Colors.black),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
     ),
     onDismiss: () {},
   ).show(context);
@@ -34,7 +36,7 @@ void errorMessage(
     int? duration}) {
   ElegantNotification.error(
     width: 360,
-    toastDuration: Duration(seconds: duration ?? 3),
+    toastDuration: Duration(seconds: duration ?? 5),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(
@@ -47,6 +49,8 @@ void errorMessage(
     description: Text(
       desc,
       style: const TextStyle(color: Colors.black),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
     ),
     onDismiss: () {},
   ).show(context);
@@ -59,7 +63,7 @@ void infoMessage(
     int? duration}) {
   ElegantNotification.info(
     width: 360,
-    toastDuration: Duration(seconds: duration ?? 3),
+    toastDuration: Duration(seconds: duration ?? 5),
     notificationPosition: NotificationPosition.bottomRight,
     animation: AnimationType.fromRight,
     title: Text(
@@ -72,6 +76,8 @@ void infoMessage(
     description: Text(
       desc,
       style: const TextStyle(color: Colors.black),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
     ),
     onDismiss: () {},
   ).show(context);

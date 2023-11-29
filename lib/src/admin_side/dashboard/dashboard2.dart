@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:neighboard/main.dart';
 import 'package:neighboard/models/hoa_model.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
@@ -38,6 +40,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   List<PostModel> pendingPostModels = [];
   List<UserModel> userModels = [];
   List<StoreModel> storeModels = [];
+  List<NotificationModel> logsModels = [];
 
   getAllData() async {
     hoaModels = await SiteSettingsFunction.getHOA() ?? [];
@@ -45,6 +48,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     pendingPostModels = await AllPostsFunction.getAllPendingPost(false) ?? [];
     userModels = await VotersFunction.getAllUsers() ?? [];
     storeModels = await StoreFunction.getAllStores() ?? [];
+    logsModels = await ActivityLogsFunction.getLogs() ?? [];
     setState(() {
       isLoading = false;
     });
@@ -66,23 +70,106 @@ class _AdminDashboardState extends State<AdminDashboard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                RichText(
-                  text: TextSpan(
-                    style: widget.deviceScreenType == DeviceScreenType.mobile
-                        ? Theme.of(context).textTheme.titleLarge!.copyWith(
-                              fontWeight: FontWeight.bold,
-                            )
-                        : Theme.of(context).textTheme.headlineMedium!.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                    children: <TextSpan>[
-                      const TextSpan(
-                          text: 'Welcome back, ',
-                          style: TextStyle(color: Colors.grey)),
-                      TextSpan(text: ' ${widget.currentUser!.firstName}! 👋'),
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: widget.deviceScreenType ==
+                                DeviceScreenType.mobile
+                            ? Theme.of(context).textTheme.titleLarge!.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                )
+                            : Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                        children: <TextSpan>[
+                          const TextSpan(
+                              text: 'Welcome back, ',
+                              style: TextStyle(color: Colors.grey)),
+                          TextSpan(
+                              text: ' ${widget.currentUser!.firstName}! 👋'),
+                        ],
+                      ),
+                    ),
+                    if (widget.deviceScreenType == DeviceScreenType.desktop)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          showGeneralDialog(
+                              context: context,
+                              pageBuilder: (context, ant1, ant2) {
+                                return Scaffold(
+                                  appBar: AppBar(
+                                    title: const Text(
+                                      "Activity Logs",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                  body: logsModels.isEmpty
+                                      ? const Center(
+                                          child: Text("No Logs"),
+                                        )
+                                      : ListView.builder(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 40.w),
+                                          shrinkWrap: true,
+                                          itemCount: logsModels.length,
+                                          itemBuilder: (context, index) {
+                                            NotificationModel log =
+                                                logsModels[index];
+                                            return ListTile(
+                                              title: Text(log.notifTitle),
+                                              subtitle: Text(log.notifTime),
+                                            );
+                                          }),
+                                );
+                              });
+                        },
+                        icon: const Icon(Icons.receipt_rounded),
+                        label: const Text("Logs"),
+                      ),
+                  ],
                 ),
+                if (widget.deviceScreenType == DeviceScreenType.mobile)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      showGeneralDialog(
+                          context: context,
+                          pageBuilder: (context, ant1, ant2) {
+                            return Scaffold(
+                              appBar: AppBar(
+                                title: const Text(
+                                  "Activity Logs",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              body: logsModels.isEmpty
+                                  ? const Center(
+                                      child: Text("No Logs"),
+                                    )
+                                  : ListView.builder(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 40.w),
+                                      shrinkWrap: true,
+                                      itemCount: logsModels.length,
+                                      itemBuilder: (context, index) {
+                                        NotificationModel log =
+                                            logsModels[index];
+                                        return ListTile(
+                                          title: Text(log.notifTitle),
+                                          subtitle: Text(log.notifTime),
+                                        );
+                                      }),
+                            );
+                          });
+                    },
+                    icon: const Icon(Icons.receipt_rounded),
+                    label: const Text("Logs"),
+                  ),
                 SizedBox(
                   height: 30.h,
                 ),
@@ -356,7 +443,18 @@ class _MyPieChartState extends State<MyPieChart> {
       defaultRenderer: charts.ArcRendererConfig(
         arcRatio: _arcRatio,
         arcRendererDecorators: [
-          charts.ArcLabelDecorator(labelPosition: _arcLabelPosition)
+          charts.ArcLabelDecorator(
+            labelPosition: _arcLabelPosition,
+            outsideLabelStyleSpec: charts.TextStyleSpec(
+              fontSize: 12,
+              color: isDarkMode ? charts.Color.white : charts.Color.black,
+            ),
+            leaderLineStyleSpec: charts.ArcLabelLeaderLineStyleSpec(
+              color: isDarkMode ? charts.Color.white : charts.Color.black,
+              length: 10,
+              thickness: 1,
+            ),
+          )
         ],
       ),
       behaviors: !widget.isOnModal
@@ -460,16 +558,20 @@ class _MyBarChartState extends State<MyBarChart> {
           colorFn: (_, idx) => colorPalletes[idx!].shadeDefault,
           domainFn: (_CategoriesData datum, _) => datum.category,
           measureFn: (_CategoriesData datum, _) => datum.noOfPost,
-          // labelAccessorFn: (_CategoriesData row, _) {
-          //   return "${row.category}: ${row.noOfPost}";
-          // },
+          labelAccessorFn: (_CategoriesData row, _) {
+            return "${row.category}: ${row.noOfPost}";
+          },
         ),
       ],
       animate: _animate,
       defaultRenderer: charts.BarRendererConfig(
         barRendererDecorator: charts.BarLabelDecorator(
-            labelAnchor: charts.BarLabelAnchor.middle,
-            labelPosition: charts.BarLabelPosition.auto),
+          outsideLabelStyleSpec: charts.TextStyleSpec(
+            fontSize: 12,
+            color: isDarkMode ? charts.Color.white : charts.Color.black,
+          ),
+          labelPosition: charts.BarLabelPosition.auto,
+        ),
       ),
       // behaviors: [
       //   charts.DatumLegend(

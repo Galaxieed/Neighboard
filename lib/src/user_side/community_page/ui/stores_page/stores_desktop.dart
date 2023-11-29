@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -76,6 +79,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
     storeModels = await StoreFunction.getAllStores() ?? [];
     allStoreModels = storeModels;
     storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
+    await getArchivedStores();
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -121,7 +125,7 @@ class _StoresDesktopState extends State<StoresDesktop> {
         storeModels.add(storeModel);
         storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
         onNewStore();
-        // ignore: use_build_context_synchronously
+
         successMessage(
           title: "Success!",
           desc: 'Store successfully added',
@@ -164,7 +168,8 @@ class _StoresDesktopState extends State<StoresDesktop> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(
+      UserModel user, NotificationModel notificationModel) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Store Added: ",
@@ -172,6 +177,11 @@ class _StoresDesktopState extends State<StoresDesktop> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Store Added: ",
@@ -182,12 +192,26 @@ class _StoresDesktopState extends State<StoresDesktop> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+  List<StoreModel> archivedStores = [];
+  getArchivedStores() async {
+    archivedStores = await StoreFunction.getArchivedStores() ?? [];
+  }
+
+  retrieveStore(StoreModel store) async {
+    bool status = await StoreFunction.retrieveArchivedStore(store);
+    if (status) {
+      successMessage(
+          title: "Retrieved!", desc: "Store retrieved!", context: context);
+    } else {
+      errorMessage(
+          title: "Error", desc: "Something went wrong!", context: context);
+    }
   }
 
   @override
@@ -575,8 +599,63 @@ class _StoresDesktopState extends State<StoresDesktop> {
             ),
           if (widget.isAdmin)
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Dialog(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          child: SizedBox(
+                            height: 500,
+                            width: 500,
+                            child: Column(
+                              children: [
+                                const SizedBox(
+                                  height: 30,
+                                ),
+                                Text(
+                                  "Archives",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                ListView.separated(
+                                  padding: const EdgeInsets.all(30),
+                                  shrinkWrap: true,
+                                  itemCount: archivedStores.length,
+                                  itemBuilder: (context, index) {
+                                    StoreModel str = archivedStores[index];
+                                    return ListTile(
+                                      title: Text(str.storeName),
+                                      subtitle: Text(str.storeStreetName),
+                                      trailing: IconButton(
+                                        onPressed: () {
+                                          retrieveStore(str);
+                                        },
+                                        icon: const Icon(Icons.recycling),
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  label: const Text("Archives"),
+                  icon: const Icon(Icons.archive),
+                ),
+                const Spacer(),
                 SizedBox(
                   width: 300,
                   child: SearchBar(
@@ -674,16 +753,14 @@ class StoresCards extends StatelessWidget {
   bool isEditing = false;
 
   removeStore(BuildContext context) async {
-    bool isSuccess = await StoreFunction.removeStore(storeModel.storeId);
+    bool isSuccess = await StoreFunction.removeStore(storeModel);
     if (isSuccess) {
-      // ignore: use_build_context_synchronously
       successMessage(
           title: "Success!", desc: "Refresh to see changes!", context: context);
       stateSetter();
-      // ignore: use_build_context_synchronously
+
       Navigator.pop(context);
     } else {
-      // ignore: use_build_context_synchronously
       errorMessage(
           title: "Something went wrong!",
           desc: "This store isn't archived!",
@@ -704,14 +781,12 @@ class StoresCards extends StatelessWidget {
           _streetController.text);
 
       if (isSuccess) {
-        // ignore: use_build_context_synchronously
         successMessage(
             title: "Success!",
             desc: "Refresh to see changes!",
             context: context);
         stateSetter();
       } else {
-        // ignore: use_build_context_synchronously
         errorMessage(
             title: "Something went wrong!",
             desc: "This store isn't updated!",

@@ -14,6 +14,7 @@ import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
@@ -80,6 +81,7 @@ class _StoresMobileState extends State<StoresMobile> {
     storeModels = await StoreFunction.getAllStores() ?? [];
     allStoreModels = storeModels;
     storeModels.sort((a, b) => b.storeId.compareTo(a.storeId));
+    await getArchivedStores();
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -185,7 +187,8 @@ class _StoresMobileState extends State<StoresMobile> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(
+      UserModel user, NotificationModel notificationModel) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Store Added: ",
@@ -193,6 +196,11 @@ class _StoresMobileState extends State<StoresMobile> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(notificationModel, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Store Added: ",
@@ -203,12 +211,10 @@ class _StoresMobileState extends State<StoresMobile> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -216,6 +222,23 @@ class _StoresMobileState extends State<StoresMobile> {
   checkIfLoggedIn() {
     if (_auth.currentUser != null) {
       isLoggedIn = true;
+    }
+  }
+
+  List<StoreModel> archiveStores = [];
+  getArchivedStores() async {
+    archiveStores = await StoreFunction.getArchivedStores() ?? [];
+  }
+
+  retrieveStore(StoreModel store) async {
+    bool status = await StoreFunction.retrieveArchivedStore(store);
+    if (status) {
+      // ignore: use_build_context_synchronously
+      successMessage(
+          title: "Retrieved!", desc: "Store retrieved!", context: context);
+    } else {
+      errorMessage(
+          title: "Error", desc: "Something went wrong", context: context);
     }
   }
 
@@ -658,35 +681,85 @@ class _StoresMobileState extends State<StoresMobile> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: SizedBox(
-                          width: 100,
-                          child: SearchBar(
-                            leading: const Icon(Icons.search),
-                            hintText: 'Search...',
-                            constraints: const BoxConstraints(
-                              minWidth: double.infinity,
-                              minHeight: 40,
-                            ),
-                            onChanged: (String searchText) {
-                              setState(() {
-                                searchStore(searchText);
-                              });
-                            },
-                            onTap: () {
-                              // showSearch(
-                              //     context: context, delegate: SearchScreenUI());
-                            },
+                        child: SearchBar(
+                          leading: const Icon(Icons.search),
+                          hintText: 'Search...',
+                          constraints: const BoxConstraints(
+                            minWidth: double.infinity,
+                            minHeight: 40,
                           ),
+                          onChanged: (String searchText) {
+                            setState(() {
+                              searchStore(searchText);
+                            });
+                          },
+                          onTap: () {
+                            // showSearch(
+                            //     context: context, delegate: SearchScreenUI());
+                          },
                         ),
                       ),
                     ),
-                    ElevatedButton.icon(
+                    IconButton.filledTonal(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          showDragHandle: true,
+                          context: context,
+                          builder: (_) {
+                            return Column(
+                              children: [
+                                Text(
+                                  "Archives",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: archiveStores.length,
+                                  itemBuilder: (context, index) {
+                                    StoreModel str = archiveStores[index];
+                                    return ListTile(
+                                      title: Text(str.storeName),
+                                      subtitle: Text(str.storeStreetName),
+                                      trailing: IconButton(
+                                        onPressed: () {
+                                          retrieveStore(str);
+                                        },
+                                        icon: const Icon(Icons.recycling),
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.archive_outlined),
+                    ),
+                    SizedBox(
+                      width: 5.w,
+                    ),
+                    IconButton.filledTonal(
                       onPressed: () {
                         onNewStore();
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text("New Store"),
-                    )
+                    ),
+                    SizedBox(
+                      width: 5.w,
+                    ),
                   ],
                 )
               : Container(),
@@ -758,7 +831,7 @@ class StoresCards extends StatelessWidget {
   bool isEditing = false;
 
   removeStore(BuildContext context) async {
-    bool isSuccess = await StoreFunction.removeStore(storeModel.storeId);
+    bool isSuccess = await StoreFunction.removeStore(storeModel);
     if (isSuccess) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);

@@ -11,6 +11,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -65,6 +66,7 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
     allAnnouncementModels = announcementModels;
+    await getArchivedAnnouncements();
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -220,7 +222,7 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(UserModel user, NotificationModel notif) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New Announcement",
@@ -228,6 +230,11 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(notif, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Announcement: ",
@@ -238,12 +245,10 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   String searchedText = "";
@@ -270,6 +275,28 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
     setState(() {
       dateSet = date;
     });
+  }
+
+  List<AnnouncementModel> archivedAnnouncements = [];
+  getArchivedAnnouncements() async {
+    archivedAnnouncements =
+        await AnnouncementFunction.getArchivedAnnouncements() ?? [];
+  }
+
+  retrieveAnnouncement(AnnouncementModel announcementModel) async {
+    bool status = await AnnouncementFunction.retrieveArchivedAnnouncement(
+        announcementModel);
+    if (status) {
+      // ignore: use_build_context_synchronously
+      successMessage(
+          title: "Retrieved!",
+          desc: "Announcement was retrieved!",
+          context: context);
+    } else {
+      // ignore: use_build_context_synchronously
+      errorMessage(
+          title: "Error", desc: "Something went wrong", context: context);
+    }
   }
 
   @override
@@ -343,6 +370,64 @@ class _AdminAnnouncementDesktopState extends State<AdminAnnouncementDesktop> {
                             : null,
                         icon: const Icon(Icons.timer_outlined),
                         label: const Text("Pending"),
+                      ),
+                      SizedBox(width: 2.w),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: SizedBox(
+                                  height: 500,
+                                  width: 500,
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(
+                                        height: 30,
+                                      ),
+                                      Text(
+                                        "Archives",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge!
+                                            .copyWith(
+                                                fontWeight: FontWeight.bold),
+                                      ),
+                                      ListView.separated(
+                                        padding: const EdgeInsets.all(30),
+                                        shrinkWrap: true,
+                                        itemCount: archivedAnnouncements.length,
+                                        itemBuilder: (context, index) {
+                                          AnnouncementModel ann =
+                                              archivedAnnouncements[index];
+                                          return ListTile(
+                                            title: Text(ann.title),
+                                            subtitle: Text(ann.datePosted),
+                                            trailing: IconButton(
+                                              onPressed: () {
+                                                retrieveAnnouncement(ann);
+                                              },
+                                              icon: const Icon(Icons.recycling),
+                                            ),
+                                          );
+                                        },
+                                        separatorBuilder:
+                                            (BuildContext context, int index) {
+                                          return const Divider();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        icon: const Icon(Icons.archive_outlined),
+                        label: const Text("Archives"),
                       ),
                       SizedBox(width: 2.w),
                       PopupMenuButton(

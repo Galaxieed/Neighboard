@@ -11,6 +11,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
 import 'package:neighboard/src/admin_side/announcements/announcement_function.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -60,6 +61,7 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
     announcementModels
         .sort((a, b) => b.announcementId.compareTo(a.announcementId));
     allAnnouncementModels = announcementModels;
+    await getArchivedAnnouncements();
     if (mounted) {
       setState(() {
         isLoading = false;
@@ -214,14 +216,19 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(UserModel user, NotificationModel notif) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
-      "New Announcement: ",
+      "New Announcement",
       'to this date: ${formattedDate(dateSet)}',
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(notif, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New Announcement: ",
@@ -232,12 +239,10 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   String searchedText = "";
@@ -264,6 +269,28 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
     setState(() {
       dateSet = date;
     });
+  }
+
+  List<AnnouncementModel> archivedAnnouncements = [];
+  getArchivedAnnouncements() async {
+    archivedAnnouncements =
+        await AnnouncementFunction.getArchivedAnnouncements() ?? [];
+  }
+
+  retrieveAnnouncement(AnnouncementModel announcementModel) async {
+    bool status = await AnnouncementFunction.retrieveArchivedAnnouncement(
+        announcementModel);
+    if (status) {
+      // ignore: use_build_context_synchronously
+      successMessage(
+          title: "Retrieved!",
+          desc: "Announcement was retrieved!",
+          context: context);
+    } else {
+      // ignore: use_build_context_synchronously
+      errorMessage(
+          title: "Error", desc: "Something went wrong", context: context);
+    }
   }
 
   @override
@@ -318,7 +345,7 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    ElevatedButton(
+                    ElevatedButton.icon(
                       onPressed: () {
                         setState(() {
                           isOnPending = !isOnPending;
@@ -332,10 +359,61 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                                   Theme.of(context).colorScheme.onPrimary,
                             )
                           : null,
-                      child: const Text("Pending"),
+                      icon: const Icon(Icons.pending_outlined),
+                      label: const Text("Pending"),
                     ),
                     const Spacer(),
-                    ElevatedButton.icon(
+                    IconButton.filledTonal(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          showDragHandle: true,
+                          context: context,
+                          builder: (_) {
+                            return Column(
+                              children: [
+                                Text(
+                                  "Archives",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  itemCount: archivedAnnouncements.length,
+                                  itemBuilder: (context, index) {
+                                    AnnouncementModel ann =
+                                        archivedAnnouncements[index];
+                                    return ListTile(
+                                      title: Text(ann.title),
+                                      subtitle: Text(ann.datePosted),
+                                      trailing: IconButton(
+                                        onPressed: () {
+                                          retrieveAnnouncement(ann);
+                                        },
+                                        icon: const Icon(Icons.recycling),
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) {
+                                    return const Divider();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.archive_outlined),
+                    ),
+                    SizedBox(width: 5.w),
+                    IconButton.filledTonal(
                       onPressed: () {
                         showModalBottomSheet(
                           useSafeArea: true,
@@ -580,14 +658,13 @@ class _AdminAnnouncemetMobileState extends State<AdminAnnouncemetMobile> {
                         );
                       },
                       icon: const Icon(Icons.add),
-                      label: const Text("Announcement"),
                     ),
-                    SizedBox(width: 2.w),
+                    SizedBox(width: 5.w),
                     PopupMenuButton(
                       position: PopupMenuPosition.under,
                       tooltip: "Filter",
                       child: AbsorbPointer(
-                        child: IconButton(
+                        child: IconButton.filledTonal(
                           onPressed: () {},
                           icon: const Icon(Icons.sort),
                         ),
@@ -701,8 +778,8 @@ class MainAnnouncement extends StatelessWidget {
   bool isEditing = false;
 
   removeAnnouncement(BuildContext context) async {
-    bool isSuccess = await AnnouncementFunction.removeAnnouncement(
-        announcementModel.announcementId);
+    bool isSuccess =
+        await AnnouncementFunction.removeAnnouncement(announcementModel);
     if (isSuccess) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);

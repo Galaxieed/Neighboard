@@ -13,6 +13,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_list/hoa_list_ui.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
@@ -277,7 +278,7 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(UserModel user, NotificationModel notif) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "Site Settings had changed: ",
@@ -285,6 +286,11 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(notif, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "Site Settings had changed: ",
@@ -295,12 +301,10 @@ class _SiteSettingsDesktopState extends State<SiteSettingsDesktop> {
       isArchived: false,
     );
 
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   editOfficer(doc, officerDetails, candidateId) async {

@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:neighboard/constants/constants.dart';
+import 'package:neighboard/data/posts_data.dart';
 import 'package:neighboard/main.dart';
+import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/user_model.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/login_register_page/register_page/register_function.dart';
@@ -153,6 +156,19 @@ class _ProfileScreenDesktopState extends State<ProfileScreenDesktop> {
       'contact_no': tcCNo.text,
     };
     await ProfileFunction.updateUserProfile(userDetails);
+
+    NotificationModel logModel = NotificationModel(
+      notifId: DateTime.now().toIso8601String(),
+      notifTitle: "Admin changed profile details",
+      notifBody: "Profile Details was edited!",
+      notifTime: formattedDate(),
+      notifLocation: "PROFILE",
+      isRead: false,
+      isArchived: false,
+    );
+
+    await ActivityLogsFunction.addLogs(logModel);
+
     await getCurrentUserDetails();
     // ignore: use_build_context_synchronously
     successMessage(

@@ -46,13 +46,53 @@ class StoreFunction {
     }
   }
 
-  static Future<bool> removeStore(String storeId) async {
+  static Future<bool> removeStore(StoreModel store) async {
     try {
-      //remove announcement
-      await _firestore.collection("stores").doc(storeId).delete();
+      //archive store
+      await _firestore
+          .collection("archived_stores")
+          .doc(store.storeId)
+          .set(store.toJson())
+          .then((value) async {
+        //remove announcement
+        await _firestore.collection("stores").doc(store.storeId).delete();
+      });
+
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  static Future<bool> retrieveArchivedStore(StoreModel store) async {
+    try {
+      //archive store
+      await _firestore
+          .collection("stores")
+          .doc(store.storeId)
+          .set(store.toJson())
+          .then((value) async {
+        //remove announcement
+        await _firestore
+            .collection("archived_stores")
+            .doc(store.storeId)
+            .delete();
+      });
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<List<StoreModel>?> getArchivedStores() async {
+    try {
+      final result = await _firestore.collection("archived_stores").get();
+      List<StoreModel> stores = [];
+      stores = result.docs.map((e) => StoreModel.fromJson(e.data())).toList();
+      return stores;
+    } catch (e) {
+      return null;
     }
   }
 

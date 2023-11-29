@@ -49,16 +49,19 @@ class _ScreenDirectState extends State<ScreenDirect> {
     setState(() {
       isLoading = true;
     });
+    //pag naka login
     if (_auth.currentUser != null) {
       bool emailVerified = _auth.currentUser!.emailVerified;
+      //exemptedUser for email verification
       List<String> exemptedUser = [
         '2jB7wg7PFZUV382mpTId2dqoTyL2',
         '8Jnmea0EkxgwTOLNpA9PQjm85j72',
         'sJuGAwN3Ena76LVIdJIdudfPSmh2',
         'v0HBgPZPb3OxY4VsQAWrI2oY4rF2',
       ];
-
+      //pag di verified saka di exempted
       if (!emailVerified && !exemptedUser.contains(_auth.currentUser!.uid)) {
+        //this delete() throws an error if session was made long ago. Then catch
         await _auth.currentUser!.delete().catchError((e) {
           _auth.signOut();
           infoMessage(
@@ -73,10 +76,11 @@ class _ScreenDirectState extends State<ScreenDirect> {
         infoMessage(
             title: "",
             desc:
-                "This account is not verified\nRegister again and verify your email",
+                "Current account is not verified\nRegister again and verify your email",
             context: context);
         isLoggedIn = false;
       } else {
+        //exempted user logins without any additional requirements
         if (exemptedUser.contains(_auth.currentUser!.uid)) {
           await getUserDetails(_auth.currentUser!.uid);
           Map<String, dynamic> deviceToken = {
@@ -87,21 +91,20 @@ class _ScreenDirectState extends State<ScreenDirect> {
           isLoggedIn = true;
           listenForNotification();
         } else {
-          User? user = _auth.currentUser;
-          if (user != null) {
-            await getUserDetails(_auth.currentUser!.uid);
-            Map<String, dynamic> deviceToken = {
-              'device_token': myToken,
-            };
-
-            await ProfileFunction.updateUserProfile(deviceToken);
-            isLoggedIn = true;
-            listenForNotification();
-          } else {
+          final mfa = await _auth.currentUser!.multiFactor.getEnrolledFactors();
+          //pag walang mfa si user, mag signout
+          if (mfa.isEmpty) {
             _auth.signOut();
-            print("SIGNS OUT");
-            isLoggedIn = false;
+            return;
           }
+          await getUserDetails(_auth.currentUser!.uid);
+          Map<String, dynamic> deviceToken = {
+            'device_token': myToken,
+          };
+
+          await ProfileFunction.updateUserProfile(deviceToken);
+          isLoggedIn = true;
+          listenForNotification();
         }
       }
     } else {
@@ -243,7 +246,6 @@ class _ScreenDirectState extends State<ScreenDirect> {
     }
   }
 
-  //TODO: display the office address and contactNo.
   List<String> contactNo = [];
   void displayNo() {
     officeAddress = siteModel?.siteOfficeAddress ?? "";

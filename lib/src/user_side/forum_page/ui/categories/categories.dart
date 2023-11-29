@@ -9,6 +9,7 @@ import 'package:neighboard/models/notification_model.dart';
 import 'package:neighboard/models/post_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/forum/pending_posts/pending_posts_function.dart';
 import 'package:neighboard/src/loading_screen/loading_posts.dart';
 import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
@@ -183,8 +184,8 @@ class _CategoriesState extends State<Categories> {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: isApproved
-          ? "Your post has been approved: "
-          : "Your post was declined: ",
+          ? "Admin approved this post: "
+          : "Admin declined this post: ",
       notifBody: post.title,
       notifTime: formattedDate(),
       notifLocation: isApproved ? "FORUM|${post.postId}" : "",
@@ -194,6 +195,8 @@ class _CategoriesState extends State<Categories> {
 
     await NotificationFunction.addNotification(
         notificationModel, post.authorId);
+
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   @override

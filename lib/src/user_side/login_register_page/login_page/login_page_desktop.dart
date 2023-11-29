@@ -1,13 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:neighboard/constants/constants.dart';
 import 'package:neighboard/main.dart';
-import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/routes/routes.dart';
 import 'package:neighboard/screen_direct.dart';
 import 'package:neighboard/src/loading_screen/loading_screen.dart';
-import 'package:neighboard/src/profile_screen/profile_screen_function.dart';
 import 'package:neighboard/src/user_side/login_register_page/login_page/login_function.dart';
 import 'package:neighboard/widgets/notification/mini_notif/elegant_notif.dart';
 import 'package:page_transition/page_transition.dart';
@@ -20,60 +17,25 @@ class LoginPageDesktop extends StatefulWidget {
 }
 
 class _LoginPageDesktopState extends State<LoginPageDesktop> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
   String? loginResult;
-  String? _passwordError;
-  String? _emailError;
+  // String? _passwordError;
+  // String? _emailError;
   bool passToggle = true;
 
   void onLogin() async {
     setState(() {
       isLoading = true;
     });
-
-    loginResult = await LoginFunction.login(email.text.trim(), password.text);
-    bool isUser = loginResult == "USER";
+    //USER LOGIN is inside mfa function
+    loginResult =
+        await LoginFunction.login(email.text.trim(), password.text, context);
     bool isAdmin = loginResult == "ADMIN";
 
-    if (isUser) {
-      UserModel? userModel;
-      if (_auth.currentUser != null) {
-        userModel =
-            await ProfileFunction.getUserDetails(_auth.currentUser!.uid);
-        if (userModel != null && userModel.contactNo.isNotEmpty) {
-          // ignore: use_build_context_synchronously
-          Navigator.of(context).pushAndRemoveUntil(
-              PageTransition(
-                  duration: const Duration(milliseconds: 500),
-                  child: const ScreenDirect(),
-                  type: PageTransitionType.fade),
-              (route) => false);
-        } else {
-          setState(() {
-            isLoading = false;
-            return;
-          });
-        }
-      } else {
-        setState(() {
-          isLoading = false;
-          return;
-        });
-      }
-    } else if (isAdmin) {
-      //Update deviceToken
-      // try {
-      //   Map<String, dynamic> deviceToken = {
-      //     'device_token': myToken,
-      //   };
-      //   await ProfileFunction.updateUserProfile(deviceToken);
-      // } catch (e) {
-      //   print(e);
-      // }
+    if (isAdmin) {
       // ignore: use_build_context_synchronously
       Navigator.of(context).pushAndRemoveUntil(
           PageTransition(
@@ -81,20 +43,21 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
               child: const ScreenDirect(),
               type: PageTransitionType.fade),
           (route) => false);
-    } else {
-      if (loginResult ==
-          'There is no user record corresponding to this identifier. The user may have been deleted.') {
-        _emailError = 'User not found';
-        loginResult = 'User not found';
-      } else if (loginResult ==
-          'The password is invalid or the user does not have a password.') {
-        _passwordError = 'Wrong password';
-        loginResult = 'Wrong password';
-      } else {
-        _emailError = loginResult;
-        _passwordError = loginResult;
-      }
     }
+    // else {
+    //   if (loginResult ==
+    //       'There is no user record corresponding to this identifier. The user may have been deleted.') {
+    //     _emailError = 'User not found';
+    //     loginResult = 'User not found';
+    //   } else if (loginResult ==
+    //       'The password is invalid or the user does not have a password.') {
+    //     _passwordError = 'Wrong password';
+    //     loginResult = 'Wrong password';
+    //   } else {
+    //     _emailError = loginResult;
+    //     _passwordError = loginResult;
+    //   }
+    // }
     setState(() {
       isLoading = false;
     });
@@ -227,8 +190,8 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                 TextFormField(
                                   controller: email,
                                   onFieldSubmitted: (value) {
-                                    _emailError = null;
-                                    _passwordError = null;
+                                    // _emailError = null;
+                                    // _passwordError = null;
                                     if (_formKey.currentState!.validate()) {
                                       onLogin();
                                     }
@@ -249,22 +212,22 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                     // }
                                     return null;
                                   },
-                                  decoration: InputDecoration(
-                                    border: const OutlineInputBorder(),
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
                                     labelText: 'Email',
-                                    prefixIcon: const Icon(Icons.email),
-                                    suffixIcon: loginResult != null
-                                        ? _emailError == null
-                                            ? const Icon(
-                                                Icons.check,
-                                              )
-                                            : const Icon(
-                                                Icons.close,
-                                              )
-                                        : null,
-                                    suffixIconColor: _emailError == null
-                                        ? Colors.green
-                                        : Colors.red,
+                                    prefixIcon: Icon(Icons.email),
+                                    // suffixIcon: loginResult != null
+                                    //     ? _emailError == null
+                                    //         ? const Icon(
+                                    //             Icons.check,
+                                    //           )
+                                    //         : const Icon(
+                                    //             Icons.close,
+                                    //           )
+                                    //     : null,
+                                    // suffixIconColor: _emailError == null
+                                    //     ? Colors.green
+                                    //     : Colors.red,
                                   ),
                                 ),
                                 const SizedBox(
@@ -273,8 +236,8 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                 TextFormField(
                                   controller: password,
                                   onFieldSubmitted: (value) {
-                                    _emailError = null;
-                                    _passwordError = null;
+                                    // _emailError = null;
+                                    // _passwordError = null;
                                     if (_formKey.currentState!.validate()) {
                                       onLogin();
                                     }
@@ -295,20 +258,20 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                     border: const OutlineInputBorder(),
                                     labelText: 'Password',
                                     prefixIcon: const Icon(Icons.lock),
-                                    suffixIcon: loginResult != null &&
-                                            _emailError == null
-                                        ? _passwordError == null
-                                            ? const Icon(
-                                                Icons.check,
-                                              )
-                                            : const Icon(
-                                                Icons.close,
-                                              )
-                                        : null,
-                                    suffixIconColor: _emailError == null &&
-                                            _passwordError == null
-                                        ? Colors.green
-                                        : Colors.red,
+                                    // suffixIcon: loginResult != null &&
+                                    //         _emailError == null
+                                    //     ? _passwordError == null
+                                    //         ? const Icon(
+                                    //             Icons.check,
+                                    //           )
+                                    //         : const Icon(
+                                    //             Icons.close,
+                                    //           )
+                                    //     : null,
+                                    // suffixIconColor: _emailError == null &&
+                                    //         _passwordError == null
+                                    //     ? Colors.green
+                                    //     : Colors.red,
                                     suffix: InkWell(
                                       onTap: () {
                                         setState(() {
@@ -324,21 +287,10 @@ class _LoginPageDesktopState extends State<LoginPageDesktop> {
                                 const SizedBox(
                                   height: 20,
                                 ),
-                                loginResult == null
-                                    ? Container()
-                                    : Text(
-                                        loginResult!,
-                                        style: const TextStyle(
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    _emailError = null;
-                                    _passwordError = null;
+                                    // _emailError = null;
+                                    // _passwordError = null;
                                     if (_formKey.currentState!.validate()) {
                                       onLogin();
                                     }

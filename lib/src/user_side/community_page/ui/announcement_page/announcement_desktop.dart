@@ -272,8 +272,8 @@ class MainAnnouncement extends StatelessWidget {
   bool isEditing = false;
 
   removeAnnouncement(BuildContext context) async {
-    bool isSuccess = await AnnouncementFunction.removeAnnouncement(
-        announcementModel.announcementId);
+    bool isSuccess =
+        await AnnouncementFunction.removeAnnouncement(announcementModel);
     if (isSuccess) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);
@@ -673,8 +673,8 @@ class OtherAnnouncement extends StatelessWidget {
   final Function stateSetter;
 
   removeAnnouncement(BuildContext context) async {
-    bool isSuccess = await AnnouncementFunction.removeAnnouncement(
-        announcementModel.announcementId);
+    bool isSuccess =
+        await AnnouncementFunction.removeAnnouncement(announcementModel);
     if (isSuccess) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);

@@ -13,6 +13,7 @@ import 'package:neighboard/models/site_model.dart';
 import 'package:neighboard/models/store_model.dart';
 import 'package:neighboard/models/user_model.dart';
 import 'package:neighboard/services/notification/notification.dart';
+import 'package:neighboard/src/admin_side/dashboard/activity_logs.dart';
 import 'package:neighboard/src/admin_side/hoa_voting/voters/voters_function.dart';
 import 'package:neighboard/src/admin_side/site_settings/site_settings_function.dart';
 import 'package:neighboard/src/admin_side/stores/store_function.dart';
@@ -177,7 +178,7 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
   }
 
   //send notif to one
-  Future<void> sendNotificaton(UserModel user) async {
+  Future<void> sendNotificaton(UserModel user, NotificationModel model) async {
     await MyNotification().sendPushMessage(
       user.deviceToken,
       "New map location has been set: ",
@@ -185,6 +186,11 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
     );
 
     //ADD sa notification TAB
+    await NotificationFunction.addNotification(model, user.userId);
+  }
+
+  //send notif to all at once
+  sendNotifToAll() async {
     NotificationModel notificationModel = NotificationModel(
       notifId: DateTime.now().toIso8601String(),
       notifTitle: "New map location has been set: ",
@@ -194,13 +200,10 @@ class _AdminCommunityMapState extends State<AdminCommunityMap> {
       isRead: false,
       isArchived: false,
     );
-
-    await NotificationFunction.addNotification(notificationModel, user.userId);
-  }
-
-  //send notif to all at once
-  sendNotifToAll() async {
-    await Future.forEach(allUsers, sendNotificaton);
+    await Future.forEach(allUsers, (user) {
+      sendNotificaton(user, notificationModel);
+    });
+    await ActivityLogsFunction.addLogs(notificationModel);
   }
 
   @override
